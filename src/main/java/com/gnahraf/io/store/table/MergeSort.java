@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import com.gnahraf.io.store.NotSortedException;
 import com.gnahraf.io.store.table.SortedTable.Searcher;
@@ -168,6 +169,7 @@ public class MergeSort {
   private final SortedTable target;
   
   private final ArrayList<MergeSource> sources;
+  private final ArrayList<MergeSource> finishedSources;
   
   private long startTime;
   private long endTime;
@@ -216,6 +218,7 @@ public class MergeSort {
     }
     
     Collections.sort(sources);
+    finishedSources = new ArrayList<>(tables.length);
   }
   
   
@@ -241,8 +244,10 @@ public class MergeSort {
       
       top.setRow(top.rowNumber() + count);
       
-      if (top.finished())
+      if (top.finished()) {
         sources.remove(sources.size() - 1);
+        finishedSources.add(top);
+      }
       else {
         int comp = top.compareTo(next);
         if (top.compareTo(next) < 0)
@@ -256,7 +261,33 @@ public class MergeSort {
       
     }
     
+    if (sources.size() != 1)
+      throw new RuntimeException("assertion failure: " + sources.size());
+    
+    MergeSource last = sources.get(0);
+    target.appendRows(last.table, last.rowNumber(), last.rowCount() - last.rowNumber());
+    
     endTime = System.currentTimeMillis();
+  }
+
+
+  public final SortedTable getTarget() {
+    return target;
+  }
+
+
+  public final long getStartTime() {
+    return startTime;
+  }
+
+
+  public final long getEndTime() {
+    return endTime;
+  }
+
+
+  public final int getCompZeroEdgeCase() {
+    return compZeroEdgeCase;
   }
   
   

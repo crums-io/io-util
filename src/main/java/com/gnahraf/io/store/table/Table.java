@@ -181,6 +181,7 @@ public class Table implements Channel {
    * faster than copying the rows to a buffer and then appending the buffer
    * in this instance.
    * 
+   * @param source
    * @param row
    *        the row number in the source table
    * @param count

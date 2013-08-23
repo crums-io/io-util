@@ -6,7 +6,9 @@ package com.gnahraf.io;
 import java.io.IOException;
 
 /**
- * Represents an illegal I/O state.
+ * Represents an illegal I/O state. This is not a low level exception; rather
+ * it represents an unexpected condition, say corrupt or inconsistent application
+ * level data.
  * 
  * @author Babak
  */
