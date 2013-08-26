@@ -137,6 +137,7 @@ public class SortedTable extends Table implements Sorted {
 
     private final SortedBlock block;
     private long firstRowNumberInBlock;
+    private ByteBuffer readOnlyBlockBufferView;
     
     
     private long excLo;
@@ -315,13 +316,27 @@ public class SortedTable extends Table implements Sorted {
     }
 
 
+    /**
+     * Returns the number of rows in the search buffer.
+     */
     public int getRetrievedRowCount() {
       return retrievedRowCount;
     }
 
 
+    /**
+     * Returns the first retrieved row number in the search buffer.
+     */
     public long getFirstRetrievedRowNumber() {
       return firstRowNumberInBlock;
+    }
+
+
+    /**
+     * Returns the last retrieved row number in the search buffer (<em>exclusive</em>).
+     */
+    public long getLastRetrievedRowNumber() {
+      return firstRowNumberInBlock + retrievedRowCount;
     }
     
     /**
@@ -329,20 +344,71 @@ public class SortedTable extends Table implements Sorted {
      * 
      * @param rowNumber
      *        row number in the range {@linkplain #getFirstRetrievedRowNumber()} (inclusive),
-     *        and <tt>getFirstRetrievedRowNumber() + </tt>{@linkplain #getRetrievedRowCount()}
-     *        (exclusive)
+     *        {@linkplain #getLastRetrievedRowNumber()} (exclusive)
      *        
      * @throws IndexOutOfBoundsException
      *         if <tt>rowNumber<tt> is outside the retrieved range
      */
     public ByteBuffer getRow(long rowNumber) throws IndexOutOfBoundsException {
-      
+      return block.cell(toBlockIndex(rowNumber));
+    }
+    
+    
+    
+    /**
+     * Returns the result of comparing the given <tt>key</tt> with contents
+     * of the specified <tt>rowNumber</tt>.
+     */
+    public int compareToRetrievedRow(ByteBuffer key, long rowNumber) {
+      return block.compareToCell(key, toBlockIndex(rowNumber));
+    }
+    
+    
+    
+    private int toBlockIndex(long rowNumber) throws IndexOutOfBoundsException {
       long blockIndex = rowNumber - firstRowNumberInBlock;
-      
       if (blockIndex < 0 || blockIndex >= retrievedRowCount)
         throw new IndexOutOfBoundsException("rowNumber: " + rowNumber);
+      return (int) blockIndex;
+    }
+    
+    
+    
+    /**
+     * Returns the shared, read-only view of the specified rows already loaded in the
+     * search buffer. Since it's shared, the returned buffer is for immediate consumption:
+     * it must be used before the next invocation of this method or of {@linkplain #search(ByteBuffer)}.
+     * 
+     * @param rowNumber
+     *        row number in the range {@linkplain #getFirstRetrievedRowNumber()} (inclusive),
+     *        {@linkplain #getLastRetrievedRowNumber()} (exclusive)
+     * @param count
+     *        the number of rows to return in the buffer
+     * @return
+     *        the shared read-only view of the search buffer, its remaining bytes the contents
+     *        of the specified rows
+     *        
+     */
+    public ByteBuffer getRows(long rowNumber, int count) throws IndexOutOfBoundsException {
       
-      return block.cell((int) blockIndex);
+      if (count < 1)
+        throw new IllegalArgumentException("count: " + count);
+
+      long blockIndex = rowNumber - firstRowNumberInBlock;
+      long lastBlockIndex = blockIndex + count; // exc.
+      
+      if (blockIndex < 0 || lastBlockIndex - blockIndex > retrievedRowCount)
+        throw new IndexOutOfBoundsException("rowNumber=" + rowNumber + "; count=" + count);
+      
+      int blockPosition = (int) blockIndex * getRowWidth();
+      int blockLimit = blockPosition + count * getRowWidth();
+      
+      if (readOnlyBlockBufferView == null)
+        readOnlyBlockBufferView = block.buffer().asReadOnlyBuffer();
+      
+      readOnlyBlockBufferView.limit(blockLimit).position(blockPosition);
+      
+      return readOnlyBlockBufferView;
     }
     
     

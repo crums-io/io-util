@@ -144,5 +144,13 @@ public class SortedBlock extends Block implements Sorted {
   public int lastIndexOf(ByteBuffer key) {
     return binaryLast(cells, key, order);
   }
+  
+  
+  /**
+   * Compares the given <tt>key</tt> to the cell at the specified <tt>index</tt>.
+   */
+  public int compareToCell(ByteBuffer key, int index) {
+    return order.compare(key, cells[index]);
+  }
 
 }

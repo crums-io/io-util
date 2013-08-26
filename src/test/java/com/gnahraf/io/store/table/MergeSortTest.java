@@ -161,14 +161,59 @@ public class MergeSortTest {
   
 
   @Test
-  public void testQuadMerge() throws IOException {
+  public void testSimpleQuadMerge() throws IOException {
+    initUnitTestDir(method(new Object() { }));
+    
+    int[][] sourceValues = {
+        { 5, },
+        { 3, },
+        { 4, },
+        { 1, },
+    };
+    
+    mergeTest(sourceValues);
+  }
+  
+
+  @Test
+  public void testQuadMergeWithDups() throws IOException {
+    initUnitTestDir(method(new Object() { }));
+    
+    int[][] sourceValues = {
+        { 5, },
+        { 0, 2, },
+        { 2, 3, },
+        { 1, 2, 2, },
+    };
+    
+    mergeTest(sourceValues);
+  }
+  
+
+  @Test
+  public void testQuadMerge2() throws IOException {
     initUnitTestDir(method(new Object() { }));
     
     int[][] sourceValues = {
         { 1, 5, 5, 7, 84},
         { 3, 4, 5, 11, 23, 29, 31, 37},
-        { 2, 4, 22, 23, 24, 65, 90, },
+        { 2, 4, 22, 23, 24, 62, 90, },
         { 9, 13, 17, 56, 61, 62, 62, 62, },
+    };
+    
+    mergeTest(sourceValues);
+  }
+  
+
+  @Test
+  public void testQuadMerge3() throws IOException {
+    initUnitTestDir(method(new Object() { }));
+    
+    int[][] sourceValues = {
+        { 2, 4, 22, 23, 24, 62, 90, },
+        { 9, 13, 17, 56, 61, 62, 62, 62, },
+        { 1, 5, 5, 7, 84},
+        { 3, 4, 5, 11, 23, 29, 31, 37},
     };
     
     mergeTest(sourceValues);
@@ -311,7 +356,7 @@ public class MergeSortTest {
       }
     }
     
-    
+    LOG.debug("merge.getCompZeroEdgeCase(): " + merge.getCompZeroEdgeCase());
     
     
     // clean up

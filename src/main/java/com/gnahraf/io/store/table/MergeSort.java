@@ -7,11 +7,10 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
+import com.gnahraf.io.IoStateException;
 import com.gnahraf.io.store.NotSortedException;
 import com.gnahraf.io.store.table.SortedTable.Searcher;
-import com.gnahraf.io.store.table.order.RowOrder;
 
 /**
  * A merge sort operation on <tt>SortedTable</tt>s.
@@ -137,12 +136,6 @@ public class MergeSort {
       }
       
       return -target.order().compare(this.row, other.row);
-//      if (this.finished())
-//        return other.finished() ? 0 : -1;
-//      else if (other.finished())
-//        return 1;
-//      else
-//        return -order.compare(this.row, other.row);
     }
     
     
@@ -223,34 +216,84 @@ public class MergeSort {
   
   
   public void mergeToTarget() throws IOException {
+    
     synchronized (sources) {
       if (startTime != 0)
         throw new IllegalStateException("already run");
       startTime = System.currentTimeMillis();
     }
+    
     while (sources.size() > 1) {
       // invariant: sources is sorted
       MergeSource top = sources.get(sources.size() - 1);
       MergeSource next = sources.get(sources.size() - 2);
       
-      long blockEndRowNumber; // exclusive
-      if (top.searcher.search(next.row()))
-        blockEndRowNumber = top.searcher.getHitRowNumber() + 1;
-      else
+      final long blockEndRowNumber; // exclusive
+      
+      // search for next.row()..
+      if (top.searcher.search(next.row())) {
+        
+        // next.row() was found in the top merge source..
+        long rowNumberCursor = top.searcher.getHitRowNumber();  // +
+
+        // search for the last row in the top merge source that matches next.row()..
+        
+        // first search the contents search buffer..
+        while (++rowNumberCursor < top.searcher.getLastRetrievedRowNumber()) {
+          int comp = top.searcher.compareToRetrievedRow(next.row(), rowNumberCursor);
+          if (comp < 0)
+            break;
+          else if (comp > 0)
+            throw new NotSortedException("at row number " + rowNumberCursor);
+          // comp == 0
+        }
+        
+        // if our cursor ran beyond the contents of the search buffer,
+        // continue a linear on the top merge source's table.
+        // This _can_ be sped up, but very long sequences of dups are hopefully infrequent,
+        // so we're not bothering with optimizing
+        //
+        if (rowNumberCursor == top.searcher.getLastRetrievedRowNumber()) {
+          
+          ByteBuffer sampleRow = ByteBuffer.allocate(top.table.getRowWidth());
+          
+          while (rowNumberCursor < top.table.getRowCount()) {
+            
+            sampleRow.clear();
+            top.table.read(rowNumberCursor, sampleRow);
+            sampleRow.flip();
+            
+            int comp = top.table.order().compareRows(next.row(), sampleRow);
+            if (comp < 0)
+              break;
+            else if (comp > 0)
+              throw new NotSortedException("at row number " + rowNumberCursor);
+            ++rowNumberCursor;
+          }
+        }
+        
+        blockEndRowNumber = rowNumberCursor;
+        
+      } else
+        // next.row() is NOT found in top merge source
         blockEndRowNumber = -top.searcher.getHitRowNumber() - 1;
       
       long count = blockEndRowNumber - top.rowNumber();
+      if (count < 1)
+        throw new IoStateException("assertion failure: count=" + count);
+      
       target.appendRows(top.table, top.rowNumber(), count);
       
-      top.setRow(top.rowNumber() + count);
+      top.setRow(blockEndRowNumber);
       
       if (top.finished()) {
+        
         sources.remove(sources.size() - 1);
         finishedSources.add(top);
-      }
-      else {
+      
+      } else {
         int comp = top.compareTo(next);
-        if (top.compareTo(next) < 0)
+        if (comp < 0)
           // sort the sources
           Collections.sort(sources);
         else if (comp == 0)
