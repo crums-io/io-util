@@ -29,7 +29,7 @@ public class SortedTableTest {
   
   public final static String PERF_TEST_PROPERTY = "perf_test";
 
-  private final Logger LOG = Logger.getLogger(getClass());
+  private final Logger log = Logger.getLogger(getClass());
 
   private FileChannel file;
 
@@ -246,10 +246,10 @@ public class SortedTableTest {
     String method = method(new Object() { });
     
     if (!"true".equalsIgnoreCase(System.getProperty(PERF_TEST_PROPERTY))) {
-      LOG.info("Skipping " + method + "(): to activate -D" + PERF_TEST_PROPERTY + "=true");
+      log.info("Skipping " + method + "(): to activate -D" + PERF_TEST_PROPERTY + "=true");
       return;
     }
-    LOG.info("*** Benchmarking " + method + " ***");
+    log.info("*** Benchmarking " + method + " ***");
     
     setup(method);
 
@@ -281,10 +281,10 @@ public class SortedTableTest {
     String method = method(new Object() { });
     
     if (!"true".equalsIgnoreCase(System.getProperty(PERF_TEST_PROPERTY))) {
-      LOG.info("Skipping " + method + "(): to activate -D" + PERF_TEST_PROPERTY + "=true");
+      log.info("Skipping " + method + "(): to activate -D" + PERF_TEST_PROPERTY + "=true");
       return;
     }
-    LOG.info("*** Benchmarking " + method + " ***");
+    log.info("*** Benchmarking " + method + " ***");
     
     
     setup(method);
@@ -310,37 +310,37 @@ public class SortedTableTest {
   }
   
   private void showSearchStats(Searcher searcher) {
-    LOG.info("Profiler stats.. (in microseconds)");
+    log.info("Profiler stats.. (in microseconds)");
     showProf(searcher.getProfiler());
-    LOG.info("Block search profiler stats.. (in microseconds)");
+    log.info("Block search profiler stats.. (in microseconds)");
     showProf(searcher.getBlockSearchProfiler());
-    LOG.info("Number of disk reads per request..");
+    log.info("Number of disk reads per request..");
     showStats(searcher.getReadOpStats());
   }
 
 
   private void showProf(PerfProf prof) {
-    LOG.info("_______________");
-    LOG.info("    max: " + prof.getMaxNanos() / 1000);
-    LOG.info("    min: " + prof.getMinNanos() / 1000);
-    LOG.info("   mean: " + prof.getMeanNanos() / 1000);
-    LOG.info("  sigma: " + prof.getNansosSd() / 1000);
-    LOG.info("===============");
-    LOG.info("  count: " + NUM_FORMAT.format(prof.getCount()));
-    LOG.info("  total: " + NUM_FORMAT.format(prof.getSumNanos() / 1000));
-    LOG.info("---------------");
+    log.info("_______________");
+    log.info("    max: " + prof.getMaxNanos() / 1000);
+    log.info("    min: " + prof.getMinNanos() / 1000);
+    log.info("   mean: " + prof.getMeanNanos() / 1000);
+    log.info("  sigma: " + prof.getNansosSd() / 1000);
+    log.info("===============");
+    log.info("  count: " + NUM_FORMAT.format(prof.getCount()));
+    log.info("  total: " + NUM_FORMAT.format(prof.getSumNanos() / 1000));
+    log.info("---------------");
   }
   private final static DecimalFormat NUM_FORMAT = new DecimalFormat("#,###");
   
   private void showStats(SimpleSampler stats) {
-    LOG.info("_______________");
-    LOG.info("    max: " + stats.getMax());
-    LOG.info("    min: " + stats.getMin());
-    LOG.info("   mean: " + stats.getMean());
-    LOG.info("  sigma: " + stats.getSd());
-    LOG.info("===============");
-    LOG.info("  count: " + NUM_FORMAT.format(stats.getCount()));
-    LOG.info("---------------");
+    log.info("_______________");
+    log.info("    max: " + stats.getMax());
+    log.info("    min: " + stats.getMin());
+    log.info("   mean: " + stats.getMean());
+    log.info("  sigma: " + stats.getSd());
+    log.info("===============");
+    log.info("  count: " + NUM_FORMAT.format(stats.getCount()));
+    log.info("---------------");
   }
   
   

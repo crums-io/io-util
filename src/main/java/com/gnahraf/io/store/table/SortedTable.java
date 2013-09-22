@@ -103,6 +103,9 @@ public class SortedTable extends Table implements Sorted {
   public Searcher newSearcher(int rowsInBuffer) throws IOException {
     if (!isOpen())
       throw new IllegalStateException("closed table: " + this);
+    rowsInBuffer = (int) Math.max(
+        Searcher.MIN_BUFFER_ROWS,
+        Math.min(SortedTable.this.getRowCount(), rowsInBuffer));
     ByteBuffer buffer = ByteBuffer.allocate(rowsInBuffer * getRowWidth());
     return new Searcher(buffer, getRowWidth(), order);
   }
@@ -347,7 +350,7 @@ public class SortedTable extends Table implements Sorted {
      *        {@linkplain #getLastRetrievedRowNumber()} (exclusive)
      *        
      * @throws IndexOutOfBoundsException
-     *         if <tt>rowNumber<tt> is outside the retrieved range
+     *         if <tt>rowNumber</tt> is outside the retrieved range
      */
     public ByteBuffer getRow(long rowNumber) throws IndexOutOfBoundsException {
       return block.cell(toBlockIndex(rowNumber));

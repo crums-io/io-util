@@ -105,8 +105,8 @@ public class MergeSort {
 
     
     /**
-     * Returns the contents of the current {@linkplain #rowNumber()}, unless the
-     * instance is {@linkplain #finished()}.
+     * Returns the contents of the current {@linkplain #rowNumber()}, if the
+     * instance is not {@linkplain #finished()}; otherwise, the return value is undefined.
      * @return
      */
     ByteBuffer row() {
@@ -161,35 +161,45 @@ public class MergeSort {
   
   private final SortedTable target;
   
+  /**
+   * Sorted list of merge sources.
+   */
   private final ArrayList<MergeSource> sources;
-  private final ArrayList<MergeSource> finishedSources;
+  /**
+   * For bookkeeping only. Unused. Once the entire contents of a
+   * source has been written to the target, the source is placed
+   * in here and removed from <tt>sources</tt>.
+   */
+  protected final ArrayList<MergeSource> finishedSources;
   
   private long startTime;
   private long endTime;
   
   private int compZeroEdgeCase;
   
+  private boolean abort;
+  
   
   /**
    * Creates a new instance
    */
   public MergeSort(
-      SortedTable target, SortedTable[] tables)
+      SortedTable target, SortedTable[] sources)
           throws IOException {
     
-    this(target, tables, DEFAULT_ROWS_PER_SEARCH_BUFFER);
+    this(target, sources, DEFAULT_ROWS_PER_SEARCH_BUFFER);
   }
   
   
   public MergeSort(
-      SortedTable target, SortedTable[] tables, int searchBufferRowsPerTable)
+      SortedTable target, SortedTable[] sources, int searchBufferRowsPerTable)
           throws IOException {
     
     this.target = target;
     
     if (target == null)
       throw new IllegalArgumentException("null target");
-    if (tables == null)
+    if (sources == null)
       throw new IllegalArgumentException("null merge tables array");
     if (!target.isOpen())
       throw new IllegalArgumentException("target not open");
@@ -198,23 +208,27 @@ public class MergeSort {
           "min expected searchBufferRowsPerTable is " + SortedTable.Searcher.MIN_BUFFER_ROWS +
           "; actual was " + searchBufferRowsPerTable);
     
-    if (tables.length < 2)
-      throw new IllegalArgumentException("too few tables in array: " + tables.length);
+    if (sources.length < 2)
+      throw new IllegalArgumentException("too few tables in array: " + sources.length);
     
-    sources = new ArrayList<>(tables.length);
-    for (int i = 0; i < tables.length; ++i) {
+    this.sources = new ArrayList<>(sources.length);
+    for (int i = 0; i < sources.length; ++i) {
       try {
-        sources.add(new MergeSource(tables[i].newSearcher(searchBufferRowsPerTable)));
+        this.sources.add( new MergeSource(sources[i].newSearcher(searchBufferRowsPerTable)) );
       } catch (IllegalArgumentException iax) {
-        throw new IllegalArgumentException("at index [" + i + "]: " + iax.getMessage());
+        throw new IllegalArgumentException("at index [" + i + "]: " + iax.getMessage(), iax);
       }
     }
     
-    Collections.sort(sources);
-    finishedSources = new ArrayList<>(tables.length);
+    Collections.sort(this.sources);
+    finishedSources = new ArrayList<>(sources.length);
   }
   
   
+  /**
+   * Merges the source
+   * @throws IOException
+   */
   public void mergeToTarget() throws IOException {
     
     synchronized (sources) {
@@ -223,7 +237,7 @@ public class MergeSort {
       startTime = System.currentTimeMillis();
     }
     
-    while (sources.size() > 1) {
+    while (sources.size() > 1 && !abort) {
       // invariant: sources is sorted
       MergeSource top = sources.get(sources.size() - 1);
       MergeSource next = sources.get(sources.size() - 2);
@@ -317,15 +331,41 @@ public class MergeSort {
   public final SortedTable getTarget() {
     return target;
   }
+  
+  
+  public boolean isFinished() {
+    return endTime != 0;
+  }
+  
+  public boolean isStarted() {
+    return startTime != 0;
+  }
 
 
+  /**
+   * Returns the time (UTC millis) the merge started; zero, if not started.
+   */
   public final long getStartTime() {
     return startTime;
   }
 
 
+  /**
+   * Returns the time (UTC millis) the merge finished; zero, if not finished.
+   */
   public final long getEndTime() {
     return endTime;
+  }
+  
+  /**
+   * Returns the total time elapsed for the {@linkplain #mergeToTarget()} merge;
+   * zero, if not started.
+   */
+  public final long getTimeTaken() {
+    if (startTime == 0)
+      return 0;
+    long endMillis = endTime == 0 ? System.currentTimeMillis() : endTime;
+    return endMillis - startTime;
   }
 
 

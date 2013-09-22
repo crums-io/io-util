@@ -6,6 +6,15 @@ package com.gnahraf.io.store.table.order;
 import java.nio.ByteBuffer;
 
 /**
+ * Utility for creating common {@linkplain RowOrder}s. Note the orderings
+ * defined here do not consider a buffer's position or limit: they see the
+ * buffer in absolute positions.
+ * <p/>
+ * This is not necessarily a good thing. The
+ * natural (lexical) ordering of <tt>ByteBuffer</tt> for example, considers
+ * the ordering relative to the buffer's current position. On the plus side,
+ * with such orderings, you don't at least need to worry a buffer's positional
+ * state.
  * 
  * @author Babak
  */

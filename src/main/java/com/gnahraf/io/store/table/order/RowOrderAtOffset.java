@@ -36,5 +36,16 @@ public abstract class RowOrderAtOffset extends RowOrder {
   public int hashCode() {
     return getClass().hashCode() ^ offset;
   }
+  
+  
+  /**
+   * By default, a buffer's position is irrelevant to the comparison.
+   * 
+   * @return <tt>false</tt>
+   */
+  @Override
+  public boolean isRelative() {
+    return false;
+  }
 
 }

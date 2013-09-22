@@ -27,7 +27,7 @@ public abstract class RowOrder extends ClassEquivalent implements Comparator<Byt
    * Compares two rows. The two rows are assumed to be non null. This is a read-only
    * operation: the implementation shall not ever modify the state
    * of its input arguments; modifying then restoring the position and limits is not
-   * permissable.
+   * permissible.
    * <p/>
    * Note, one of the input arguments may be a key, in which case the implementation
    * may allow the key to have a different length than the row. 
@@ -44,5 +44,13 @@ public abstract class RowOrder extends ClassEquivalent implements Comparator<Byt
   public final int compare(ByteBuffer rowA, ByteBuffer rowB) {
     return compareRows(rowA, rowB);
   }
+  
+  /**
+   * Indicates whether the implementation considers an input {@linkplain ByteBuffer}'s
+   * position (and possibly limit) when comparing it to another.
+   * 
+   * @return <tt>true</tt>, if an input buffer's position matters in comparisons
+   */
+  public abstract boolean isRelative();
 
 }
