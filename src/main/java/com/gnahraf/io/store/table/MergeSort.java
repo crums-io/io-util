@@ -62,9 +62,6 @@ public class MergeSort {
 
       this.row = ByteBuffer.allocate(table.getRowWidth());
       setRow(0);
-      row.clear();
-      table.read(0, row);
-      row.flip();
     }
     
     /**
