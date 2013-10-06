@@ -3,7 +3,10 @@
  */
 package com.gnahraf.io.store.table;
 
-import static org.junit.Assert.*;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -12,10 +15,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-import java.util.SortedMap;
-import java.util.SortedSet;
-import java.util.TreeMap;
-import java.util.TreeSet;
 
 import org.junit.Test;
 
@@ -196,47 +195,6 @@ public class TableSetTest extends TableTestHarness {
         for (int v : values)
           expectedValues.add(v);
     }
-    
-    return tables;
-  }
-  
-  /**
-   * Returns an array of sorted tables generated from the given arguments. An optional
-   * set may be passed in order to keep track of the order of the input values.
-   * 
-   * @param tableValues
-   *        per-table values
-   * @param expectedValuesWithTableIds
-   *        optional union of the table values
-   * @return
-   *        array of sorted tables just generated
-   * @throws IOException
-   */
-  private SortedTable[] createIntTableSet(
-      int rowSize, int[][] tableValues, Map<Integer, Integer> expectedValuesWithTableIds) throws IOException {
-    
-    final RowOrder order = RowOrders.INT_ORDER;
-
-    SortedTable[] tables = new SortedTable[tableValues.length];
-    
-    int collisionCount = 0;
-    int entryCount = 0;
-    for (int s = 0; s < tableValues.length; ++s) {
-      int[] values = tableValues[s];
-      entryCount += values.length;
-      
-      tables[s] = initIntTable(rowSize, order, values, s);
-      
-      Integer tableIndex = s;
-      
-      if (expectedValuesWithTableIds != null)
-        for (int v : values) {
-          if (expectedValuesWithTableIds.put(v, tableIndex) != null)
-            ++collisionCount;
-        }
-    }
-    
-    log.info(getMethod() + ": " + collisionCount + "/" + entryCount + " collisions in test");
     
     return tables;
   }

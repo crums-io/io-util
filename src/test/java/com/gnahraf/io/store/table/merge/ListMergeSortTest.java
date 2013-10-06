@@ -1,4 +1,4 @@
-package com.gnahraf.io.store.table;
+package com.gnahraf.io.store.table.merge;
 
 
 import static org.junit.Assert.*;
@@ -18,6 +18,8 @@ import java.util.TreeSet;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
+import com.gnahraf.io.store.table.SortedTable;
+import com.gnahraf.io.store.table.merge.ListMergeSort;
 import com.gnahraf.io.store.table.order.RowOrder;
 import com.gnahraf.io.store.table.order.RowOrders;
 import com.gnahraf.test.TestDirs;
@@ -27,10 +29,10 @@ import com.gnahraf.test.TestDirs;
  * 
  * @author Babak
  */
-public class MergeSortTest {
+public class ListMergeSortTest {
   
-  private final static Logger LOG = Logger.getLogger(MergeSortTest.class);
-  private final static File TEST_DIR = TestDirs.getTestDir(MergeSortTest.class);
+  private final static Logger LOG = Logger.getLogger(ListMergeSortTest.class);
+  private final static File TEST_DIR = TestDirs.getTestDir(ListMergeSortTest.class);
   
   
   private File unitTestDir;
@@ -260,7 +262,7 @@ public class MergeSortTest {
     
     
     
-    MergeSort merge = new MergeSort(target, sources);
+    ListMergeSort merge = new ListMergeSort(target, sources);
     merge.mergeToTarget();
     final int expectedRowCount = expectedMergedValues.size();
     assertEquals(expectedRowCount, target.getRowCount());
@@ -332,7 +334,7 @@ public class MergeSortTest {
     
     
     
-    MergeSort merge = new MergeSort(target, sources);
+    ListMergeSort merge = new ListMergeSort(target, sources);
     merge.mergeToTarget();
     
     final int expectedRowCount = valuesCount;

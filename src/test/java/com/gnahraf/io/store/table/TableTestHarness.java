@@ -11,15 +11,18 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 
+import com.gnahraf.io.store.table.merge.ListMergeSortTest;
 import com.gnahraf.io.store.table.order.RowOrder;
+import com.gnahraf.io.store.table.order.RowOrders;
 import com.gnahraf.test.TestDirs;
 import com.gnahraf.test.TestHelper;
 
 /**
- * Reusable fragment lifted from {@linkplain MergeSortTest}.
+ * Reusable fragment lifted from {@linkplain ListMergeSortTest}.
  * 
  * @author Babak
  */
@@ -128,6 +131,49 @@ public class TableTestHarness {
   protected int guessIntTableIndexFromRow(ByteBuffer row) {
     assertTrue(row.remaining() > 4);
     return 0xff & row.get(row.position() + 4);
+  }
+
+
+
+
+  /**
+   * Returns an array of sorted tables generated from the given arguments. An optional
+   * map may be passed in order to keep track of the order of the input values.
+   * 
+   * @param tableValues
+   *        per-table values
+   * @param expectedValuesWithTableIds
+   *        optional union of the table values
+   * @return
+   *        array of sorted tables just generated
+   * @throws IOException
+   */
+  public SortedTable[] createIntTableSet(int rowSize, int[][] tableValues, Map<Integer, Integer> expectedValuesWithTableIds) throws IOException {
+    
+    final RowOrder order = RowOrders.INT_ORDER;
+  
+    SortedTable[] tables = new SortedTable[tableValues.length];
+    
+    int collisionCount = 0;
+    int entryCount = 0;
+    for (int s = 0; s < tableValues.length; ++s) {
+      int[] values = tableValues[s];
+      entryCount += values.length;
+      
+      tables[s] = initIntTable(rowSize, order, values, s);
+      
+      Integer tableIndex = s;
+      
+      if (expectedValuesWithTableIds != null)
+        for (int v : values) {
+          if (expectedValuesWithTableIds.put(v, tableIndex) != null)
+            ++collisionCount;
+        }
+    }
+    
+    log.info(getMethod() + ": " + collisionCount + "/" + entryCount + " collisions in test");
+    
+    return tables;
   }
 
 }
