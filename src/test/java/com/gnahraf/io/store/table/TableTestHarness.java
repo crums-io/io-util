@@ -12,6 +12,7 @@ import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Map;
+import java.util.Random;
 
 import org.apache.log4j.Logger;
 
@@ -27,6 +28,31 @@ import com.gnahraf.test.TestHelper;
  * @author Babak
  */
 public class TableTestHarness {
+  
+  
+  public static class IntGenerator {
+    
+    private final Random rand;
+    
+    private final int maxSeparation;
+    
+    private int value;
+    
+    public IntGenerator(long seed, int start, int maxSeparation) {
+      this.rand = new Random(seed);
+      this.maxSeparation = maxSeparation;
+      this.value = start;
+      if (maxSeparation < 2)
+        throw new IllegalArgumentException("maxSeparation: " + maxSeparation);
+    }
+    
+    public int next() {
+      int out = value;
+      value = value + rand.nextInt(maxSeparation) + 1;
+      return out;
+    }
+    
+  }
   
   protected final Logger log = Logger.getLogger(getClass());
   protected final File testDir = TestDirs.getTestDir(getClass());
@@ -85,15 +111,6 @@ public class TableTestHarness {
     if (rowSize > 4) {
       
       ByteBuffer padding = paddingForIntTable(rowSize, tableIndex);
-//      ByteBuffer padding = ByteBuffer.allocate(rowSize - 4);
-//      {
-//        padding.clear();
-//        int value = tableIndex;
-//        while (padding.hasRemaining()) {
-//          padding.put((byte) value);
-//          value = (value + 1) % 256;
-//        }
-//      }
       
       for (int i = 0; i < values.length; ++i) {
         rows.putInt(values[i]);

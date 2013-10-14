@@ -35,7 +35,7 @@ public class PrecedenceMergeSource extends BaseMergeSource<PrecedenceMergeSource
           "assertion failure: this/other is finished. this=" + this + "; other=" + other);
     }
     int comp = compareToImpl(other);
-    return comp == 0 ? other.precedence -  this.precedence : comp;
+    return comp == 0 ? this.precedence -  other.precedence : comp;
   }
   
   

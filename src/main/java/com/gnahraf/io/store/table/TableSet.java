@@ -10,6 +10,7 @@ import com.gnahraf.io.store.table.SortedTable.Searcher;
 import com.gnahraf.io.store.table.order.RowOrder;
 
 /**
+ * A stack of {@linkplain SortedTable SortedTable}s, the top overriding the bottom.
  * 
  * @author Babak
  */
@@ -24,6 +25,7 @@ public class TableSet {
   public TableSet(SortedTable[] tables) throws IOException {
     this(tables, true);
   }
+  
   
   protected TableSet(SortedTable[] tables, boolean checkAndClone) throws IOException {
     
@@ -50,23 +52,34 @@ public class TableSet {
   
   
   public TableSet append(SortedTable table) throws IOException {
+    SortedTable[] set = appendImpl(table);
+    return new TableSet(set, false);
+  }
+  
+  
+  protected SortedTable[] appendImpl(SortedTable table) throws IOException {
     checkTable(table);
     SortedTable[] set = new SortedTable[tables.length + 1];
     set[tables.length] = table;
     for (int i = tables.length; i-- > 0; )
       set[i] = tables[i];
-    return new TableSet(set, false);
+    return set;
   }
   
   
   public TableSet append(SortedTable... table) throws IOException {
+    SortedTable[] set = appendImpl(table);
+    return new TableSet(set, false);
+  }
+  
+  protected SortedTable[] appendImpl(SortedTable[] table) throws IOException {
     checkTables(table);
     SortedTable[] set = new SortedTable[tables.length + table.length];
     for (int i = table.length; i-- > 0; )
       set[tables.length + i] = table[i];
     for (int i = tables.length; i-- > 0; )
       set[i] = tables[i];
-    return new TableSet(set, false);
+    return set;
   }
   
   private void checkTables(SortedTable[] inputTables) throws IOException {

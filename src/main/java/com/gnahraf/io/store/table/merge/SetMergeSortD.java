@@ -3,25 +3,36 @@
  */
 package com.gnahraf.io.store.table.merge;
 
-
 import java.io.IOException;
 import java.util.Collections;
 
 import com.gnahraf.io.IoStateException;
 import com.gnahraf.io.store.table.SortedTable;
+import com.gnahraf.io.store.table.TableSet;
+import com.gnahraf.io.store.table.TableSetD;
+import com.gnahraf.io.store.table.del.DeleteCodec;
 
 /**
- * A merge sort operation on <tt>SortedTable</tt>s, collectively representing a <em>set</em>.
- * That is, this models a data structure with no duplicates.
+ * A merge sort operation on <tt>SortedTable</tt>s with support for dealing with
+ * deletion entries. Like it's parent class, this models a data structure with no duplicates.
+ * 
+ * @see DeleteCodec#isDeleted(java.nio.ByteBuffer)
  * 
  * @author Babak
  */
-public class SetMergeSort extends BaseMergeSort<PrecedenceMergeSource> {
+public class SetMergeSortD extends SetMergeSort {
+
+
+  protected final DeleteCodec deleteCodec;
+  protected final TableSet backSet;
+  
+  
 
   /**
-   * Creates a new instance with the given <tt>sources</tt>, that will merge to the specified
-   * <tt>target</tt>. The precedence of the tables is from back to front. That is, higher index
-   * tables in the given array override lower index tables.
+   * Creates a new instance with the given delete codec and back-set. The delete codec
+   * encapsulates the protocol for delete overrides. The back-set determines whether or not
+   * any given delete entry in this merge should be preserved in the <tt>target</tt> of the
+   * merge.
    * <p/>
    * The number of rows in each source
    * table's search buffer defaults to {@linkplain BaseMergeSort#DEFAULT_ROWS_PER_SEARCH_BUFFER
@@ -31,35 +42,62 @@ public class SetMergeSort extends BaseMergeSort<PrecedenceMergeSource> {
    *        the source tables ordered in increasing order of precedence. Each table contains
    *        unique rows (no 2 rows in a given table compare to 0 using the tables' row comparator).
    *        Results are very much undefined, o.w.
+   * @param deleteCodec
+   *        non-<tt>null</tt> delete codec
+   * @param backSet
+   *        optional back-set (may be <tt>null</tt>). Deletion entries in are checked against
+   *        this back set in order to determine whether a given delete entry should purged
+   *        (skipped) during the merge: if a given deletion entry overrides an entry in the
+   *        back-set, then the deletion entry is preserved in the merge. Will typically be an
+   *        of sub-type {@linkplain TableSetD}.
    */
-  public SetMergeSort(SortedTable target, SortedTable[] sources) throws IOException {
-    this(target, sources, DEFAULT_ROWS_PER_SEARCH_BUFFER);
+  public SetMergeSortD(
+      SortedTable target, SortedTable[] sources,
+      DeleteCodec deleteCodec,
+      TableSet backSet)
+          throws IOException {
+    this(target, sources, deleteCodec, backSet, DEFAULT_ROWS_PER_SEARCH_BUFFER);
   }
 
 
   /**
-   * Creates a new instance with the given <tt>sources</tt>, that will merge to the specified
-   * <tt>target</tt>. The precedence of the tables is from back to front. That is, higher index
-   * tables in the given array override lower index tables.
+   * Creates a new instance with the given delete codec and back-set. The delete codec
+   * encapsulates the protocol for delete overrides. The back-set determines whether or not
+   * any given delete entry in this merge should be preserved in the <tt>target</tt> of the
+   * merge.
    * 
    * @param sources
    *        the source tables ordered in increasing order of precedence. Each table contains
    *        unique rows (no 2 rows in a given table compare to 0 using the tables' row comparator).
    *        Results are very much undefined, o.w.
+   * @param deleteCodec
+   *        non-<tt>null</tt> delete codec
+   * @param backSet
+   *        optional back-set (may be <tt>null</tt>). Deletion entries are checked against
+   *        this back set in order to determine whether a given delete entry should purged
+   *        (skipped) during the merge: if a given deletion entry overrides an entry in the
+   *        back-set, then the deletion entry is preserved in the merge. Will typically be an
+   *        of sub-type {@linkplain TableSetD}.
    * @param searchBufferRowsPerTable
    *        the number of rows in each source table's search buffer
+   *        
+   * @see SetMergeSort#SetMergeSort(SortedTable, SortedTable[], int)
    */
-  public SetMergeSort(SortedTable target, SortedTable[] sources, int searchBufferRowsPerTable) throws IOException {
+  protected SetMergeSortD(
+      SortedTable target, SortedTable[] sources,
+      DeleteCodec deleteCodec,
+      TableSet backSet,
+      int searchBufferRowsPerTable)
+          throws IOException {
     super(target, sources, searchBufferRowsPerTable);
+    
+    this.deleteCodec = deleteCodec;
+    this.backSet = backSet;
+    
+    if (deleteCodec == null)
+      throw new IllegalArgumentException("null deleteCodec");
   }
-
-
-  @Override
-  protected PrecedenceMergeSource newMergeSource(
-      SortedTable table, int searchBufferRowsPerTable, int tableIndex) throws IOException {
-    return new PrecedenceMergeSource(table.newSearcher(searchBufferRowsPerTable), tableIndex);
-  }
-
+  
 
   @Override
   protected void processTop() throws IOException {
@@ -71,9 +109,7 @@ public class SetMergeSort extends BaseMergeSort<PrecedenceMergeSource> {
     long blockEndRowNumber;
     long postTopRowNumber;
     
-    // see if *top* contains *next*s current row: if so, advance next and re-sort,
-    // and soon-come-back!
-    
+    // if *top* contains *next*s current row..
     if (top.searcher().search(next.row())) {
       
       // if top overrides next's row..
@@ -97,6 +133,16 @@ public class SetMergeSort extends BaseMergeSort<PrecedenceMergeSource> {
       }
       
       
+      
+    } else if (deleteCodec.isDeleted(top.row()) && (backSet == null || backSet.getRow(top.row()) == null) ) {
+      
+      top.setRow(top.rowNumber() + 1);
+      if (top.finished()) {
+        sources.remove(sources.size() - 1);
+        finishedSources.add(top);
+      }
+      // we wont be block copying
+      blockEndRowNumber = postTopRowNumber = 0;
       
     } else {
       // Good. next row is not found in *top*, so we're ready to block-copy
@@ -129,5 +175,5 @@ public class SetMergeSort extends BaseMergeSort<PrecedenceMergeSource> {
   }
   
 
- 
+
 }

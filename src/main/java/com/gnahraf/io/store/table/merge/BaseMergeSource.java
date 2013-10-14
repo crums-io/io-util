@@ -22,7 +22,7 @@ import com.gnahraf.io.store.table.SortedTable.Searcher;
  * 
  * @author Babak
  */
-public abstract class BaseMergeSource<S extends BaseMergeSource> implements Comparable<S> {
+public abstract class BaseMergeSource<S extends BaseMergeSource<?>> implements Comparable<S> {
 
 
   private final Searcher searcher;
@@ -126,7 +126,7 @@ public abstract class BaseMergeSource<S extends BaseMergeSource> implements Comp
   
   
   
-  protected int compareToImpl(BaseMergeSource other) {
+  protected int compareToImpl(BaseMergeSource<?> other) {
     if (this.finished()) {
       return other.finished() ? 0 : -1;
     } else if (other.finished())
