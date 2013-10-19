@@ -7,7 +7,7 @@ import java.nio.ByteBuffer;
 
 /**
  * Utility for creating common {@linkplain RowOrder}s. Note the orderings
- * defined here do not consider a buffer's position or limit: they see the
+ * defined here do not consider a buffer's position: they see the
  * buffer in absolute positions.
  * <p/>
  * This is not necessarily a good thing. The
@@ -22,14 +22,26 @@ public class RowOrders {
 
   private RowOrders() { }
 
-  
+
+  /**
+   * Short order at zero offset.
+   */
   public final static RowOrder SHORT_ORDER = shortOrderAtOffset(0);
   
+  /**
+   * Int order at zero offset.
+   */
   public final static RowOrder INT_ORDER = intOrderAtOffset(0);
-  
+
+  /**
+   * Long order at zero offset.
+   */
   public final static RowOrder LONG_ORDER = longOrderAtOffset(0);
   
   
+  /**
+   * Returns 4 byte <em>int</em> order at byte <tt>offset</tt>.
+   */
   public static RowOrder intOrderAtOffset(int offset) {
     return new RowOrderAtOffset(offset) {
       @Override
@@ -46,7 +58,10 @@ public class RowOrders {
     };
   }
   
-  
+
+  /**
+   * Returns 8 byte <em>long</em> order at byte <tt>offset</tt>.
+   */
   public static RowOrder longOrderAtOffset(int offset) {
     return new RowOrderAtOffset(offset) {
       @Override
@@ -63,7 +78,10 @@ public class RowOrders {
     };
   }
   
-  
+
+  /**
+   * Returns 2 byte <em>short</em> order at byte <tt>offset</tt>.
+   */
   public static RowOrder shortOrderAtOffset(int offset) {
     return new RowOrderAtOffset(offset) {
       @Override

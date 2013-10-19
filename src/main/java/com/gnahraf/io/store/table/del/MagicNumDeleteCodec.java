@@ -32,6 +32,12 @@ public abstract class MagicNumDeleteCodec extends DeleteCodec {
 
 
   
+  public static DeleteCodec newByteInstance(int offset, int magic) {
+    if (magic < Byte.MIN_VALUE || magic > Byte.MAX_VALUE)
+      throw new IllegalArgumentException("magic: "+ magic);
+    return newByteInstance(offset, (byte) magic);
+  }
+  
   public static DeleteCodec newByteInstance(int offset, byte magic) {
     return new MagicNumDeleteCodec(offset, magic) {
       
@@ -45,6 +51,12 @@ public abstract class MagicNumDeleteCodec extends DeleteCodec {
         return row.get(offset);
       }
     };
+  }
+  
+  public static DeleteCodec newShortInstance(int offset, int magic) {
+    if (magic < Short.MIN_VALUE || magic > Short.MAX_VALUE)
+      throw new IllegalArgumentException("magic: " + magic);
+    return newShortInstance(offset, (short) magic);
   }
   
   public static DeleteCodec newShortInstance(int offset, short magic) {
