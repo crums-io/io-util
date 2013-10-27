@@ -5,22 +5,29 @@ package com.gnahraf.io.store.table;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.AbstractList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
+import com.gnahraf.io.store.Sorted;
 import com.gnahraf.io.store.table.SortedTable.Searcher;
 import com.gnahraf.io.store.table.order.RowOrder;
+import com.gnahraf.util.CollectionUtils;
 
 /**
  * A stack of {@linkplain SortedTable SortedTable}s, the top overriding the bottom.
  * 
  * @author Babak
  */
-public class TableSet {
+public class TableSet implements Sorted {
   
   protected final SortedTable[] tables;
   
   /**
-   * Creates a new instance using the given backing <tt>table</tt>s. The order
-   * of precedence in the given array is from back to front.
+   * Creates a new instance using the given backing <tt>tables</tt>. The order
+   * of precedence in the given array is from back to front. Each <tt>SortedTable</tt>
+   * element of the given array is assumed to not contain any rows with duplicate keys.
    */
   public TableSet(SortedTable[] tables) throws IOException {
     this(tables, true);
@@ -48,6 +55,14 @@ public class TableSet {
     } else
       
       this.tables = tables;
+  }
+  
+  
+  /**
+   * Returns a new iterator positioned at the given search <tt>key</tt>.
+   */
+  public TableSetIterator iterator(ByteBuffer key) throws IOException {
+    return new TableSetIterator(this, key);
   }
   
   
@@ -97,7 +112,7 @@ public class TableSet {
     }
   }
   
-  private void checkTable(SortedTable table) throws IOException {
+  protected final void checkTable(SortedTable table) throws IOException {
     if (table == null)
       throw new IllegalArgumentException("null table");
     if (table.getRowWidth() != getRowWidth())
@@ -131,6 +146,16 @@ public class TableSet {
     }
     return null;
   }
+  
+  
+  public List<SortedTable> tables() {
+    return CollectionUtils.asReadOnlyList(tables);
+  }
+  
+  
+  
+  
+  
 
   private final static int SEARCH_BUFFER_SIZE_LIMIT = 8192;
 

@@ -11,11 +11,15 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.Test;
 
 import com.gnahraf.io.store.table.SortedTable;
+import com.gnahraf.io.store.table.TableSet;
+import com.gnahraf.io.store.table.TableSetD;
 import com.gnahraf.io.store.table.TableTestDHarness;
 import com.gnahraf.io.store.table.SortedTable.Searcher;
 import com.gnahraf.io.store.table.del.DeleteCodec;
@@ -92,7 +96,8 @@ public class SetMergeSortDTest extends TableTestDHarness {
   
   private void testImpl(int[][] tableValues, boolean profile, int expectedCorpusSize, int maxPostTests) throws IOException {
     Map<Integer, Integer> expected = new HashMap<>();
-    SortedTable[] stack = createIntTableSet(tableValues, expected);
+    Set<Integer> deletes = new HashSet<>();
+    SortedTable[] stack = createIntTableSet(tableValues, expected, deletes);
     if (expectedCorpusSize >= 0)
       assertEquals(expectedCorpusSize, expected.size());
     SortedTable target;
@@ -139,6 +144,14 @@ public class SetMergeSortDTest extends TableTestDHarness {
       assertTrue(key.hasRemaining());
       assertEquals(expectedEntry.getValue().intValue(), guessIntTableIndexFromRow(row));
     }
+    
+    TableSet tableSet = new TableSetD(target, DELETE_CODEC);
+    for (int delete : deletes) {
+      key.clear();
+      key.putInt(delete).flip();
+      assertNull(tableSet.getRow(key));
+    }
+    
     end = System.nanoTime();
     if (profile) {
       log.info("Total time taken to test corpus post merge: " + (end - start) / 1000 + " microseconds");

@@ -73,9 +73,26 @@ public abstract class BaseMergeSource<S extends BaseMergeSource<?>> implements C
       throw new IndexOutOfBoundsException("rowNum/rowCount: " + rowNum + "/" + rowCount);
     }
     row.clear();
-    searcher.getTable().read(rowNum, row);
+    // if the row is already loaded in the search buffer
+    if (searcher.isRowInBuffer(rowNum))
+      row.put(searcher.getRow(rowNum));
+    // o.w. hit the file system
+    else
+      searcher.getTable().read(rowNum, row);
     row.flip();
     rowCursor = rowNum;
+  }
+
+  /**
+   * Advances to the next row, unless already at the end of this merge source.
+   * @return <tt>true</tt>, if advanced to the next existing row; <tt>false</tt>,
+   *         if advanced, or already advanced, past the last row, i.e. if <tt>finished()</tt>.
+   */
+  public boolean advanceRow() throws IOException {
+    if (finished())
+      return false;
+    setRow(rowNumber() + 1);
+    return !finished();
   }
   
   /**

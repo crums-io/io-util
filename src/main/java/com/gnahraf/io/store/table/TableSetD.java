@@ -19,6 +19,12 @@ public class TableSetD extends TableSet {
   private final DeleteCodec deleteCodec;
 
 
+  public TableSetD(SortedTable table, DeleteCodec deleteCodec) throws IOException {
+    this(new SortedTable[]{ table }, deleteCodec, false);
+    checkTable(table);
+  }
+
+
   public TableSetD(SortedTable[] tables, DeleteCodec deleteCodec) throws IOException {
     this(tables, deleteCodec, true);
   }
@@ -43,6 +49,12 @@ public class TableSetD extends TableSet {
   
 
   @Override
+  public TableSetDIterator iterator(ByteBuffer key) throws IOException {
+    return new TableSetDIterator(this, key);
+  }
+  
+
+  @Override
   public TableSetD append(SortedTable table) throws IOException {
     return new TableSetD(appendImpl(table), deleteCodec, false);
   }
@@ -51,6 +63,11 @@ public class TableSetD extends TableSet {
   @Override
   public TableSetD append(SortedTable... table) throws IOException {
     return new TableSetD(appendImpl(table), deleteCodec, false);
+  }
+
+
+  public final DeleteCodec getDeleteCodec() {
+    return deleteCodec;
   }
   
   

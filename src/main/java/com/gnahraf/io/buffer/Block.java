@@ -30,16 +30,6 @@ public class Block {
    */
   private final ByteBuffer buffer;
   
-  /**
-   * The out bound view of the cells. Even read-only <tt>ByteBuffer</tt>s are
-   * mutable (you can change their position, for example). So in order to
-   * guarantee the boundaries of our cells remain intact, we maintain a
-   * separate (but still shared) view of each cell for outbound consumption.
-   * <p/>
-   * Initialized lazily.
-   */
-  protected ByteBuffer[] cellsOut;
-  
   
   /**
    * Copy constructor available to subclasses; pointless in base class.
@@ -47,7 +37,6 @@ public class Block {
   protected Block(Block copy) {
     this.cells = copy.cells;
     this.buffer = copy.buffer;
-    this.cellsOut = copy.cellsOut;
   }
   
   

@@ -30,5 +30,26 @@ public abstract class DeleteCodec {
    * with respect to the table's row order.
    */
   public abstract void markDeleted(ByteBuffer row);
+  
+  
+  
+  
+  
+  
+  
+  /**
+   * Noop codec. Never considers anything deleted. Note {@linkplain DeleteCodec#markDeleted(ByteBuffer)}
+   * throws <tt>UnsupportedOperationException</tt>.
+   */
+  public final static DeleteCodec NOOP = new DeleteCodec() {
+    @Override
+    public void markDeleted(ByteBuffer row) {
+      throw new UnsupportedOperationException();
+    }
+    @Override
+    public boolean isDeleted(ByteBuffer row) {
+      return false;
+    }
+  };
 
 }

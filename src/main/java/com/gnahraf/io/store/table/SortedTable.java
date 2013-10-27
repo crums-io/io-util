@@ -343,6 +343,18 @@ public class SortedTable extends Table implements Sorted {
     }
     
     /**
+     * Determines whether the given row is already loaded.
+     * <pre><tt>
+     *   return rowNumber < getLastRetrievedRowNumber() && rowNumber >= getFirstRetrievedRowNumber();
+     * </tt></pre>
+     * 
+     * @see #getRow(long)
+     */
+    public boolean isRowInBuffer(long rowNumber) {
+      return rowNumber < getLastRetrievedRowNumber() && rowNumber >= getFirstRetrievedRowNumber();
+    }
+    
+    /**
      * Returns a read-only view of an already retrieved row, given its row number.
      * 
      * @param rowNumber
@@ -351,6 +363,8 @@ public class SortedTable extends Table implements Sorted {
      *        
      * @throws IndexOutOfBoundsException
      *         if <tt>rowNumber</tt> is outside the retrieved range
+     * 
+     * @see #isRowInBuffer(long)
      */
     public ByteBuffer getRow(long rowNumber) throws IndexOutOfBoundsException {
       return block.cell(toBlockIndex(rowNumber));

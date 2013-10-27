@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Map;
+import java.util.Set;
 
 import com.gnahraf.io.store.table.del.DeleteCodec;
 import com.gnahraf.io.store.table.del.MagicNumDeleteCodec;
@@ -26,10 +27,19 @@ public class TableTestDHarness extends TableTestHarness {
   public final static DeleteCodec DELETE_CODEC = MagicNumDeleteCodec.newByteInstance(4, DELETE_MARKER);
   public final static int ROW_WIDTH = 4 + 1 + 4;
   public final static RowOrder ORDER = RowOrders.INT_ORDER;
+
   
   
   public SortedTable[] createIntTableSet(
       int[][] tableValues, Map<Integer, Integer> expected) throws IOException {
+    
+    return createIntTableSet(tableValues, expected, null);
+  }
+  
+  
+  
+  public SortedTable[] createIntTableSet(
+      int[][] tableValues, Map<Integer, Integer> expected, Set<Integer> deleted) throws IOException {
     
     SortedTable[] tables = new SortedTable[tableValues.length];
     
@@ -48,12 +58,18 @@ public class TableTestDHarness extends TableTestHarness {
         Integer tableIndex = s;
         for (int v : values) {
           if (v < 0) {
+            // deleted
             v = -v - 1;
             ++deleteCount;
             if (expected.remove(v) != null)
               ++effectiveDeleteCount;
-          } else if (expected.put(v, tableIndex) != null) {
-            ++collisionCount;
+            if (deleted != null)
+              deleted.add(v);
+          } else {
+            if (expected.put(v, tableIndex) != null)
+              ++collisionCount;
+            if (deleted != null)
+              deleted.remove(v);
           }
         }
       }

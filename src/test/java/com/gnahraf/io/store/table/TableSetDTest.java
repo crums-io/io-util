@@ -9,6 +9,7 @@ import static org.junit.Assert.*;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 import org.junit.Test;
@@ -82,6 +83,7 @@ public class TableSetDTest extends TableTestDHarness {
   
   private void testImpl(int[][] tableValues, int maxTests) throws IOException {
     Map<Integer, Integer> expected = new HashMap<>();
+    HashSet<Integer> deletes = new HashSet<>();
     SortedTable[] tables = createIntTableSet(tableValues, expected);
     TableSetD tableSet = new TableSetD(tables, DELETE_CODEC);
     ByteBuffer key = ByteBuffer.allocate(4); // size of int
@@ -94,6 +96,11 @@ public class TableSetDTest extends TableTestDHarness {
       assertNotNull(row);
       assertTrue(key.hasRemaining());
       assertEquals(expectedEntry.getValue().intValue(), guessIntTableIndexFromRow(row));
+    }
+    for (int deleted : deletes) {
+      key.clear();
+      key.putInt(deleted).flip();
+      assertNull(tableSet.getRow(key));
     }
   }
 

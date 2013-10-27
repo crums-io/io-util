@@ -37,8 +37,5 @@ public class PrecedenceMergeSource extends BaseMergeSource<PrecedenceMergeSource
     int comp = compareToImpl(other);
     return comp == 0 ? this.precedence -  other.precedence : comp;
   }
-  
-  
-  
 
 }
