@@ -96,6 +96,15 @@ public class KeystoneImplTest {
     assertEquals(value, keystone.get());
   }
 
+	@Test
+	public void testOldValue() throws IOException {
+		String filename = method(new Object() { });
+		long oldvalue = 5;
+		Keystone keystone = createKeystone(filename, 0, oldvalue);
+		long newvalue = -9;
+		assertEquals(oldvalue, keystone.set(newvalue));
+	}
+
 
   @Test
   public void testIncrement() throws IOException {
