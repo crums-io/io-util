@@ -6,7 +6,9 @@ package com.gnahraf.io.buffer;
 
 import static com.gnahraf.io.buffer.BufferUtils.*;
 
+import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
+import java.util.ConcurrentModificationException;
 
 import org.apache.log4j.Logger;
 
@@ -33,9 +35,10 @@ public class Block {
   
   /**
    * Copy constructor available to subclasses; pointless in base class.
+   * The new instance shares the copy's buffer
    */
   protected Block(Block copy) {
-    this.cells = copy.cells;
+    this.cells = copy.cells.clone();
     this.buffer = copy.buffer;
   }
   
@@ -64,9 +67,7 @@ public class Block {
     block.clear();
     
     if (block.capacity() % cellByteWidth != 0) {
-      LOG.warn(
-          "slicing off trailing cell fragment from end of buffer: " +
-          "this.block != block (content still shared");
+      LOG.debug("slicing off trailing cell fragment from end of buffer");
       block.limit(cellCount * cellByteWidth);
       block = block.slice();
     }
@@ -124,11 +125,14 @@ public class Block {
   
   
   /**
-   * Returns backing buffer. The capacity of the returned buffer is equals to the sum
+   * Returns the backing buffer. The capacity of the returned buffer is equals to the sum
    * of the capacities of its cells. Modifications in the returned buffer's content
    * are visible in the {@linkplain #cells() cells} and vice versa. The position and limit of
    * the returned buffer is independent of those of the cells.
    * The returned buffer is read-only, if {@linkplain #isReadOnly()} returns <tt>true</tt>.
+   * Modifications to the buffer's position and limit are ignored by this class.
+   * The contents of the returned buffer may be ordered differently than the order of
+   * this instance's cells.
    */
   public final ByteBuffer buffer() {
     return buffer;
@@ -163,5 +167,13 @@ public class Block {
   }
   
   
-
+  public void copyCellInto(int index, ByteBuffer buffer) throws BufferOverflowException {
+    ByteBuffer cell = cells[index];
+    if (cell.remaining() != cell.capacity())
+      throw new IllegalStateException(
+          "Assertion failure at cell[" + index + "]=" + cell + " Illegal concurrent access?");
+    buffer.put(cell);
+    cell.rewind();
+  }
+  
 }

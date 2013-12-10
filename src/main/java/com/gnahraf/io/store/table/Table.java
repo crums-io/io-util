@@ -15,6 +15,7 @@ import org.apache.log4j.Logger;
 
 import com.gnahraf.io.channels.ChannelUtils;
 import com.gnahraf.io.store.ks.CachingKeystone;
+import com.gnahraf.io.store.ks.FixedKeystone;
 import com.gnahraf.io.store.ks.Keystone;
 import com.gnahraf.io.store.ks.KeystoneImpl;
 import com.gnahraf.io.store.ks.VolatileKeystone;
@@ -81,6 +82,37 @@ public class Table implements Channel {
     long rows = checkRowCount(rowCount);
     if (file.size() < zeroRowFileOffset + rows * rowSize)
       throw new IOException("file size (" + file.size() + " bytes) too small; zeroRowFileOffset is " + zeroRowFileOffset + "; row count is " + rows + "; and row size is " + rowSize);
+  }
+  
+  
+  
+  public Table sliceTable(long firstRow, long count) throws IOException {
+    if (count <= 0)
+      throw new IllegalArgumentException("count: " + count);
+    if (firstRow < 0)
+      throw new IllegalArgumentException("firstRow: " + firstRow);
+
+    long rowCountNow = rowCount.get();
+    if (rowCountNow < firstRow + count)
+      throw new IllegalArgumentException(
+          "Overflow: firstRow=" + firstRow + "; count=" + count + "; current row count = " + rowCountNow);
+    
+    Keystone snapshot = new FixedKeystone(count);
+    long zeroRowOffset = this.zeroRowFileOffset + firstRow * rowSize;
+    
+    return new Table(snapshot, file, zeroRowOffset, rowSize) {
+
+      @Override
+      public long append(ByteBuffer rowData) {
+        throw new UnsupportedOperationException();
+      }
+
+      @Override
+      public void appendRows(Table source, long row, long count) {
+        throw new UnsupportedOperationException();
+      }
+      
+    };
   }
 
 

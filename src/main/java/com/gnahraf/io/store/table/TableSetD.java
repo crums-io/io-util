@@ -3,10 +3,14 @@
  */
 package com.gnahraf.io.store.table;
 
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import com.gnahraf.io.store.table.del.DeleteCodec;
+import com.gnahraf.io.store.table.iter.TableSetDIterator;
+import com.gnahraf.io.store.table.iter.TableSetIterator;
+import com.gnahraf.io.store.table.order.RowOrder;
 
 /**
  * A {@linkplain TableSet} supporting delete overrides.
@@ -18,6 +22,17 @@ public class TableSetD extends TableSet {
 
   private final DeleteCodec deleteCodec;
 
+  
+
+  /**
+   * Creates an empty instance.
+   */
+  public TableSetD(RowOrder order, int rowWidth, DeleteCodec deleteCodec) {
+    super(order, rowWidth);
+    this.deleteCodec = deleteCodec;
+    if (deleteCodec == null)
+      throw new IllegalArgumentException("null deleteCodec");
+  }
 
   public TableSetD(SortedTable table, DeleteCodec deleteCodec) throws IOException {
     this(new SortedTable[]{ table }, deleteCodec, false);
@@ -33,7 +48,6 @@ public class TableSetD extends TableSet {
   protected TableSetD(SortedTable[] tables, DeleteCodec deleteCodec, boolean checkAndClone) throws IOException {
     super(tables, checkAndClone);
     this.deleteCodec = deleteCodec;
-    
     if (deleteCodec == null)
       throw new IllegalArgumentException("null deleteCodec");
   }
@@ -49,8 +63,8 @@ public class TableSetD extends TableSet {
   
 
   @Override
-  public TableSetDIterator iterator(ByteBuffer key) throws IOException {
-    return new TableSetDIterator(this, key);
+  public TableSetIterator iterator() throws IOException {
+    return new TableSetDIterator(this);
   }
   
 

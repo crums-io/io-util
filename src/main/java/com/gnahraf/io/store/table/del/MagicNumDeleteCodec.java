@@ -29,9 +29,25 @@ public abstract class MagicNumDeleteCodec extends DeleteCodec {
   
   
   protected abstract long magicCellValue(ByteBuffer row);
-
+  
 
   
+  
+  @Override
+  public String toString() {
+    StringBuilder builder = new StringBuilder();
+    builder.append("magic[");
+    builder.append(offset);
+    builder.append(",0x");
+    String hex = Long.toHexString(magic);
+    if (hex.length() % 2 != 0)
+      builder.append('0');
+    builder.append(hex);
+    builder.append("]");
+    return builder.toString();
+  }
+
+
   public static DeleteCodec newByteInstance(int offset, int magic) {
     if (magic < Byte.MIN_VALUE || magic > Byte.MAX_VALUE)
       throw new IllegalArgumentException("magic: "+ magic);

@@ -1,0 +1,100 @@
+/*
+ * Copyright 2013 Babak Farhang 
+ */
+package com.gnahraf.io.store.karoon;
+
+
+import java.io.IOException;
+import java.nio.channels.FileChannel;
+import java.util.HashMap;
+import java.util.Map;
+
+import com.gnahraf.io.store.table.SortedTable;
+import com.gnahraf.io.store.table.TableSet;
+import com.gnahraf.io.store.table.order.RowOrder;
+
+/**
+ * A <tt>SortedTable</tt> tagged with a bookkeeping ID.
+ * 
+ * @author Babak
+ */
+public class SidTable extends SortedTable {
+  
+  private final long id;
+
+  /**
+   * Creates a new instance by loading it from the given <tt>file</tt> channel,
+   * at the file's current position.
+   * 
+   * @see SortedTable#SortedTable(FileChannel, int, RowOrder)
+   */
+  public SidTable(FileChannel file, int rowSize, RowOrder order, long id) throws IOException {
+    super(file, rowSize, order);
+    this.id = id;
+  }
+
+
+  /**
+   * Creates a new instance by loading it at the specified <tt>zeroRowFileOffset</tt>.
+   * 
+   * @see SortedTable#SortedTable(FileChannel, long, int, RowOrder)
+   */
+  public SidTable(
+      FileChannel file, long zeroRowFileOffset, int rowSize, RowOrder order, long id)
+          throws IOException {
+    super(file, zeroRowFileOffset, rowSize, order);
+    this.id = id;
+  }
+  
+  /**
+   * Returns the table's ID.
+   */
+  public final long id() {
+    return id;
+  }
+  
+  
+  /**
+   * Returns the table's decimal ID.
+   */
+  @Override
+  public String toString() {
+    return Long.toString(id);
+  }
+
+  
+
+  public Searcher getSearcher() throws IOException {
+    if (searcher == null) {
+      long byteSize = getRowCount() * getRowWidth();
+      int rowsInBuffer;
+      if (byteSize < 2 * TableSet.DEFAULT_SEARCH_BUFFER_SIZE)
+        rowsInBuffer = (int) getRowCount();
+      else
+        rowsInBuffer = TableSet.DEFAULT_SEARCH_BUFFER_SIZE / getRowWidth();
+      rowsInBuffer = Math.max(rowsInBuffer, 8);
+      searcher = newSearcher(rowsInBuffer);
+    }
+    return searcher;
+  }
+  
+  private Searcher searcher;
+  
+//
+//  
+//
+//  public Searcher getSearcher(int rowsInBuffer) throws IOException {
+//    Searcher searcher = searchers.get(rowsInBuffer);
+//    if (searcher == null) {
+//      searcher = newSearcher(rowsInBuffer);
+//      searchers.put(rowsInBuffer, searcher);
+//    }
+//    return searcher;
+//  }
+//  
+//  private Map<Integer, Searcher> searchers = new HashMap<Integer, SortedTable.Searcher>();
+//  
+  
+  
+
+}

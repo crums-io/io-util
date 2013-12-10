@@ -65,5 +65,17 @@ public class CachingKeystone extends Keystone {
     base.commit();
   }
 
+
+  @Override
+  public boolean isOpen() {
+    return base.isOpen();
+  }
+
+
+  @Override
+  public void close() throws IOException {
+    base.close();
+  }
+
 }
 

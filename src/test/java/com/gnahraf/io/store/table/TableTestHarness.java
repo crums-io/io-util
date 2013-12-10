@@ -14,20 +14,18 @@ import java.nio.channels.FileChannel;
 import java.util.Map;
 import java.util.Random;
 
-import org.apache.log4j.Logger;
 
 import com.gnahraf.io.store.table.merge.ListMergeSortTest;
 import com.gnahraf.io.store.table.order.RowOrder;
 import com.gnahraf.io.store.table.order.RowOrders;
-import com.gnahraf.test.TestDirs;
-import com.gnahraf.test.TestHelper;
+import com.gnahraf.test.TestMethodHarness;
 
 /**
  * Reusable fragment lifted from {@linkplain ListMergeSortTest}.
  * 
  * @author Babak
  */
-public class TableTestHarness {
+public class TableTestHarness extends TestMethodHarness {
   
   
   public static class IntGenerator {
@@ -54,38 +52,8 @@ public class TableTestHarness {
     
   }
   
-  protected final Logger log = Logger.getLogger(getClass());
-  protected final File testDir = TestDirs.getTestDir(getClass());
-  
-  private File unitTestDir;
-  
-  protected File unitTestDir() {
-    if (unitTestDir == null)
-      throw new IllegalStateException("not initialized");
-    return unitTestDir;
-  }
-  
-  
-  
-  
-  protected void initUnitTestDir(Object methodAnon) {
-    String method = TestHelper.method(methodAnon);
-    if (unitTestDir != null)
-      fail();
-    log.debug("Creating test directory for " + method);
-    File dir = new File(testDir, method);
-    assertFalse(dir.exists());
-    assertTrue( dir.mkdirs() );
-    unitTestDir = dir;
-  }
-  
-  
-  public String getMethod() {
-    return unitTestDir.getName();
-  }
-  
   protected FileChannel openFile(String filename, boolean exists) throws IOException {
-    File testFile = new File(unitTestDir, filename);
+    File testFile = new File(unitTestDir(), filename);
     if (testFile.exists() != exists)
       fail("test file already exists: " + testFile);
     return new RandomAccessFile(testFile, "rw").getChannel();

@@ -31,7 +31,21 @@ public abstract class BufferOp {
           return buffer.duplicate();
         }
       };
-  
+
+      
+  /**
+   * Duplicates the buffer. The input buffer is unmodified.
+   * {@linkplain #opAll(ByteBuffer[])} returns the input array.
+   */
+  public final static BufferOp DUPLICATE_INPLACE =
+      new InplaceOp() {
+        @Override
+        public ByteBuffer op(ByteBuffer buffer) {
+          return buffer.duplicate();
+        }
+      };
+      
+      
   /**
    * Slices the buffer. The input buffer is unmodified.
    * {@linkplain #opAll(ByteBuffer[])} returns a new array.
@@ -43,6 +57,20 @@ public abstract class BufferOp {
           return buffer.slice();
         }
       };
+
+      
+  /**
+   * Slices the buffer. The input buffer is unmodified.
+   * {@linkplain #opAll(ByteBuffer[])} returns the input array.
+   */
+  public final static BufferOp SLICE_INPLACE =
+      new InplaceOp() {
+        @Override
+        public ByteBuffer op(ByteBuffer buffer) {
+          return buffer.slice();
+        }
+      };
+
 
   /**
    * Clears the buffer. The input buffer is <em>modified</em>.
@@ -57,6 +85,34 @@ public abstract class BufferOp {
           return buffer;
         }
       };
+
+  /**
+   * Marks the buffer. The input buffer is <em>modified</em>.
+   * {@linkplain #opAll(ByteBuffer[])} returns the input array.
+   * 
+   */
+  public final static BufferOp MARK =
+      new InplaceOp() {
+        @Override
+        public ByteBuffer op(ByteBuffer buffer) {
+          buffer.mark();
+          return buffer;
+        }
+      };
+
+  /**
+   * Resets the buffer. The input buffer is <em>modified</em>.
+   * {@linkplain #opAll(ByteBuffer[])} returns the input array.
+   * 
+   */
+  public final static BufferOp RESET =
+      new InplaceOp() {
+        @Override
+        public ByteBuffer op(ByteBuffer buffer) {
+          buffer.reset();
+          return buffer;
+        }
+      };
   
 
   /**
@@ -67,10 +123,25 @@ public abstract class BufferOp {
       new BufferOp() {
         @Override
         public ByteBuffer op(ByteBuffer buffer) {
-          return buffer.duplicate();
+          return buffer.asReadOnlyBuffer();
         }
       };
   
+
+  /**
+   * Creates a new read-only view of the buffer. The input buffer is unmodified.
+   * {@linkplain #opAll(ByteBuffer[])} returns the input array.
+   */
+  public final static BufferOp AS_READONLY_INPLACE =
+      new InplaceOp() {
+        @Override
+        public ByteBuffer op(ByteBuffer buffer) {
+          return buffer.asReadOnlyBuffer();
+        }
+      };
+      
+
+
 
   /**
    * Ensures the input buffer is read-only; if read-only, the input is returned;
@@ -103,6 +174,7 @@ public abstract class BufferOp {
   * @return
   */
  public abstract ByteBuffer op(ByteBuffer buffer);
+ 
  
  public ByteBuffer[] opAll(ByteBuffer[] buffers) {
    return defaultOpAllImpl(buffers, new ByteBuffer[buffers.length]);

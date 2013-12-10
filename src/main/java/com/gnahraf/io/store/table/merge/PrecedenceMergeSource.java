@@ -8,6 +8,12 @@ import java.io.IOException;
 import com.gnahraf.io.store.table.SortedTable.Searcher;
 
 /**
+ * A merge source with precedence. Instances' precedences are used as tie
+ * breakers for when they would otherwise compare equal to one another.
+ * <p/>
+ * The use case for this structure is a stack of tables with the the top
+ * tables overriding the bottom ones. I.e. if we're merging the underlying tables
+ * of a {@linkplain TableSet}.
  * 
  * @author Babak
  */
@@ -20,7 +26,9 @@ public class PrecedenceMergeSource extends BaseMergeSource<PrecedenceMergeSource
     this.precedence = precedence;
   }
   
-  
+  /**
+   * Returns this instance's precedence.
+   */
   public final int precedence() {
     return precedence;
   }

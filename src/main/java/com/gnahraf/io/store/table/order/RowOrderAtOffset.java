@@ -47,5 +47,8 @@ public abstract class RowOrderAtOffset extends RowOrder {
   public boolean isRelative() {
     return false;
   }
+  
+  
+  
 
 }

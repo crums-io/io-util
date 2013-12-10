@@ -8,10 +8,12 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
+import java.nio.channels.GatheringByteChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 
@@ -40,13 +42,8 @@ public class ChannelUtils {
 
       if (amountRead == -1)
         throw new EofException("While attempting to read " + buffer.remaining() + " more bytes");
-      else if (amountRead == 0) {
-        if (--noopCountDown == 0)
-          throw new IOException("Write failed after " + MAX_NOOP_TRIALS + " trials");
-        continue;
-      }
 
-      noopCountDown = MAX_NOOP_TRIALS;
+      noopCountDown = updateNoopCountDown(noopCountDown, amountRead);
     }
   }
 
@@ -65,13 +62,7 @@ public class ChannelUtils {
       if (amountRead == -1)
         throw new EofException("While attempting to read " + buffer.remaining() + " more bytes at position " + (position + 1));
 
-      else if (amountRead == 0) {
-        if (--noopCountDown == 0)
-          throw new IOException("Write failed after " + MAX_NOOP_TRIALS + " trials");
-        continue;
-      }
-
-      noopCountDown = MAX_NOOP_TRIALS;
+      noopCountDown = updateNoopCountDown(noopCountDown, amountRead);
     }
 
   }
@@ -82,12 +73,8 @@ public class ChannelUtils {
     int noopCountDown = MAX_NOOP_TRIALS;
 
     while (buffer.hasRemaining()) {
-      if (channel.write(buffer) == 0) {
-        if (--noopCountDown == 0)
-          throw new IOException("Write failed after " + MAX_NOOP_TRIALS + " trials");
-        continue;
-      }
-      noopCountDown = MAX_NOOP_TRIALS;
+      int amountWritten = channel.write(buffer);
+      noopCountDown = updateNoopCountDown(noopCountDown, amountWritten);
     }
   }
 
@@ -99,14 +86,45 @@ public class ChannelUtils {
     while (buffer.hasRemaining()) {
       int amountWritten = file.write(buffer, position);
       position += amountWritten;
-      if (amountWritten == 0) {
-        if (--noopCountDown == 0)
-          throw new IOException("Write failed after " + MAX_NOOP_TRIALS + " trials");
-        continue;
-      }
-      noopCountDown = MAX_NOOP_TRIALS;
+      noopCountDown = updateNoopCountDown(noopCountDown, amountWritten);
     }
   }
+  
+  
+  /**
+   * 
+   * @param file
+   * @param buffers
+   * @throws IOException
+   */
+  public static void writeRemaining(GatheringByteChannel file, ByteBuffer[] buffers) throws IOException {
+
+    int noopCountDown = MAX_NOOP_TRIALS;
+    
+    int activeIndex = 0;
+    while (activeIndex < buffers.length) {
+      if (!buffers[activeIndex].hasRemaining()) {
+        ++activeIndex;
+        continue;
+      }
+      long bytesWritten = file.write(buffers, activeIndex, buffers.length - activeIndex);
+      noopCountDown = updateNoopCountDown(noopCountDown, bytesWritten);
+    }
+  }
+  
+  
+  private static int updateNoopCountDown(int noopCountDown, long bytes) throws IOException {
+    if (bytes == 0) {
+      --noopCountDown;
+      if (noopCountDown <= 0)
+        throw new IOException("I/O operation failed after " + MAX_NOOP_TRIALS + " trials");
+    } else
+      noopCountDown = MAX_NOOP_TRIALS;
+    return noopCountDown;
+  }
+  
+  
+  
 
 
   public static ReadableByteChannel asChannel(InputStream in) throws IOException {
@@ -152,15 +170,12 @@ public class ChannelUtils {
       long amount = src.transferTo(offset, progress, sink);
       
       // check if we didn't transfer anything..
-      if (amount == 0) {
-        if (--noopCountDown == 0)
-          throw new IOException("Write failed after " + MAX_NOOP_TRIALS + " trials");
-        if (noopCountDown > 3) {
-          try {
-            Thread.sleep(5);
-          } catch (InterruptedException ix) {
-            // swallow
-          }
+      noopCountDown = updateNoopCountDown(noopCountDown, amount);
+      if (amount == 0 && noopCountDown < 4) {
+        try {
+          Thread.sleep(5);
+        } catch (InterruptedException ix) {
+          throw new InterruptedIOException("interrupted while sleeping");
         }
       }
       

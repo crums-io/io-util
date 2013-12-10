@@ -272,8 +272,6 @@ public class SortedTableTest {
     
     showSearchStats(searcher);
   }
-  
-
 
   @Test
   public void testWith1MRows() throws IOException {

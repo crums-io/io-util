@@ -5,6 +5,7 @@ package com.gnahraf.io.store.table;
 
 
 import java.io.IOException;
+import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
@@ -365,9 +366,41 @@ public class SortedTable extends Table implements Sorted {
      *         if <tt>rowNumber</tt> is outside the retrieved range
      * 
      * @see #isRowInBuffer(long)
+     * @see #copyRowInto(long, ByteBuffer)
      */
     public ByteBuffer getRow(long rowNumber) throws IndexOutOfBoundsException {
       return block.cell(toBlockIndex(rowNumber));
+    }
+    
+    /**
+     * Copies the contents of the given already retrieved <tt>rowNumber</tt> to the
+     * specified <tt>buffer</tt>. The position of the given buffer is advanced by
+     * the underlying {@linkplain #getTable() table}'s {@linkplain Table#getRowWidth() row width}.
+     * <p/>
+     * This is functionally equivalent to
+     * <pre><tt>
+     * Searcher seacher = ..
+     * buffer.put(searcher.getRow(rowNumber));
+     * </tt></pre>
+     * except that it's marginally more efficient.
+     * <p/>
+     * 
+     * @param rowNumber
+     *        row number in the range {@linkplain #getFirstRetrievedRowNumber()} (inclusive),
+     *        {@linkplain #getLastRetrievedRowNumber()} (exclusive)
+     * @param buffer
+     *        the buffer to which the row's contents will be put
+     * @throws IndexOutOfBoundsException
+     *         if <tt>rowNumber</tt> is outside the retrieved range
+     * @throws BufferOverflowException
+     *         if <tt>buffer</tt>'s remaining bytes is less than the underlying table's row width
+     * 
+     * @see #isRowInBuffer(long)
+     * @see #getRow(long)
+     */
+    public void copyRowInto(long rowNumber, ByteBuffer buffer)
+        throws IndexOutOfBoundsException, BufferOverflowException {
+      block.copyCellInto(toBlockIndex(rowNumber), buffer);
     }
     
     

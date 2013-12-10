@@ -3,26 +3,50 @@
  */
 package com.gnahraf.io.store.table;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.AbstractList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
+
+import org.apache.log4j.Logger;
 
 import com.gnahraf.io.store.Sorted;
 import com.gnahraf.io.store.table.SortedTable.Searcher;
+import com.gnahraf.io.store.table.iter.TableSetIterator;
 import com.gnahraf.io.store.table.order.RowOrder;
 import com.gnahraf.util.CollectionUtils;
+import com.gnahraf.util.TaskStack;
 
 /**
  * A stack of {@linkplain SortedTable SortedTable}s, the top overriding the bottom.
  * 
  * @author Babak
  */
-public class TableSet implements Sorted {
+public class TableSet implements Sorted, Closeable {
+  
+  private final Logger LOG = Logger.getLogger(TableSet.class);
+  
+  protected final static SortedTable[] EMPTY_TABLE_ARRAY = { };
   
   protected final SortedTable[] tables;
+
+  private final RowOrder order;
+  private final int rowWidth;
+  
+  
+  /**
+   * Creates an empty instance.
+   */
+  public TableSet(RowOrder order, int rowWidth) {
+    this.tables = EMPTY_TABLE_ARRAY;
+    this.order = order;
+    this.rowWidth = rowWidth;
+    
+    if (order == null)
+      throw new IllegalArgumentException("null row order");
+    if (rowWidth < 1)
+      throw new IllegalArgumentException("row width: " + rowWidth);
+  }
   
   /**
    * Creates a new instance using the given backing <tt>tables</tt>. The order
@@ -47,22 +71,26 @@ public class TableSet implements Sorted {
         throw new IllegalArgumentException("null table at index 0");
       
       this.tables = new SortedTable[tables.length];
-      this.tables[0] = tables[0];
+      order = tables[0].order();
+      rowWidth = tables[0].getRowWidth();
+      
       checkTables(tables);
       for (int i = tables.length; i-- > 0; )
         this.tables[i] = tables[i];
     
-    } else
-      
+    } else {
       this.tables = tables;
+      order = tables[0].order();
+      rowWidth = tables[0].getRowWidth();
+    }
   }
   
   
   /**
    * Returns a new iterator positioned at the given search <tt>key</tt>.
    */
-  public TableSetIterator iterator(ByteBuffer key) throws IOException {
-    return new TableSetIterator(this, key);
+  public TableSetIterator iterator() throws IOException {
+    return new TableSetIterator(this);
   }
   
   
@@ -128,12 +156,12 @@ public class TableSet implements Sorted {
   
   
   public final int getRowWidth() {
-    return tables[0].getRowWidth();
+    return rowWidth;
   }
   
   
   public final RowOrder order() {
-    return tables[0].order();
+    return order;
   }
   
   
@@ -157,12 +185,24 @@ public class TableSet implements Sorted {
   
   
 
-  private final static int SEARCH_BUFFER_SIZE_LIMIT = 8192;
+  public final static int DEFAULT_SEARCH_BUFFER_SIZE = 8192;
 
   
   
   protected Searcher getSearcher(SortedTable table) throws IOException {
-    return table.newSearcher(SEARCH_BUFFER_SIZE_LIMIT / getRowWidth());
+    return table.newSearcher(DEFAULT_SEARCH_BUFFER_SIZE / getRowWidth());
+  }
+
+
+  /**
+   * Closes the underlying tables. The base implementation does not throw
+   * any exceptions.
+   */
+  @Override
+  public void close() throws IOException {
+    TaskStack closer = new TaskStack(LOG);
+    closer.pushClose(tables);
+    closer.close();
   }
   
 

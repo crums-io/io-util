@@ -55,6 +55,10 @@ public class RowOrders {
         else
           return -1;
       }
+      @Override
+      public String toString() {
+        return "[INT_ORDER, off=" + offset + "]";
+      }
     };
   }
   
@@ -75,6 +79,10 @@ public class RowOrders {
         else
           return -1;
       }
+      @Override
+      public String toString() {
+        return "[LONG_ORDER, off=" + offset + "]";
+      }
     };
   }
   
@@ -89,6 +97,10 @@ public class RowOrders {
         int a = rowA.getShort(offset);
         int b = rowB.getShort(offset);
         return a - b;
+      }
+      @Override
+      public String toString() {
+        return "[SHORT_ORDER, off=" + offset + "]";
       }
     };
   }

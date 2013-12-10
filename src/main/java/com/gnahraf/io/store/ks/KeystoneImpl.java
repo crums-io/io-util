@@ -60,7 +60,7 @@ import com.gnahraf.io.channels.ChannelUtils;
  */
 public class KeystoneImpl extends Keystone {
   
-  private final static int STRUC_SIZE = 17;
+  public final static int STRUC_SIZE = 17;
 
   private final long fileOffset;
   private final ByteBuffer workBuffer;
@@ -77,9 +77,6 @@ public class KeystoneImpl extends Keystone {
    *          open channel to the undelying file
    * @param fileOffset
    *          the offset at which this keystone begins
-   * @param cellCount
-   *          the number of cells in the keystone (between 2 and 256). (This
-   *          number is not represented anywhere in the file format.)
    */
   public KeystoneImpl(FileChannel file, long fileOffset) throws IOException {
     // construct the instance and validate parameters..
@@ -98,9 +95,6 @@ public class KeystoneImpl extends Keystone {
    *          open channel to the undelying file
    * @param fileOffset
    *          the offset at which this keystone begins
-   * @param cellCount
-   *          the number of cells in the keystone (between 2 and 256). (This
-   *          number is not represented anywhere in the file format.)
    * @param initValue
    *          the initial value of the keystone
    */
@@ -170,6 +164,18 @@ public class KeystoneImpl extends Keystone {
   @Override
   public void commit() throws IOException {
     file.force(false);
+  }
+
+
+  @Override
+  public boolean isOpen() {
+    return file.isOpen();
+  }
+
+
+  @Override
+  public void close() throws IOException {
+    file.close();
   }
 
 

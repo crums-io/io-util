@@ -4,6 +4,7 @@
 package com.gnahraf.util;
 
 import java.util.AbstractList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -16,6 +17,9 @@ public class CollectionUtils {
   
   
   public static <T> List<T> asReadOnlyList(final T[] array) {
+    if (array.length == 0)
+      return Collections.emptyList();
+    
     return new AbstractList<T>() {
       @Override
       public T get(int index) {

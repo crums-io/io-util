@@ -5,6 +5,8 @@ package com.gnahraf.io.store.ks;
 
 
 import java.io.IOException;
+import java.nio.channels.Channel;
+import java.nio.channels.FileChannel;
 
 /**
  * A keystone maintains a long value that is typically serialized to a file.
@@ -14,7 +16,83 @@ import java.io.IOException;
  * 
  * @author Babak
  */
-public abstract class Keystone {
+public abstract class Keystone implements Channel {
+  
+  
+  /**
+   * Creates a new instance by loading a previously serialized instance.
+   * 
+   * @param file
+   *          open channel to the underlying file positioned at the start
+   *          of the serialized keystone. On return the file's position is
+   *          advanced to the byte just beyond the keystone.
+   *  
+   * @return a {@linkplain KeystoneImpl KeystoneImpl} instance
+   */
+  public static Keystone loadInstance(FileChannel file) throws IOException {
+    long offset = file.position();
+    Keystone keystone = loadInstance(file, offset);
+    file.position(offset + keystone.size());
+    return keystone;
+  }
+  
+  
+  /**
+   * Creates a new instance by loading a previously serialized instance.
+   * 
+   * @param file
+   *          open channel to the underlying file. The file's position is not modified.
+   * @param fileOffset
+   *          the offset at which this keystone begins
+   *  
+   * @return a {@linkplain KeystoneImpl KeystoneImpl} instance
+   */
+  public static Keystone loadInstance(FileChannel file, long offset) throws IOException {
+    return new KeystoneImpl(file, offset);
+  }
+  
+
+
+  /**
+   * Creates a new instance with given initial value and writes its state to
+   * persistent storage. (There's no such thing as uninitialized keystone.)
+   * 
+   * @param file
+   *          open channel to the underlying file positioned at the start
+   *          of the serialized keystone. On return the file's position is
+   *          advanced to the byte just beyond the keystone.
+   * @param initValue
+   *          the initial value of the keystone
+   *  
+   * @return a {@linkplain KeystoneImpl KeystoneImpl} instance
+   */
+  public static Keystone createInstance(FileChannel file, long initValue) throws IOException {
+    long offset = file.position();
+    Keystone keystone = createInstance(file, offset, initValue);
+    file.position(offset + keystone.size());
+    return keystone;
+  }
+  
+
+
+  /**
+   * Creates a new instance with given initial value and writes its state to
+   * persistent storage. (There's no such thing as uninitialized keystone.)
+   * 
+   * @param file
+   *          open channel to the underlying file. The file's position is not modified.
+   * @param fileOffset
+   *          the offset at which this keystone begins
+   * @param initValue
+   *          the initial value of the keystone
+   *  
+   * @return a {@linkplain KeystoneImpl KeystoneImpl} instance
+   */
+  public static Keystone createInstance(FileChannel file, long offset, long initValue) throws IOException {
+    return new KeystoneImpl(file, offset, initValue);
+  }
+  
+  
 
   /**
    * Returns the byte-width of this keystone structure.]
@@ -99,4 +177,16 @@ public abstract class Keystone {
    * @see #increment(long, boolean)
    */
   public abstract void commit() throws IOException;
+
+
+
+  @Override
+  public boolean isOpen() {
+    return true;
+  }
+
+
+
+  @Override
+  public void close() throws IOException {  }
 }
