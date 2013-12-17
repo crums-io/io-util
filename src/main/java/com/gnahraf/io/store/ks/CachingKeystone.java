@@ -6,6 +6,8 @@ package com.gnahraf.io.store.ks;
 
 import java.io.IOException;
 
+import com.gnahraf.io.IoStateException;
+
 
 /**
  * Caching facade over a <tt>Keystone</tt> implementation.
@@ -48,6 +50,9 @@ public class CachingKeystone extends Keystone {
   @Override
   public synchronized long put(long value, boolean rollingCommit) throws IOException {
     long oldValue = base.put(value, rollingCommit);
+    if (oldValue != currentValue)
+      throw new IoStateException(
+          "expected old value " + currentValue + "; actual was " + oldValue);
     currentValue = value;
     return oldValue;
   }

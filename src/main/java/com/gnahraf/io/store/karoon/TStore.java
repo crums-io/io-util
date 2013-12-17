@@ -21,6 +21,7 @@ import org.apache.log4j.Logger;
 
 import com.gnahraf.io.Files;
 import com.gnahraf.io.IoStateException;
+import com.gnahraf.io.store.karoon.merge.TableMergeEngine;
 import com.gnahraf.io.store.ks.CachingKeystone;
 import com.gnahraf.io.store.ks.Keystone;
 import com.gnahraf.io.store.table.TableSet;
@@ -32,6 +33,25 @@ import com.gnahraf.util.TaskStack;
  * @author Babak
  */
 public class TStore implements Channel {
+  
+  public class TmeContext {
+    
+    public long newTableId() throws IOException {
+      return tableCounter.increment(1);
+    }
+    
+    public File newTablePath(long tableId) throws IOException {
+      return getSortedTablePath(tableId, false);
+    }
+    
+    public void tablesMerged(List<Long> srcIds, SidTable result) throws IOException {
+      processMerged(srcIds, result);
+    }
+    
+    public TStore store() {
+      return TStore.this;
+    }
+  }
   
   private final static Logger LOG = Logger.getLogger(TStore.class);
   private final static long INIT_COUNTER_VALUE = 0L;
@@ -55,6 +75,8 @@ public class TStore implements Channel {
   private final Keystone commitNumber;
   private final Keystone walTableNumber;
   private final File trashDir;
+  
+  private final TableMergeEngine tableMergeEngine;
   
   
   private WriteAheadTableBuilder writeAhead;
@@ -126,7 +148,9 @@ public class TStore implements Channel {
         setNextWriteAhead();
       }
       
-      
+      this.tableMergeEngine = new TableMergeEngine(new TmeContext());
+      closer.pushClose(tableMergeEngine);
+      tableMergeEngine.start();
       
       failed = false;
       
@@ -167,10 +191,10 @@ public class TStore implements Channel {
   
   
   public void deleteRow(ByteBuffer key, boolean checkExists) throws IOException {
-    
-    if (checkExists) {
+
+    synchronized (apiLock) {
       
-      synchronized (apiLock) {
+      if (checkExists) {
         ByteBuffer row = writeAhead.getRow(key);
         if (row != null && config.getDeleteCodec().isDeleted(row))
           return;
@@ -178,19 +202,18 @@ public class TStore implements Channel {
         if (row == null) {
           if (backRow == null)
             return;
-        } else {
-          if (backRow == null) {
-            // the wal contains this key, but the backset doesn't..
-            // remove the in-memory row, but write a tombstone
-            config.getDeleteCodec().markDeleted(key);
-            writeAhead.writeAheadButRemove(key);
-            return;
-          }
+        } else if (backRow == null) {
+          // the wal contains this key, but the backset doesn't..
+          // remove the in-memory row, but write a tombstone
+          config.getDeleteCodec().markDeleted(key);
+          writeAhead.writeAheadButRemove(key);
+          return;
         }
       }
+      
+      config.getDeleteCodec().markDeleted(key);
+      setRow(key);
     }
-    config.getDeleteCodec().markDeleted(key);
-    setRow(key);
   }
   
   
@@ -286,6 +309,7 @@ public class TStore implements Channel {
       this.currentCommit = newCommitRecord;
     }
     setNextWriteAhead();
+    this.tableMergeEngine.notifyFreshMeat();
   }
   
   
@@ -384,13 +408,6 @@ public class TStore implements Channel {
     return new SidTableSet(tables, config.getDeleteCodec(), record.getId());
   }
   
-  
-  
-  public SidTableSet load(CommitRecord record, SidTableSet previous) throws IOException {
-    // TODO
-    return null;
-  }
-
 
 
   private File getSortedTablePath(long tableId, boolean exists) throws IOException {
@@ -418,20 +435,12 @@ public class TStore implements Channel {
   
 
   /**
-   * @return the currentCommit
+   * Returns the commit record of the current back set.
    */
   public CommitRecord getCurrentCommit() {
     synchronized (backSetLock) {
       return currentCommit;
     }
-  }
-
-
-  /**
-   * @param currentCommit the currentCommit to set
-   */
-  public void setCurrentCommit(CommitRecord currentCommit) {
-    this.currentCommit = currentCommit;
   }
 
 
@@ -485,9 +494,94 @@ public class TStore implements Channel {
   
   
   
+  protected void processMerged(List<Long> srcIds, SidTable result) throws IOException {
+    // check args..
+    // failure here represents a bug, but we still want to fail fast
+    if (srcIds == null || srcIds.size() < 2)
+      throw new IllegalArgumentException("srcIds: " + srcIds);
+    if (result == null)
+      throw new IllegalArgumentException("null result");
+    if (!result.isOpen())
+      throw new IllegalArgumentException("result not open");
+    
+    // it's theoretically possible that 2 or more tables cancel each other out perfectly
+    // Rather than handle this case, we'll just wait until until the condition changes..
+    if (result.getRowCount() == 0) {
+      LOG.warn("Discarding empty merge result. This should be a rare corner case. srcIds=" + srcIds);
+      result.close();
+      return;
+    }
+    
+    TaskStack closer = new TaskStack();
+    boolean failed = true;
+    CommitRecord preMergeCommit;
+    try {
+      synchronized (backSetLock) {
+        if (!isOpen())
+          return;
+        
+        preMergeCommit = currentCommit;
+        final List<Long> tableIds = preMergeCommit.getTableIds();
+        if (tableIds.contains(result.id()))
+          throw new IllegalArgumentException("result=" + result + ", currentCommit=" + currentCommit);
+        
+        final int insertionOff = tableIds.indexOf(srcIds.get(0));
+        
+        // sanity check
+        if (insertionOff == -1 ||
+            insertionOff + srcIds.size() > tableIds.size() ||
+            !tableIds.subList(insertionOff, srcIds.size() + insertionOff).equals(srcIds))
+          throw new IllegalArgumentException("srcIds=" + srcIds + "; currentCommit=" + currentCommit);
+
+        SidTable[] postMergeStack = new SidTable[tableIds.size() - srcIds.size() + 1];
+        final List<SidTable> preMergeStack = activeTableSet().sidTables();
+        
+        int index = 0;
+        
+        while (index < insertionOff) {
+          postMergeStack[index] = preMergeStack.get(index);
+          ++index;
+        }
+        postMergeStack[index] = result;
+        while (index < insertionOff + srcIds.size())
+          closer.pushClose(preMergeStack.get(index++));
+        for (int j = insertionOff; ++j < postMergeStack.length; )
+          postMergeStack[j] = preMergeStack.get(index++);
+        
+        final long postCommitId = commitNumber.get() + 1;
+        
+        SidTableSet postMergeTableSet =
+            new SidTableSet(postMergeStack, config.getDeleteCodec(), postCommitId);
+        
+        File commitFile = getCommitPath(postCommitId);
+        
+        CommitRecord postCommitRecord =
+            CommitRecord.create(commitFile, postMergeTableSet.getTableIds(), postCommitId);
+        
+        // commit
+        commitNumber.set(postCommitId);
+        currentCommit = postCommitRecord;
+        activeTableSet(postMergeTableSet);
+      }
+      failed = false;
+    } finally {
+      if (failed)
+        closer.clear().pushClose(result);
+      closer.close();
+    }
+    
+    // if we get this far we haven't failed
+    // clean up the left overs..
+    if (preMergeCommit.getFile() != null)
+      discardFile(preMergeCommit.getFile());
+    for (long srcId : srcIds)
+      discardFile(getSortedTablePath(srcId, true));
+  }
   
   
-  
-  
+  @Override
+  public String toString() {
+    return getClass().getSimpleName() + "[" + config.getRootDir().getName() + "]";
+  }
 
 }

@@ -4,6 +4,7 @@
 package com.gnahraf.io.store.karoon;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -78,6 +79,14 @@ public class SidTableSet extends TableSetD {
 
   public final long getCommitId() {
     return commitId;
+  }
+  
+  
+  public final List<Long> getTableIds() {
+    ArrayList<Long> ids = new ArrayList<>(sidTables.size());
+    for (int i = 0; i < sidTables.size(); ++i)
+      ids.add(sidTables.get(i).id());
+    return ids;
   }
 
 }

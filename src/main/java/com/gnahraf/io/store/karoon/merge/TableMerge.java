@@ -4,19 +4,23 @@
 package com.gnahraf.io.store.karoon.merge;
 
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 
 import com.gnahraf.io.store.karoon.SidTable;
-import com.gnahraf.io.store.table.SortedTable;
 import com.gnahraf.io.store.table.TableSet;
 import com.gnahraf.io.store.table.del.DeleteCodec;
 import com.gnahraf.io.store.table.merge.SetMergeSortD;
 import com.gnahraf.io.store.table.order.RowOrder;
+import com.gnahraf.util.CollectionUtils;
+import com.gnahraf.util.TaskStack;
 import com.gnahraf.util.cc.RunState;
 
 /**
@@ -24,15 +28,16 @@ import com.gnahraf.util.cc.RunState;
  * 
  * @author Babak
  */
-public class TableMerge implements Runnable {
+public class TableMerge implements Runnable, Closeable {
   
   private final static Logger LOG = Logger.getLogger(TableMerge.class);
   
-  private final List<SidTable> sources;
+  private final SidTable[] sources;
   private final DeleteCodec deleteCodec;
   private final TableSet backSet;
   private final File outputFile;
   private final long outTableId;
+  private final TaskStack closer;
   private SidTable outTable;
   private SetMergeSortD sorter;
 
@@ -41,7 +46,7 @@ public class TableMerge implements Runnable {
   
   
   TableMerge(
-      List<SidTable> sources,
+      SidTable[] sources,
       DeleteCodec deleteCodec,
       TableSet backSet,
       File outputFile,
@@ -52,11 +57,27 @@ public class TableMerge implements Runnable {
     this.backSet = backSet;
     this.outputFile = outputFile;
     this.outTableId = outTableId;
+    this.closer = new TaskStack();
+    closer.pushClose(sources);
+    if (backSet != null)
+      closer.pushClose(backSet);
+  }
+  
+  
+  /**
+   * Closes all the open (I/O) resoures associated with this merge, excepting
+   * the {@linkplain #getOutTable() out table}.
+   */
+  @Override
+  public void close() {
+    closer.close();
   }
   
 
   @Override
   public void run() {
+    if (state.hasStarted())
+      throw new IllegalStateException("already started: " + this);
     state = RunState.STARTED;
     LOG.info(this);
     boolean failed = true;
@@ -66,7 +87,7 @@ public class TableMerge implements Runnable {
       outTable = new SidTable(out, getRowWidth(), getRowOrder(), outTableId);
       sorter = new SetMergeSortD(
           outTable,
-          sources.toArray(new SortedTable[sources.size()]),
+          sources,
           deleteCodec,
           backSet);
       
@@ -76,25 +97,25 @@ public class TableMerge implements Runnable {
     } catch (Exception x) {
       this.x = x;
       LOG.error(this, x);
+      if (out != null)
+        closer.pushClose(out);
     } finally {
-        state = failed ? RunState.FAILED : RunState.SUCCEEDED;
+        state = failed || sorter.isAborted() ? RunState.FAILED : RunState.SUCCEEDED;
         LOG.info(this);
-        
-        // clean up if we had a messy failure..
-        if (outTable == null && out != null) try {
-          out.close();
-        } catch (Exception x) {
-          LOG.error("cascaded exception on out.close(): " + x.getMessage(), x);
-        }
     }
   }
   
+  
+  public boolean abort() {
+    return sorter != null && sorter.abort();
+  }
+  
   public int getRowWidth() {
-    return sources.get(0).getRowWidth();
+    return sources[0].getRowWidth();
   }
   
   public RowOrder getRowOrder() {
-    return sources.get(0).order();
+    return sources[0].order();
   }
 
   
@@ -103,7 +124,7 @@ public class TableMerge implements Runnable {
   }
 
 
-  private SetMergeSortD getSorter() {
+  public SetMergeSortD getSorter() {
     if (sorter == null)
       throw new IllegalStateException("not started: " + this);
     return sorter;
@@ -120,7 +141,7 @@ public class TableMerge implements Runnable {
   }
   
   public List<SidTable> getSources() {
-    return sources;
+    return CollectionUtils.asReadOnlyList(sources);
   }
 
 
@@ -157,11 +178,19 @@ public class TableMerge implements Runnable {
   public Exception getException() {
     return x;
   }
+  
+  
+  public List<Long> getSourceIds() {
+    List<Long> srcIds = new ArrayList<>(getSources().size());
+    for (SidTable table : getSources())
+      srcIds.add(table.id());
+    return srcIds;
+  }
 
 
   public String toString() {
     return
-        "[srcs=" + sources +
+        "[srcs=" + Arrays.asList(sources) +
         ", bset=" + backSet +
         ", out=" + outputFile.getName() +
         ", state=" + state + "]";

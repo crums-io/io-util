@@ -162,5 +162,10 @@ public class TaskStack implements Channel {
   public boolean isOpen() {
     return !opStack.isEmpty();
   }
+
+  public TaskStack clear() {
+    opStack.clear();
+    return this;
+  }
   
 }

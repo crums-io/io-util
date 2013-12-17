@@ -76,6 +76,10 @@ public final class CommitRecord {
     return commitId;
   }
   
+  @Override
+  public String toString() {
+    return "[cid=" + commitId + ", tids=" + tableIds + "]";
+  }
   
   
   public static CommitRecord load(File file, long commitId) throws IOException {

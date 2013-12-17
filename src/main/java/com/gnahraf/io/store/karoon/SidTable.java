@@ -64,11 +64,17 @@ public class SidTable extends SortedTable {
 
   
 
+  /**
+   * Returns the same searcher. Reminder: <em>no concurrent access!</em>.
+   * @return
+   * @throws IOException
+   */
   public Searcher getSearcher() throws IOException {
     if (searcher == null) {
       long byteSize = getRowCount() * getRowWidth();
       int rowsInBuffer;
-      if (byteSize < 2 * TableSet.DEFAULT_SEARCH_BUFFER_SIZE)
+      // if the table size is <= 16k, load it all into memory
+      if (byteSize <= 2 * TableSet.DEFAULT_SEARCH_BUFFER_SIZE)
         rowsInBuffer = (int) getRowCount();
       else
         rowsInBuffer = TableSet.DEFAULT_SEARCH_BUFFER_SIZE / getRowWidth();
@@ -79,21 +85,6 @@ public class SidTable extends SortedTable {
   }
   
   private Searcher searcher;
-  
-//
-//  
-//
-//  public Searcher getSearcher(int rowsInBuffer) throws IOException {
-//    Searcher searcher = searchers.get(rowsInBuffer);
-//    if (searcher == null) {
-//      searcher = newSearcher(rowsInBuffer);
-//      searchers.put(rowsInBuffer, searcher);
-//    }
-//    return searcher;
-//  }
-//  
-//  private Map<Integer, Searcher> searchers = new HashMap<Integer, SortedTable.Searcher>();
-//  
   
   
 
