@@ -3,3 +3,5 @@
 .*
 target/
 
+# So you can move generated javadocs here
+apidocs/
