@@ -89,6 +89,34 @@ public class TStoreTest extends TestMethodHarness {
 
   
   @Test
+  public void testCreate2() throws IOException {
+    initUnitTestDir(new Object() { });
+    
+    int rowWidth = 8;
+    RowOrder order = RowOrders.INT_ORDER;
+    DeleteCodec deleteCodec = MagicNumDeleteCodec.newIntInstance(4, 0);
+    MergePolicy mergePolicy = new MergePolicyBuilder().snapshot();
+    File rootDir = unitTestDir();
+    
+    TStoreConfig config = new Builder()
+        .setRowWidth(rowWidth)
+        .setDeleteCodec(deleteCodec)
+        .setRowOrder(order)
+        .setRootDir(rootDir)
+        .setMergePolicy(mergePolicy)
+        .toConfig();
+    
+    TStore tableStore = new TStore(config, true);
+    tableStore.close();
+    tableStore = new TStore(config, true);
+    tableStore.close();
+    ByteBuffer key = ByteBuffer.allocate(rowWidth);
+    ByteBuffer row = tableStore.getRow(key);
+    assertNull(row);
+  }
+
+  
+  @Test
   public void testOneRow() throws IOException {
     initUnitTestDir(new Object() { });
     

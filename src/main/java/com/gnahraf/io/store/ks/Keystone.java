@@ -27,7 +27,7 @@ public abstract class Keystone implements Channel {
    *          of the serialized keystone. On return the file's position is
    *          advanced to the byte just beyond the keystone.
    *  
-   * @return a {@linkplain KeystoneImpl KeystoneImpl} instance
+   * @return a {@linkplain RollingKeystone RollingKeystone} instance
    */
   public static Keystone loadInstance(FileChannel file) throws IOException {
     long offset = file.position();
@@ -45,10 +45,10 @@ public abstract class Keystone implements Channel {
    * @param fileOffset
    *          the offset at which this keystone begins
    *  
-   * @return a {@linkplain KeystoneImpl KeystoneImpl} instance
+   * @return a {@linkplain RollingKeystone RollingKeystone} instance
    */
   public static Keystone loadInstance(FileChannel file, long offset) throws IOException {
-    return new KeystoneImpl(file, offset);
+    return new RollingKeystone(file, offset);
   }
   
 
@@ -64,7 +64,7 @@ public abstract class Keystone implements Channel {
    * @param initValue
    *          the initial value of the keystone
    *  
-   * @return a {@linkplain KeystoneImpl KeystoneImpl} instance
+   * @return a {@linkplain RollingKeystone RollingKeystone} instance
    */
   public static Keystone createInstance(FileChannel file, long initValue) throws IOException {
     long offset = file.position();
@@ -86,16 +86,16 @@ public abstract class Keystone implements Channel {
    * @param initValue
    *          the initial value of the keystone
    *  
-   * @return a {@linkplain KeystoneImpl KeystoneImpl} instance
+   * @return a {@linkplain RollingKeystone RollingKeystone} instance
    */
   public static Keystone createInstance(FileChannel file, long offset, long initValue) throws IOException {
-    return new KeystoneImpl(file, offset, initValue);
+    return new RollingKeystone(file, offset, initValue);
   }
   
   
 
   /**
-   * Returns the byte-width of this keystone structure.]
+   * Returns the byte-width of this keystone structure.
    */
   public abstract int size();
 

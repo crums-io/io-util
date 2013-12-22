@@ -20,6 +20,7 @@ import org.junit.Test;
 import com.gnahraf.io.channels.ChannelUtils;
 import com.gnahraf.io.store.ks.Keystone;
 import com.gnahraf.io.store.ks.KeystoneImpl;
+import com.gnahraf.io.store.ks.RollingKeystone;
 import com.gnahraf.io.store.ks.VolatileKeystone;
 import com.gnahraf.io.store.table.Table;
 import com.gnahraf.test.TestDirs;
@@ -234,7 +235,7 @@ public class TableTest {
     setup(method);
 
     final int rowSize = 32;
-    Keystone rowCount = new KeystoneImpl(file, 0, 0L);
+    Keystone rowCount = new RollingKeystone(file, 0, 0L);
     Table table = new Table(rowCount, file, rowCount.size(), rowSize);
     ByteBuffer buffer = ByteBuffer.allocate(rowSize);
     buffer.clear();
@@ -266,7 +267,7 @@ public class TableTest {
     setup(method);
 
     final int rowSize = 32;
-    Keystone rowCount = new KeystoneImpl(file, 0, 0L);
+    Keystone rowCount = new RollingKeystone(file, 0, 0L);
     Table table = new Table(rowCount, file, rowCount.size(), rowSize);
     ByteBuffer buffer = ByteBuffer.allocate(2 * rowSize);
     buffer.clear();

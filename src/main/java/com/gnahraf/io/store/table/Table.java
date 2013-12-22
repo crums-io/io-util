@@ -17,7 +17,7 @@ import com.gnahraf.io.channels.ChannelUtils;
 import com.gnahraf.io.store.ks.CachingKeystone;
 import com.gnahraf.io.store.ks.FixedKeystone;
 import com.gnahraf.io.store.ks.Keystone;
-import com.gnahraf.io.store.ks.KeystoneImpl;
+import com.gnahraf.io.store.ks.RollingKeystone;
 import com.gnahraf.io.store.ks.VolatileKeystone;
 
 
@@ -363,9 +363,9 @@ public class Table implements Channel {
     long position = file.position();
     Keystone rowCount;
     if (empty)
-      rowCount = new KeystoneImpl(file, position, 0);
+      rowCount = new RollingKeystone(file, position, 0);
     else
-      rowCount = new KeystoneImpl(file, position);
+      rowCount = new RollingKeystone(file, position);
     rowCount = new CachingKeystone(rowCount);
     position += rowCount.size();
     return new Table(rowCount, file, position, rowSize);

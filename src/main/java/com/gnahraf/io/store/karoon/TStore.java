@@ -81,7 +81,7 @@ public class TStore implements Channel {
   
   private WriteAheadTableBuilder writeAhead;
   private SidTableSet activeTableSet;
-  private CommitRecord currentCommit;
+  private volatile CommitRecord currentCommit;
   
   
   
@@ -165,11 +165,11 @@ public class TStore implements Channel {
   
   private void setNextWriteAhead() throws IOException {
     long walTableId = tableCounter.increment(1);
-    walTableNumber.set(walTableId);
     File writeAheadFile = getWriteAheadPath(walTableId);
     Files.assertDoesntExist(writeAheadFile);
     writeAhead = new WriteAheadTableBuilder(
         config.getRowWidth(), config.getRowOrder(), writeAheadFile);
+    walTableNumber.set(walTableId);
   }
   
   
@@ -188,6 +188,12 @@ public class TStore implements Channel {
     else
       return row;
   }
+
+  
+  
+  public void deleteRow(ByteBuffer key) throws IOException {
+    deleteRow(key, true);
+  }
   
   
   public void deleteRow(ByteBuffer key, boolean checkExists) throws IOException {
@@ -195,21 +201,27 @@ public class TStore implements Channel {
     synchronized (apiLock) {
       
       if (checkExists) {
+        
         ByteBuffer row = writeAhead.getRow(key);
+        
+        // if the row is already tombstoned, return right away
         if (row != null && config.getDeleteCodec().isDeleted(row))
           return;
+        
         ByteBuffer backRow = activeTableSet().getRow(key);
-        if (row == null) {
-          if (backRow == null)
-            return;
-        } else if (backRow == null) {
-          // the wal contains this key, but the backset doesn't..
-          // remove the in-memory row, but write a tombstone
-          config.getDeleteCodec().markDeleted(key);
-          writeAhead.writeAheadButRemove(key);
+        if (backRow == null || config.getDeleteCodec().isDeleted(backRow)) {
+          
+          if (row != null) {
+            // the wal contains this key, but the backset doesn't..
+            // remove the in-memory row, but write a tombstone to the wal
+            config.getDeleteCodec().markDeleted(key);
+            writeAhead.writeAheadButRemove(key);
+            
+          }
+          
           return;
         }
-      }
+      } // if (checkExists) {
       
       config.getDeleteCodec().markDeleted(key);
       setRow(key);
@@ -266,7 +278,9 @@ public class TStore implements Channel {
   
   
   
-  
+  /**
+   * The <tt>apiLock</tt> is already held.
+   */
   private void manageWriteAhead() throws IOException {
     if (writeAhead.getWalSize() < config.getMergePolicy().getWriteAheadFlushTrigger())
       return;
@@ -298,11 +312,12 @@ public class TStore implements Channel {
       final long commitId = prevCommitId + 1;
       File file = getCommitPath(commitId);
       CommitRecord newCommitRecord = CommitRecord.create(file, tableIds, commitId);
+      // all-or-nothing commit
       commitNumber.set(commitId);
+      // committed
       discardFile(writeAhead.getWriteAheadFile());
       if (prevCommitId != INIT_COUNTER_VALUE)
         discardFile(getCommitPath(prevCommitId));
-      // committed
       
       newActiveTables[tables.size()] = loadSortedTable(sortedWalFile, walId);
       activeTableSet(new SidTableSet(newActiveTables, config.getDeleteCodec(), commitId));
@@ -438,9 +453,7 @@ public class TStore implements Channel {
    * Returns the commit record of the current back set.
    */
   public CommitRecord getCurrentCommit() {
-    synchronized (backSetLock) {
-      return currentCommit;
-    }
+    return currentCommit;
   }
 
 

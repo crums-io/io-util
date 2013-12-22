@@ -8,7 +8,6 @@ import static com.gnahraf.io.buffer.BufferUtils.*;
 
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
-import java.util.ConcurrentModificationException;
 
 import org.apache.log4j.Logger;
 
@@ -34,12 +33,12 @@ public class Block {
   
   
   /**
-   * Copy constructor available to subclasses; pointless in base class.
-   * The new instance shares the copy's buffer
+   * Copy constructor. The new instance shares the same backing buffers. That is, content
+   * modifications in one buffer are also visible in the other.
    */
-  protected Block(Block copy) {
+  public Block(Block copy) {
     this.cells = copy.cells.clone();
-    this.buffer = copy.buffer;
+    this.buffer = copy.buffer.duplicate();
   }
   
   
@@ -167,6 +166,14 @@ public class Block {
   }
   
   
+  /**
+   * Copies the contents of the cell at the given <tt>index</tt> into the
+   * <tt>buffer</tt>. The position of the given buffer is advanced by the
+   * {@linkplain #cellWidth() cell width}. Invoking this method makes the instance
+   * especially unsuitable for concurrent read access.
+   * 
+   * @throws BufferOverflowException
+   */
   public void copyCellInto(int index, ByteBuffer buffer) throws BufferOverflowException {
     ByteBuffer cell = cells[index];
     if (cell.remaining() != cell.capacity())

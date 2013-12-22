@@ -140,22 +140,33 @@ public class KeystoneImplTest {
   }
 
 
-  protected Keystone createKeystone(String filename, long startOffset, long initValue) throws IOException {
+  private Keystone createKeystone(String filename, long startOffset, long initValue) throws IOException {
 
     File testFile = new File(testDir, filename);
     if (testFile.exists())
       fail("test file already exists: " + testFile);
     FileChannel fileChannel = new RandomAccessFile(testFile, "rw").getChannel();
+    return createKeystone(fileChannel, startOffset, initValue);
+  }
+  
+  
+  protected Keystone createKeystone(
+      FileChannel fileChannel, long startOffset, long initValue) throws IOException {
     return new KeystoneImpl(fileChannel, startOffset, initValue);
+  }
+  
+  protected Keystone loadKeystone(
+      FileChannel fileChannel, long startOffset) throws IOException {
+    return new KeystoneImpl(fileChannel, startOffset);
   }
 
 
-  protected Keystone loadKeystone(String filename, long startOffset) throws IOException {
+  private Keystone loadKeystone(String filename, long startOffset) throws IOException {
     File testFile = new File(testDir, filename);
     if (!testFile.exists())
       fail("test file does not exist: " + testFile);
     FileChannel fileChannel = new RandomAccessFile(testFile, "rw").getChannel();
-    return new KeystoneImpl(fileChannel, startOffset);
+    return loadKeystone(fileChannel, startOffset);
   }
 
 

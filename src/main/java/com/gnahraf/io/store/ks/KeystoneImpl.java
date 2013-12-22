@@ -21,13 +21,13 @@ import com.gnahraf.io.channels.ChannelUtils;
  * 
  * <h3>File Format</h3>
  * 
- * A keystone is serialized as a 17 byte sequence: two 8 byte wide
+ * This is serialized as a 17 byte sequence: two 8 byte wide
  * cells followed by a special, byte-wide index cell. On the read path, the
  * entire block is loaded, the index cell is consulted, and the relevant value
  * of the indexed cell is returned.
  * <p/>
  * On the write path, the new value is first written to the next cell
- * (determined by a a round robin scheme), then the file is flushed, and finally
+ * (determined in a round robin scheme), then the file is flushed, and finally
  * the index cell is updated to point to the cell with the newly written value.
  * 
  * <pre>
@@ -50,6 +50,8 @@ import com.gnahraf.io.channels.ChannelUtils;
  * </tt>
  * </pre>
  * 
+ * Subclasses can adjust the {@linkplain #cellCount() cell count} to a
+ * different value.
  * 
  * <h3>A note on the cell size</h3>
  * 
@@ -60,39 +62,44 @@ import com.gnahraf.io.channels.ChannelUtils;
  */
 public class KeystoneImpl extends Keystone {
   
-  public final static int STRUC_SIZE = 17;
+  private final static int DEFAULT_CELL_COUNT = 2;
 
   private final long fileOffset;
   private final ByteBuffer workBuffer;
 
   private final FileChannel file;
+  
+  private final int cellCount;
 
 
 
 
+  
+  
   /**
    * Creates a new instance by loading a previously serialized instance.
    * 
    * @param file
-   *          open channel to the undelying file
+   *          open channel to the underlying file
    * @param fileOffset
    *          the offset at which this keystone begins
    */
   public KeystoneImpl(FileChannel file, long fileOffset) throws IOException {
     // construct the instance and validate parameters..
-    this(file, fileOffset, false);
+    this(file, fileOffset, null);
 
     if (file.size() < fileOffset + workBuffer.capacity())
-      throw new IOException("No keystone found at offset " + fileOffset + "; file is " + file.size() + " bytes");
+      throw new IOException(
+          "No keystone found at offset " + fileOffset + "; file is " + file.size() + " bytes");
   }
-
+  
 
   /**
    * Creates a new instance with given initial value and writes its state to
    * persistent storage. (There's no such thing as uninitialized keystone.)
    * 
    * @param file
-   *          open channel to the undelying file
+   *          open channel to the underlying file
    * @param fileOffset
    *          the offset at which this keystone begins
    * @param initValue
@@ -100,11 +107,15 @@ public class KeystoneImpl extends Keystone {
    */
   public KeystoneImpl(FileChannel file, long fileOffset, long initValue) throws IOException {
     // construct the instance and validate parameters
-    this(file, fileOffset, false);
+    this(file, fileOffset, null);
 
     // initialize the keystone value
     workBuffer.clear();
-    workBuffer.putLong(initValue).putLong(0).put((byte) 0);
+    
+    workBuffer.putLong(initValue);
+    for (int countDown = cellCount - 1; countDown-- > 0; )
+      workBuffer.putLong(0);
+    workBuffer.put((byte) 0);
     workBuffer.flip();
     ChannelUtils.writeRemaining(file, fileOffset, workBuffer);
 
@@ -113,28 +124,40 @@ public class KeystoneImpl extends Keystone {
     if (recordedValue != initValue)
       throw new IOException("Sanity check failed: expected to read initValue <" + initValue + ">; actual was <" + recordedValue + ">");
   }
-  
 
 
-
-  private KeystoneImpl(FileChannel file, long fileOffset, boolean sigDisambiguator) throws IOException {
+  private KeystoneImpl(FileChannel file, long fileOffset, Object disambig) throws IOException {
     if (file == null)
       throw new IllegalArgumentException("null file channel");
     if (!file.isOpen())
       throw new ClosedChannelException();
     if (fileOffset < 0)
       throw new IllegalArgumentException("fileOffset: " + fileOffset);
-
+    
     this.file = file;
     this.fileOffset = fileOffset;
-
-    this.workBuffer = ByteBuffer.allocate(STRUC_SIZE);
+    this.cellCount = cellCount();
+    if (cellCount < 2 || cellCount > 256)
+      throw new RuntimeException("Assertion failure. cellCount(): " + cellCount);
+    this.workBuffer = ByteBuffer.allocate(size());
+  }
+  
+  
+  /**
+   * Returns the number of cells (excluding the index cell) used by the implementation.
+   * This method is accessed once by the base class constructor and is left as a subclass
+   * override hook. Valid return values are in the range [2, 256].
+   * 
+   * @return the base implementation returns 2
+   */
+  protected int cellCount() {
+    return DEFAULT_CELL_COUNT;
   }
 
 
   @Override
-  public int size() {
-    return STRUC_SIZE;
+  public final int size() {
+    return cellCount * 8 + 1;
   }
 
 
@@ -201,7 +224,7 @@ public class KeystoneImpl extends Keystone {
       retValue = oldValue;
     }
 
-    final int cellIndex = (1 + cellIndex()) % 2;
+    final int cellIndex = (1 + cellIndex()) % cellCount;
     workBuffer.clear();
     workBuffer.putLong(newValue).flip();
 
@@ -212,7 +235,7 @@ public class KeystoneImpl extends Keystone {
     workBuffer.clear();
     workBuffer.put((byte) cellIndex).flip();
 
-    long byteKeystoneOffset = fileOffset + 16;
+    long byteKeystoneOffset =  8 * cellCount + fileOffset;
     ChannelUtils.writeRemaining(file, byteKeystoneOffset, workBuffer);
 
     if (!rollingCommit)

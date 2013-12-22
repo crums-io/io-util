@@ -260,7 +260,7 @@ public abstract class BaseMergeSource<S extends BaseMergeSource<?>> implements C
   
   /**
    * An instance is finished when all its rows have been copied to the target. I.e. when
-   * <tt>{@linkplain #rowNumber()} == {@linkplain #rowCount()}.
+   * <tt>{@linkplain #rowNumber()} == {@linkplain #rowCount()}</tt>.
    */
   public final boolean finished() {
     return rowCursor == rowCount || rowCursor == -1;

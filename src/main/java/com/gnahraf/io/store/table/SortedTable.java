@@ -134,7 +134,11 @@ public class SortedTable extends Table implements Sorted {
   }
   
   
-  
+  /**
+   * TODO: use cached results intelligently.
+   * 
+   * @author Babak
+   */
   public class Searcher {
     
     public final static int MIN_BUFFER_ROWS = 4;
@@ -217,6 +221,10 @@ public class SortedTable extends Table implements Sorted {
 
 
     private boolean searchImpl(ByteBuffer key) throws IOException {
+      // TODO: the row may already be loaded in memory.. check the
+      //       block first.. This may also gives us an opportunity to
+      //       set a tighter boundary (excLo, excHi) -- although that
+      //       has it drawbacks 
       excHi = firstRowNumberInBlock = hitRowNumber = rowCount = getRowCount();
       excLo = -1L;
       retrievedRowCount = reads = 0;
