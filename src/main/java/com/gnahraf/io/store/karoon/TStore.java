@@ -21,6 +21,7 @@ import org.apache.log4j.Logger;
 
 import com.gnahraf.io.Files;
 import com.gnahraf.io.IoStateException;
+import com.gnahraf.io.store.karoon.TStoreConfig.Builder;
 import com.gnahraf.io.store.karoon.merge.TableMergeEngine;
 import com.gnahraf.io.store.ks.CachingKeystone;
 import com.gnahraf.io.store.ks.Keystone;
@@ -496,7 +497,19 @@ public class TStore implements Channel {
         }
       }
     }
+    boolean finished;
+    if (tableMergeEngine == null)
+      finished = true;
+    else
+      try {
+        finished = tableMergeEngine.await(3 * 1000);
+      } catch (InterruptedException rx) {
+        LOG.warn("interrupted on tableMergeEngine.await(3 * 1000). Ignoring..");
+        finished = false;
+      }
     
+    if (finished)
+      LOG.info(this + ": [STOPPED]");
   }
 
 
@@ -575,7 +588,8 @@ public class TStore implements Channel {
         commitNumber.set(postCommitId);
         currentCommit = postCommitRecord;
         activeTableSet(postMergeTableSet);
-      }
+      } // synchronized (backSetLock) { .. }
+      
       failed = false;
     } finally {
       if (failed)
@@ -588,13 +602,19 @@ public class TStore implements Channel {
     if (preMergeCommit.getFile() != null)
       discardFile(preMergeCommit.getFile());
     for (long srcId : srcIds)
-      discardFile(getSortedTablePath(srcId, true));
+      discardFile(getSortedTablePath(srcId));
   }
   
   
   @Override
   public String toString() {
-    return getClass().getSimpleName() + "[" + config.getRootDir().getName() + "]";
+    CommitRecord c = currentCommit;
+    StringBuilder string = new StringBuilder()
+      .append('[').append(config.getRootDir().getName());
+    if (c != null) {
+      string.append(':').append(c.getId()).append(':').append(c.getTableIds());
+    }
+    return string.append(']').toString();
   }
 
 }

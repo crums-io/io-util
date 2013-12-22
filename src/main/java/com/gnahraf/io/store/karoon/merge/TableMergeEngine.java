@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 
@@ -40,7 +41,7 @@ public class TableMergeEngine implements Channel {
   private final ExecutorService threadPool;
   
   
-  private boolean stopped;
+  private volatile boolean stopped;
 
   
   private final Object freshMeatLock = new Object();
@@ -81,6 +82,7 @@ public class TableMergeEngine implements Channel {
     synchronized (this) {
       if (state.hasStarted())
         throw new IllegalStateException(this + ": already started");
+      state = RunState.STARTED;
     }
     threadPool.execute(youngMergeLoop());
     try {
@@ -92,6 +94,11 @@ public class TableMergeEngine implements Channel {
     }
     threadPool.execute(generationalMergeControlLoop());
     LOG.info(this + " [STARTED]");
+  }
+  
+  
+  public boolean await(long millis) throws InterruptedException {
+    return threadPool.awaitTermination(millis, TimeUnit.MILLISECONDS);
   }
   
   
@@ -177,6 +184,20 @@ public class TableMergeEngine implements Channel {
     };
   }
   
+  private final static Comparator<GenerationInfo> MERGE_BANG_4_BUCK_RANK =
+      new Comparator<GenerationInfo>() {
+        @Override
+        public int compare(GenerationInfo a, GenerationInfo b) {
+          double ra = a.effectToBytesRatio();
+          double rb = b.effectToBytesRatio();
+          if (ra > rb)
+            return -1;
+          else if (rb > ra)
+            return 1;
+          else
+            return 0;
+        }
+      };
   
   protected Runnable generationalMergeControlLoop() {
     return new Runnable() {
@@ -211,26 +232,17 @@ public class TableMergeEngine implements Channel {
               }
             }
             
-            Comparator<GenerationInfo> mergeRank = new Comparator<GenerationInfo>() {
-              @Override
-              public int compare(GenerationInfo a, GenerationInfo b) {
-                double ra = a.effectToBytesRatio();
-                double rb = b.effectToBytesRatio();
-                if (ra > rb)
-                  return -1;
-                else if (rb > ra)
-                  return 1;
-                else
-                  return 0;
-              }
-            };
             
-            Collections.sort(mergeCandidates, mergeRank);
+            
+            Collections.sort(mergeCandidates, MERGE_BANG_4_BUCK_RANK);
             
             for (
                 Iterator<GenerationInfo> ig = mergeCandidates.iterator();
                 ig.hasNext() && !stopped && !mergeThreadsSaturated(); )
             {
+              GenerationInfo g = ig.next();
+              if (activeMerges.containsKey(g.generation))
+                continue;
               Runnable mergeOp = newGenerationMerge(ig.next());
               threadPool.execute(mergeOp);
             }
@@ -315,9 +327,11 @@ public class TableMergeEngine implements Channel {
   }
   
   public void stop() {
-    if (stopped)
-      return;
-    stopped = true;
+    synchronized (this) {
+      if (stopped)
+        return;
+      stopped = true;
+    }
     synchronized (activeMerges) {
       for (TableMerge merge : activeMerges.values()) {
         try {
