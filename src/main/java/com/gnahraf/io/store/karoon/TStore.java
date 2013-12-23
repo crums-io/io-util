@@ -3,7 +3,7 @@
  */
 package com.gnahraf.io.store.karoon;
 
-import java.io.Closeable;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -13,15 +13,13 @@ import java.nio.ByteBuffer;
 import java.nio.channels.Channel;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.log4j.Logger;
 
 import com.gnahraf.io.Files;
 import com.gnahraf.io.IoStateException;
-import com.gnahraf.io.store.karoon.TStoreConfig.Builder;
+import com.gnahraf.io.buffer.Covenant;
 import com.gnahraf.io.store.karoon.merge.TableMergeEngine;
 import com.gnahraf.io.store.ks.CachingKeystone;
 import com.gnahraf.io.store.ks.Keystone;
@@ -82,7 +80,7 @@ public class TStore implements Channel {
   private SidTableSet activeTableSet;
   private volatile CommitRecord currentCommit;
   
-  
+  private final Object commitWatch = new Object();
   
   
   public TStore(TStoreConfig config, boolean create) throws IOException {
@@ -177,8 +175,11 @@ public class TStore implements Channel {
     synchronized (apiLock) {
       row = writeAhead.getRow(key);
       
-      if (row == null)
-        row = activeTableSet().getRow(key);
+      if (row == null) {
+        synchronized (backSetLock) {
+          row = activeTableSet().getRow(key);
+        }
+      }
     }
     
     if (row != null && config.getDeleteCodec().isDeleted(row))
@@ -228,8 +229,21 @@ public class TStore implements Channel {
   
   
   public void setRow(ByteBuffer row) throws IOException {
+    setRow(row, Covenant.NONE);
+  }
+  
+  
+  public void setRow(ByteBuffer row, Covenant promise) throws IOException {
     synchronized (apiLock) {
-      writeAhead.putRow(row);
+      writeAhead.putRow(row, promise);
+      manageWriteAhead();
+    }
+  }
+  
+  
+  public void setRows(ByteBuffer rows, Covenant promise) throws IOException {
+    synchronized (apiLock) {
+      writeAhead.putRows(rows, promise);
       manageWriteAhead();
     }
   }
@@ -319,15 +333,15 @@ public class TStore implements Channel {
       
       newActiveTables[tables.size()] = loadSortedTable(sortedWalFile, walId);
       activeTableSet(new SidTableSet(newActiveTables, config.getDeleteCodec(), commitId));
-      this.currentCommit = newCommitRecord;
+      setCurrentCommit(newCommitRecord);
+      setNextWriteAhead();
     }
-    setNextWriteAhead();
     this.tableMergeEngine.notifyFreshMeat();
   }
   
   
   
-  
+
   /**
    * Discards a no-longer used file. Use this as a customization hook to build
    * such things as audit trails, etc. The base implementation just deletes the
@@ -486,7 +500,9 @@ public class TStore implements Channel {
     synchronized (apiLock) {
       synchronized (backSetLock) {
         if (isOpen()) {
-          commitWriteAheadOnClose();
+          // FIXME: following is buggy (doesn't quite work)
+          // ignoring: was a nice-to-have ..
+//          commitWriteAheadOnClose();
           closer.pushClose(activeTableSet());
           closer.close();
         }
@@ -541,10 +557,10 @@ public class TStore implements Channel {
         if (!isOpen())
           return;
         
-        preMergeCommit = currentCommit;
+        preMergeCommit = getCurrentCommit();
         final List<Long> tableIds = preMergeCommit.getTableIds();
         if (tableIds.contains(result.id()))
-          throw new IllegalArgumentException("result=" + result + ", currentCommit=" + currentCommit);
+          throw new IllegalArgumentException("result=" + result + ", currentCommit=" + preMergeCommit);
         
         final int insertionOff = tableIds.indexOf(srcIds.get(0));
         
@@ -552,7 +568,7 @@ public class TStore implements Channel {
         if (insertionOff == -1 ||
             insertionOff + srcIds.size() > tableIds.size() ||
             !tableIds.subList(insertionOff, srcIds.size() + insertionOff).equals(srcIds))
-          throw new IllegalArgumentException("srcIds=" + srcIds + "; currentCommit=" + currentCommit);
+          throw new IllegalArgumentException("srcIds=" + srcIds + "; currentCommit=" + preMergeCommit);
 
         SidTable[] postMergeStack = new SidTable[tableIds.size() - srcIds.size() + 1];
         final List<SidTable> preMergeStack = activeTableSet().sidTables();
@@ -581,7 +597,7 @@ public class TStore implements Channel {
         
         // commit
         commitNumber.set(postCommitId);
-        currentCommit = postCommitRecord;
+        setCurrentCommit(postCommitRecord);
         activeTableSet(postMergeTableSet);
       } // synchronized (backSetLock) { .. }
       
@@ -599,6 +615,36 @@ public class TStore implements Channel {
     for (long srcId : srcIds)
       discardFile(getSortedTablePath(srcId));
   }
+  
+  
+
+  
+  private void notifyNewCommit() {
+    synchronized (commitWatch) {
+      commitWatch.notifyAll();
+    }
+  }
+  
+  private void setCurrentCommit(CommitRecord newCommitRecord) {
+    currentCommit = newCommitRecord;
+    notifyNewCommit();
+  }
+  
+  public void waitForCommitChange(long commitId) throws InterruptedException {
+    waitForCommitChange(commitId, Long.MAX_VALUE);
+  }
+  
+  public void waitForCommitChange(long commitId, long timeOutMillis) throws InterruptedException {
+    if (currentCommit.getId() != commitId)
+      return;
+    synchronized (commitWatch) {
+      if (currentCommit.getId() == commitId)
+        commitWatch.wait(timeOutMillis);
+    }
+  }
+  
+  
+  
   
   
   @Override

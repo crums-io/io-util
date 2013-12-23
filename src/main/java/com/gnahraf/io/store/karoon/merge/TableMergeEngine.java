@@ -5,6 +5,7 @@ package com.gnahraf.io.store.karoon.merge;
 
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.channels.Channel;
 import java.util.ArrayList;
@@ -52,6 +53,7 @@ public class TableMergeEngine implements Channel {
       Collections.synchronizedMap(new HashMap<Integer, TableMerge>());
   
   private final Object oldGenerationLock = new Object();
+  
   
 
   private final String gclLabel;
@@ -250,8 +252,25 @@ public class TableMergeEngine implements Channel {
               GenerationInfo g = ig.next();
               if (activeMerges.containsKey(g.generation))
                 continue;
-              Runnable mergeOp = newGenerationMerge(g);
-              threadPool.execute(mergeOp);
+              try {
+                Runnable mergeOp = newGenerationMerge(g);
+                threadPool.execute(mergeOp);
+              } catch (FileNotFoundException fnfx) {
+                // This is a an expected race between the control loop and the merge threads.
+                // I can make the race go away with some careful synchronization, but
+                // honestly, it's not worth it.
+                
+                // sanity check nothing really amiss..
+                List<Long> committedTableIds = tableStore.getCurrentCommit().getTableIds();
+                if (committedTableIds.containsAll(g.srcIds()) &&
+                    committedTableIds.containsAll(g.backSetIds()) ) {
+                  throw new KaroonException(
+                      "Assertion failure. g=" + g + "; cids=" + committedTableIds +
+                      ". Cascading on FNF error: " + fnfx.getMessage(), fnfx);
+                }
+
+                LOG.warn(gclLabel + "Skipping already merged " + g + " - expected low frequency event");
+              }
             }
             
           } catch (InterruptedException ix) {
@@ -349,6 +368,7 @@ public class TableMergeEngine implements Channel {
     notifyFreshMeat();
     notifyOldGeneration();
     threadPool.shutdown();
+    storeContext.store().close();
   }
   
   

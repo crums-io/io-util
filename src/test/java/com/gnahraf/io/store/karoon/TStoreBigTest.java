@@ -7,12 +7,14 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
 import org.junit.Test;
 
+import com.gnahraf.io.buffer.Covenant;
 import com.gnahraf.io.store.karoon.TStoreConfig.Builder;
 import com.gnahraf.io.store.karoon.merge.MergePolicy;
 import com.gnahraf.io.store.karoon.merge.MergePolicyBuilder;
@@ -36,16 +38,18 @@ public class TStoreBigTest extends TestMethodHarness {
   private final static DeleteCodec deleteCodec = MagicNumDeleteCodec.newLongInstance(8, CODEC_MAGIC);
 
   @Test
-  public void test64ByteRow() throws IOException {
+  public void test64ByteRow() throws Exception {
     initUnitTestDir(new Object() { });
     if (!checkEnabled())
       return;
     
     log.info("+----------------------------------------------");
     log.info("|");
-    log.info("| " + getMethod() + " stress test");
+    log.info("| " + getMethod() + " write-heavy stress test");
     log.info("|");
     log.info("+----------------------------------------------");
+    
+    final long startTime = System.currentTimeMillis();
     
     final int rowWidth = 64;
     final long rowCount = 1024 * 1024;
@@ -60,6 +64,7 @@ public class TStoreBigTest extends TestMethodHarness {
       MergePolicyBuilder builder = new MergePolicyBuilder();
       builder.setWriteAheadFlushTrigger(rowWidth * 1024);
       mergePolicy = builder.snapshot();
+      log.info("Merge policy settings: " + mergePolicy);
     }
     File rootDir = unitTestDir();
     
@@ -90,46 +95,105 @@ public class TStoreBigTest extends TestMethodHarness {
     
     DecimalFormat numFormatter = new DecimalFormat("#,###");
     
+    final int writeAllocSize = rowWidth * 512;
+    ByteBuffer writeOnceBuffer = ByteBuffer.allocate(writeAllocSize);
     for (long index = 0; index < rowCount; ++index ) {
       
-      if (index == backTestPoint) {
-        log.info("Back testing at sequence index: " + numFormatter.format(index));
-        for (long incr = index / backTestSampleSize, ti = incr; ti < index; ti += incr) {
-          testSeq.jumpTo(ti);
-          buffer.clear();
-          long key = testSeq.next();
-          buffer.putLong(key).rewind();
-          ByteBuffer row = tableStore.getRow(buffer);
-          assertNotNull(row);
-          assertNotSame(buffer, row);
-          ByteBuffer expected = buffer;
-          prepare64ByteRow(expected, key);
-          assertEquals(expected, row);
+      if (!writeOnceBuffer.hasRemaining()) {
+        
+        writeOnceBuffer.flip();
+        tableStore.setRows(writeOnceBuffer, Covenant.WONT_MOD);
+        writeOnceBuffer = ByteBuffer.allocate(writeAllocSize);
+        
+        if (index > backTestPoint) {
+          log.info("Back testing at sequence index: " + numFormatter.format(index));
+          for (long incr = index / backTestSampleSize, ti = incr; ti < index; ti += incr) {
+            testSeq.jumpTo(ti);
+            buffer.clear();
+            long key = testSeq.next();
+            buffer.putLong(key).rewind();
+            ByteBuffer row = tableStore.getRow(buffer);
+            assertNotNull(row);
+            assertNotSame(buffer, row);
+            ByteBuffer expected = buffer;
+            prepare64ByteRow(expected, key);
+            expected.flip();
+            assertEquals(expected, row);
+          }
+           // revert the test sequence to _index_
+          testSeq.jumpTo(index);
+          backTestPoint += backTestRate;
+          log.info("Back testing passed.");
         }
-         // revert the test sequence to _index_
-        testSeq.jumpTo(index);
-        backTestPoint += backTestRate;
-        log.info("Back testing passed.");
+        
       }
       
       long key = testSeq.next();
-      prepare64ByteRow(buffer, key);
-      tableStore.setRow(buffer);
+      prepare64ByteRow(writeOnceBuffer, key);
     }
     
+
+    if (writeOnceBuffer.position() > 0) {
+      writeOnceBuffer.flip();
+      tableStore.setRows(writeOnceBuffer, Covenant.WONT_MOD);
+    }
+    
+    final long lap = System.currentTimeMillis();
+    final long seconds = (lap - startTime) / 1000;
+
+    log.info("+----------------------------------------------");
+    log.info("|");
+    log.info("| Row insertions completed");
+    log.info("| rows: " + numFormatter.format(rowCount));
+    log.info("| lap:  " + numFormatter.format(seconds) + " seconds");
+    log.info("|");
+    log.info("| rate: " + numFormatter.format(rowCount / seconds) + " rows/sec");
+    log.info("|");
+    log.info("+----------------------------------------------");
+    log.info("Preparing to shutdown..");
+    CommitRecord commitSnapshot = tableStore.getCurrentCommit();
+    while (true) {
+      int count = commitSnapshot.getTableIds().size();
+      if (count < 32)
+        break;
+      log.info("waiting on merge.. table count is " + count);
+      tableStore.waitForCommitChange(commitSnapshot.getId());
+      commitSnapshot = tableStore.getCurrentCommit();
+    }
+    
+    
+    log.info("Shutting down..");
+    
     tableStore.close();
+    
+
+    final long flap = System.currentTimeMillis();
+    final long shutdownSeconds = (flap - lap) / 1000;
+    final long amortizedSeconds = (flap - startTime) / 1000;
+
+    log.info("+----------------------------------------------");
+    log.info("|");
+    log.info("| Shutdown completed");
+    log.info("| Time taken to shutdown: " + numFormatter.format(shutdownSeconds) + " seconds");
+    log.info("| rows: " + numFormatter.format(rowCount));
+    log.info("| amortized time:  " + numFormatter.format(amortizedSeconds) + " seconds");
+    log.info("| final table count: " + tableStore.getCurrentCommit().getTableIds().size());
+    log.info("|");
+    log.info("| amortized insertion rate: " + numFormatter.format(rowCount / amortizedSeconds) + " rows/sec");
+    log.info("|");
+    log.info("+----------------------------------------------");
   }
   
   
   
   private void prepare64ByteRow(ByteBuffer row, long key) {
-    row.clear();
+//    row.clear();
     row.putLong(key);
     if (++key == CODEC_MAGIC)
       ++key;
     for (int countDown = 7; countDown-- > 0; )
       row.putLong(key++);
-    row.flip();
+//    row.flip();
   }
   
   

@@ -4,6 +4,7 @@
 package com.gnahraf.io.store.karoon.merge;
 
 
+import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -169,6 +170,38 @@ public final class GenerationInfo {
   
   public String toString() {
     return "[gen=" + generation + " , srcs=" + srcInfos + ", bset=" + backSetInfos + "]";
+  }
+
+  public List<Long> srcIds() {
+    return new AbstractList<Long>() {
+      @Override
+      public Long get(int index) {
+        return srcInfos.get(index).tableId;
+      }
+      @Override
+      public int size() {
+        return srcInfos.size();
+      }
+    };
+  }
+  
+  
+  public List<Long> backSetIds() {
+    if (backSetInfos.isEmpty())
+      return Collections.emptyList();
+    else {
+      return
+          new AbstractList<Long>() {
+            @Override
+            public Long get(int index) {
+              return backSetInfos.get(index).tableId;
+            }
+            @Override
+            public int size() {
+              return backSetInfos.size();
+            }
+          };
+    }
   }
   
 }
