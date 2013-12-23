@@ -93,6 +93,16 @@ permanent location, if you don't want it wiped out on the next build.
 
 (Btw, if anyone knows how to publish javadocs to github.com projects, please share how.)
 
+### Early performance results
+
+There's one write-heavy stress test for karoon. To run it
+
+`$ mvn clean test -Dtest=TStoreBigTest`
+
+This inserts 1M randomly generated 64-byte rows. Typical insertion rates are over 10,000 rows
+per second. Note that the randomness actually works against the store: more real world, lumpy
+data sets should perform better than what this test generates.
+
 ## Roadmap
 
 Looking beyond the immediate TODOs (such as testing the table iterators, and lots more testing)
@@ -114,4 +124,4 @@ This roadmap addresses some of my own itches, and I hope some of yours too.
 Enjoy! And remember, contributions, whether in the form of suggestions, ideas, code, or forks, are welcome.
 
 Babak<br/>
-Dec. 21, 2013
+Dec. 23, 2013

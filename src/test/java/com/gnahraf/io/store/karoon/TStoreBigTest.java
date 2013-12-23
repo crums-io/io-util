@@ -18,6 +18,7 @@ import com.gnahraf.io.buffer.Covenant;
 import com.gnahraf.io.store.karoon.TStoreConfig.Builder;
 import com.gnahraf.io.store.karoon.merge.MergePolicy;
 import com.gnahraf.io.store.karoon.merge.MergePolicyBuilder;
+import com.gnahraf.io.store.table.SortedTableTest;
 import com.gnahraf.io.store.table.del.DeleteCodec;
 import com.gnahraf.io.store.table.del.MagicNumDeleteCodec;
 import com.gnahraf.io.store.table.order.RowOrder;
@@ -63,6 +64,10 @@ public class TStoreBigTest extends TestMethodHarness {
     {
       MergePolicyBuilder builder = new MergePolicyBuilder();
       builder.setWriteAheadFlushTrigger(rowWidth * 1024);
+      builder.setMaxMergeThreads(5);
+      builder.setMergeThreadPriority(7);
+      builder.setGenerationalFactor(4);
+      builder.setWriteAheadFlushTrigger(64 * 1024);
       mergePolicy = builder.snapshot();
       log.info("Merge policy settings: " + mergePolicy);
     }
@@ -198,9 +203,16 @@ public class TStoreBigTest extends TestMethodHarness {
   
   
   private boolean checkEnabled() {
-    boolean enabled = "true".equalsIgnoreCase(System.getProperty(RUN_PROPERTY));
+    boolean enabled =
+        "true".equalsIgnoreCase(System.getProperty(RUN_PROPERTY)) ||
+        Boolean.valueOf(System.getProperty(SortedTableTest.PERF_TEST_PROPERTY)) ||
+        getClass().getSimpleName().equals(System.getProperty("test"));
     if (!enabled) {
-      log.info("Skipping " + getMethod() + ". To activate -D" + RUN_PROPERTY + "=true");
+      log.info(
+          "Skipping " + getMethod() +
+          ". To activate -D" + RUN_PROPERTY + "=true or -D" +
+          SortedTableTest.PERF_TEST_PROPERTY + "=true or -Dtest=" +
+          getClass().getSimpleName());
     }
     return enabled;
   }
