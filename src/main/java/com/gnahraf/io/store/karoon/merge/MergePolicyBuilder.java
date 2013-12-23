@@ -13,6 +13,7 @@ public class MergePolicyBuilder extends MergePolicy {
   private int youngThreshold = 2;
   private int generationalFactor = 6;
   private int maxMergeThreads = 3;
+  private int mergeThreadPriority = 3;
   
 
   
@@ -64,11 +65,23 @@ public class MergePolicyBuilder extends MergePolicy {
   }
 
 
+  @Override
+  public int getMergeThreadPriority() {
+    return mergeThreadPriority;
+  }
+
+
+  public void setMergeThreadPriority(int mergeThreadPriority) {
+    this.mergeThreadPriority = mergeThreadPriority;
+  }
+
+
   public MergePolicy snapshot() {
     final int waft = getWriteAheadFlushTrigger();
     final int yt = getMinYoungMergeTableCount();
     final int gf = getGenerationalFactor();
     final int mt = getMaxMergeThreads();
+    final int mp = getMergeThreadPriority();
     return
         new MergePolicy() {
           @Override
@@ -88,8 +101,18 @@ public class MergePolicyBuilder extends MergePolicy {
             return mt;
           }
           @Override
+          public int getMergeThreadPriority() {
+            return mp;
+          }
+          @Override
           public String toString() {
-            return "[waft=" + waft + ", yt=" + yt + ", gf=" + gf + "]";
+            return
+                "[waft=" + waft +
+                ", yt=" + yt +
+                ", gf=" + gf +
+                ", mt=" + mt +
+                ", mp=" + mp +
+                "]";
           }
         };
   }

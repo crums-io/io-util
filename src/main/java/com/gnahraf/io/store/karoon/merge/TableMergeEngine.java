@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
@@ -26,6 +27,7 @@ import com.gnahraf.io.store.karoon.TStore;
 import com.gnahraf.io.store.karoon.TStore.TmeContext;
 import com.gnahraf.io.store.table.TableSet;
 import com.gnahraf.util.TaskStack;
+import com.gnahraf.util.cc.FixedPriorityThreadFactory;
 import com.gnahraf.util.cc.RunState;
 
 /**
@@ -66,7 +68,12 @@ public class TableMergeEngine implements Channel {
     this.tableStore = storeContext.store();
     if (!tableStore.isOpen())
       throw new IllegalArgumentException("closed tableStore: " + tableStore);
-    this.threadPool = Executors.newCachedThreadPool();
+    
+    ThreadFactory threadFactory =
+        new FixedPriorityThreadFactory(
+            storeContext.store().getConfig().getMergePolicy().getMergeThreadPriority());
+    this.threadPool = Executors.newCachedThreadPool(threadFactory);
+    
     this.gclLabel = this + " - Generational control loop: ";
     this.gmLabel = this + " - Generational merge: ";
     this.ymlLabel = this + " - Young table merge loop: ";
@@ -243,7 +250,7 @@ public class TableMergeEngine implements Channel {
               GenerationInfo g = ig.next();
               if (activeMerges.containsKey(g.generation))
                 continue;
-              Runnable mergeOp = newGenerationMerge(ig.next());
+              Runnable mergeOp = newGenerationMerge(g);
               threadPool.execute(mergeOp);
             }
             

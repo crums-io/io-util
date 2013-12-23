@@ -16,6 +16,7 @@ import java.util.Random;
 import org.junit.Test;
 
 import com.gnahraf.test.TestMethodHarness;
+import com.gnahraf.io.Files;
 import com.gnahraf.io.store.karoon.TStoreConfig.Builder;
 import com.gnahraf.io.store.karoon.merge.MergePolicy;
 import com.gnahraf.io.store.karoon.merge.MergePolicyBuilder;
@@ -30,7 +31,26 @@ import com.gnahraf.io.store.table.order.RowOrders;
  */
 public class TStoreTest extends TestMethodHarness {
   
+  static class AuditTStore extends TStore {
+    
+    public final static String TRASH_DIRNAME = "removed";
+    private final File trashDir;
 
+    public AuditTStore(TStoreConfig config, boolean create) throws IOException {
+      super(config, create);
+      this.trashDir = new File(config.getRootDir(), TRASH_DIRNAME);
+      Files.ensureDir(this.trashDir);
+    }
+    
+
+    protected void discardFile(File file) throws IOException {
+      
+      if (file.exists()) {
+        Files.moveToDir(file, this.trashDir);
+      }
+    }
+    
+  }
   
 
   @Test

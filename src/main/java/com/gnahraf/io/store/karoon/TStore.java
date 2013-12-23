@@ -65,7 +65,6 @@ public class TStore implements Channel {
   public final static String TABLE_PREFIX = "T";
   public final static String SORTED_TABLE_EXT = "stbl";
   public final static String UNSORTED_TABLE_EXT = "utbl";
-  public final static String TRASH_DIRNAME = "removed";
   
   private final TaskStack closer = new TaskStack(LOG);
   private final Object apiLock = new Object();
@@ -75,7 +74,6 @@ public class TStore implements Channel {
   private final Keystone tableCounter;
   private final Keystone commitNumber;
   private final Keystone walTableNumber;
-  private final File trashDir;
   
   private final TableMergeEngine tableMergeEngine;
   
@@ -120,7 +118,6 @@ public class TStore implements Channel {
       }
       
 
-      this.trashDir = new File(config.getRootDir(), TRASH_DIRNAME);
 
       this.currentCommit = loadCommitRecord(commitNumber.get());
       this.activeTableSet = load(currentCommit);
@@ -333,9 +330,8 @@ public class TStore implements Channel {
   
   /**
    * Discards a no-longer used file. Use this as a customization hook to build
-   * such things as audit trails, etc. The base implementation just moves the
-   * file to the {@linkplain #TRASH_DIRNAME trash directory}. It'll fail if the move
-   * fails.
+   * such things as audit trails, etc. The base implementation just deletes the
+   * file.
    * 
    * @throws IOException
    *         the base implementation doesn't throw this
@@ -343,9 +339,8 @@ public class TStore implements Channel {
    *         if the <tt>file</tt> cannot be moved to the trash directory
    */
   protected void discardFile(File file) throws IOException {
-    if (file.exists()) {
-      Files.ensureDir(this.trashDir);
-      Files.moveToDir(file, this.trashDir);
+    if (!file.delete()) {
+      LOG.warn("Failed to deleted " + file.getPath());
     }
   }
   

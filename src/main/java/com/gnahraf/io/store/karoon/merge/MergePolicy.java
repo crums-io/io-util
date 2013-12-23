@@ -38,5 +38,8 @@ public abstract class MergePolicy {
   
   
   public abstract int getMaxMergeThreads();
+  
+  
+  public abstract int getMergeThreadPriority();
 
 }

@@ -6,6 +6,7 @@ package com.gnahraf.io.store.table;
 import java.io.Closeable;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -206,4 +207,8 @@ public class TableSet implements Sorted, Closeable {
   }
   
 
+  @Override
+  public String toString() {
+    return tables().toString();
+  }
 }
