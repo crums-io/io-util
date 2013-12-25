@@ -240,7 +240,26 @@ public class TStore implements Channel {
     }
   }
   
-  
+  /**
+   * Inserts or updates the given <tt>rows</tt>. The rows are passed in <em>en bloc</em>:
+   * they may be ordered in any way. The operation is fail-safe (all-or-nothing).
+   * <p/>
+   * Pay attention to the <tt>promise</tt> parameter. It has a huge impact on performance,
+   * but just as importantly, if you break the promise, you break the data set.
+   * 
+   * @param rows
+   *        the remaining bytes in this buffer represent the rows being input. The
+   *        remaining bytes must be an exact multiple of the
+   *        {@linkplain TStoreConfig#getRowWidth() row width}. If the
+   *        same row (recall, the identity of a row is defined by the table's
+   *        {@linkplain RowOrder}) occurs twice in this buffer, then the last occurance
+   *        wins. 
+   * @param promise
+   *        declares how and whether the caller <em>agrees not to later modify</em> the
+   *        given <tt>rows</tt> parameter. <em><strong>If the caller breaks the promise, then
+   *        the table will almost certainly get corrupted!</strong></em>. May be <tt>null</tt>
+   *        (no promise), but that would be a shame.
+   */
   public void setRows(ByteBuffer rows, Covenant promise) throws IOException {
     synchronized (apiLock) {
       writeAhead.putRows(rows, promise);

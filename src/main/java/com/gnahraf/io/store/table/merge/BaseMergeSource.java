@@ -21,6 +21,7 @@ import com.gnahraf.io.store.table.SortedTable.Searcher;
  * Let's say we have 3 sorted tables we want to merge. In order to keep the sketch simple,
  * let's say no 2 rows across any of the tables compare equal.:
  * <pre>
+ * 
  *   E       B       I
  *   F       C       J
  *   L       G       M
@@ -35,6 +36,7 @@ import com.gnahraf.io.store.table.SortedTable.Searcher;
  * cursor indicating the current (unmerged) row. Here are the same tables, wrapped as merge sources,
  * and sorted in their natural order:
  * <pre>
+ * 
  *   I<       E<        B<
  *   J        F         C
  *   M        L         G
@@ -56,12 +58,13 @@ import com.gnahraf.io.store.table.SortedTable.Searcher;
  * Let's call the tail merge source (far right) in the list the <em>top</em> merge source,
  * and the one immediately to the left of it, the <em>next</em> merge source.
  * <p/>
- * The first step in the merge is to note the index of the <em>next</em>'s row in <em>top</em>.
+ * The first step in the merge is to compute the index of the <em>next</em>'s row in <em>top</em>.
  * This is the row number in <em>top</em> where where <em>next</em>'s current row would have
  * found itself if it had been solely merged into <em>top</em>'s table. In our example,
- * the index evaluates to 2. Next, all the rows between the <em>top</em>s current row number
+ * the index evaluates to 2. Note this calculation is <strong>O</strong>(log n). Next, all the rows between the <em>top</em>s current row number
  * and the index are block-transfered to the output file.
  * <pre>
+ * 
  *   I<       E< --     B<                             B
  *   J        F    |    C                              C
  *   M        L     --> G  (row # 2)
@@ -72,11 +75,12 @@ import com.gnahraf.io.store.table.SortedTable.Searcher;
  *   Y
  * </pre>
  * The situation is depicted above after the rows in <em>top</em> have been transfered to
- * output (far right column).
+ * output (far right column). 
  * <p/>
  * Next the top merge source's cursor (row number) is set to the index noted in the previous
  * step and the merge sources are resorted:
  * <pre>
+ * 
  *   I<       B         E<                             B
  *   J        C         F                              C
  *   M        G<        L

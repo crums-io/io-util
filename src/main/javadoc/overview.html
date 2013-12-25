@@ -1,0 +1,91 @@
+<html>
+
+<head>
+<title>Overview</title>
+</head>
+
+<body>
+<p>
+This is intended to be a small, scalable Java library for slicing and dicing fixed width tables on disk,
+among other things. The objective is to provide reusable blocks of functionality for building efficient,
+custom binary data stores. Fail-safety (as in guarding against abnormal shutdown) is a
+primary concern.
+</p><p>
+The highest level problem tackled so far (hot out of the oven and under development) concerns building, searching, and
+maintaining a large, externally stored,
+fixed width, sorted table. The idea is that the library user specifies the row width (in bytes), a row comparison
+function (which implicitly defines any given row's key), and an optional delete codec, and they can spin up a
+fairly efficient, CRUD-like, durable, custom table in a few lines of code.
+See {@linkplain com.gnahraf.io.store.karoon}.
+</p><p>
+But because the the parts that make up <tt>karoon</tt> can hopefully be easily rearranged (in code, of course) to tackle
+other problems, I hope you'll find the parts are actually more interesting than solution itself. It's a bottom up,
+compositional approach; definitely not a framework approach.
+</p>
+<h3>Code Tour</h3>
+<p/>
+<h4>About the use of java.nio.ByteBuffer in the API</h4>
+<p>
+The fact there's no such thing as an immutable <tt>ByteBuffer</tt> is a huge problem.
+A read-only buffer's limit can still be changed, which in turn can break even absolute getter
+methods. So every time a caller asks for the contents of a buffer you own, you still have to {@linkplain
+java.nio.ByteBuffer#duplicate() duplicate} it. Though it's a cheap call (shallow copy), it's easy to
+forget. Still, the decision to use <tt>ByteBuffer</tt> as the fundamental memory abstraction (rather
+than roll out something new) was with an eye toward minimizing friction with other user code. As a result,
+where performance matters, you'll occasionally find the API uses crutches like this:
+{@linkplain com.gnahraf.io.store.karoon.TStore#setRows(ByteBuffer, Covenant)}).
+</p>
+<h4>Components</h4>
+<p>
+Here's an incomplete, but growing list of component features and attributes.
+</p><p>
+<li><p>
+{@linkplain com.gnahraf.io.store.ks.RollingKeystone Keystone}: 
+a persistent, fail-safe counter. Keystones can be persisted at any offset of a file, provide
+all-or-nothing update semantics, and are designed to tolerate abnormal program shutdown (e.g. power failure).
+</p></li><li><p>
+{@linkplain com.gnahraf.io.store.table.Table Table}: 
+a simple, fixed width table abstraction, coupled with a keystone to maintain row count. The abstraction doesn't
+divy up a row into columns. That's the user's business.
+</p></li><li><p>
+{@linkplain com.gnahraf.io.store.table.SortedTable SortedTable}: 
+provides search access over a fixed width sorted table. This models a read-only sorted map using a user-defined
+row comparison function called a {@linkplain com.gnahraf.io.store.table.order.RowOrder RowOrder}, or may be more
+like a relational table with a unique index on one of its columns. The row's lookup key is just a byte buffer as
+wide as the table's row width, with it's "index column" filled with the search term. In other words, you provide
+a <tt>ByteBuffer</tt> that evaluates equal to the row your looking for (again, where row equality is determined
+by the table's user defined <tt>RowOrder</tt>). These are write-once data structures. A builder
+({@linkplain com.gnahraf.io.store.table.SortedTableBuilder SortedTableBuilder}) is provided to create small tables.
+To update or append a sorted table we need the next item.
+</p></li><li><p>
+{@linkplain com.gnahraf.io.store.table.TableSet TableSet}:
+supports searching over a stack of <tt>SortedTable</tt>s. This presents a logical view of the stack as one (sorted)
+table. The stack refers to the fact that when searching, if a matching row is found in a table at the top of the stack,
+then the tables lower down the stack are not consulted. In this way, it's possible to push new (write-once) tables
+on top of old ones. Updating existing rows (in the logical table) comes for free. But of course this doesn't scale:
+we need to merge the tables once in a while.
+</p></li><li><p>
+{@linkplain com.gnahraf.io.store.table.merge.SetMergeSort}:
+this implements a multi-way merge of ranked, sorted, fixed width tables. I haven't seen a description of this algorithm
+anywhere to reference; a sketch of how this works is documented {@linkplain
+com.gnahraf.io.store.table.merge.BaseMergeSource here}. It's designed to minimize the number of rows loaded from
+disk for comparing row and can often block transfer a region of a source table to a target table without ever needing
+to load that region into memory.
+</p></li><li><p>
+{@linkplain com.gnahraf.io.store.table.del.DeleteCodec}:
+user defined definition of a deleted row. Deletes are supported by updating a row with content indicating it's been
+tombstoned. How this encoding is achieved is left to the user defined <tt>DeleteCodec</tt>. In the worst case design,
+each row sets aside a byte for a deletion marker field. More typically, though, deletion markers can be worked directly
+into a row's content by using a domain-specifc value (e.g. -1 in a count field). Tombstoned rows are written to new
+tables. A version of the table stack ({@linkplain com.gnahraf.io.store.table.TableSetD}) recognizes these tombstoned
+rows--again, using the user-defined DeleteCodec, so that they are skipped. Likewise, support for DeleteCodec-aware,
+multi-way merging, is provided via {@linkplain com.gnahraf.io.store.table.merge.SetMergeSortD} which is aware of
+tables lower in the stack (the back set) that are not being merged, and which eventually removes tombstoned rows
+in the merged output when there's no back set or when the back set does not contain the previously undeleted row.
+</p></li>
+</p><p>
+That concludes the basic pieces that make up <tt>karoon</tt>, a prototype vertical for testing and fleshing out the
+these components.
+</p>
+</body>
+</html>

@@ -9,7 +9,11 @@ import java.util.Comparator;
 import com.gnahraf.util.ClassEquivalent;
 
 /**
- * Defines an ordering over rows.
+ * Defines an ordering over rows. An instance typically does not consider the
+ * entire contents of any given row ({@linkplain ByteBuffer}) it evaluates; rather,
+ * the <em>examined region</em> of a row (which need not be contiguous) represents the
+ * row's <em>key</em> (or unique identifier), while the <em>unexamined region</em> of
+ * the row represents its changeable <em>value</em>.
  * <p/>
  * <h3>Importance of Equality Semantics</h3>
  * 

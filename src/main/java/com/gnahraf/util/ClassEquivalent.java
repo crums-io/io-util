@@ -6,6 +6,11 @@ package com.gnahraf.util;
 /**
  * Base class for class-equivalent objects. With class-equivalent objects, instances
  * belonging to the same class are equal.
+ * <p/>
+ * Note that derived instances can safely override
+ * {@linkplain #equals(Object)} without breaking the required ({@linkplain Object#equals(Object)
+ * equality semantics}. (Usually, when a class overrides <tt>equals()</tt>, its subclasses may not
+ * override it again without breaking the contract.) 
  * 
  * @author Babak
  */

@@ -14,6 +14,7 @@ import com.gnahraf.io.store.table.SortedTable;
  * A merge sort operation on <tt>SortedTable</tt>s, collectively representing a <em>set</em>.
  * That is, this models a data structure with no duplicates.
  * 
+ * @see BaseMergeSource
  * @author Babak
  */
 public class SetMergeSort extends BaseMergeSort<PrecedenceMergeSource> {
