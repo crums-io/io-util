@@ -153,16 +153,45 @@ public class TaskStack implements Channel {
     while (pop() > 0);
   }
   
-  
+  /**
+   * Returns the number of operations remaining on the stack.
+   */
   public int size() {
     return opStack.size();
   }
 
+  
+  /**
+   * Tells whether there are any operations remaining on the stack.
+   */
   @Override
   public boolean isOpen() {
     return !opStack.isEmpty();
   }
 
+  
+  /**
+   * Clears the stack. If there are any operations on the stack, they are discarded (ignored).
+   * This comes handy when the <tt>TaskStack</tt> is a clean-up-on-failure type of construct.
+   * For example,
+   * <pre>
+   * {@code
+   * 
+    try (TaskStack closeOnFail = new TaskStack()) {
+      InputStream in = ..
+      closeOnFail.pushClose(in);
+       .
+       .
+      closeOnFail.pushClose(sock);
+       .
+       .
+      // if we get this far, we're all good..
+      closeOnFail.clear();
+    }
+   * 
+   * }
+   * </pre>
+   */
   public TaskStack clear() {
     opStack.clear();
     return this;

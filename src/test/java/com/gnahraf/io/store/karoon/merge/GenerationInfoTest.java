@@ -187,6 +187,7 @@ public class GenerationInfoTest {
     assertEquals(5, mergeCandidates.size());
     for (int i = 0; i < mergeCandidates.size(); ++i) {
       GenerationInfo g = mergeCandidates.get(i);
+      
       assertEquals(i, g.generation);
       int expectedGenStartIndex = ids.length - 2 * i - 2;
       assertEquals(
@@ -195,7 +196,12 @@ public class GenerationInfoTest {
       assertEquals(
           tableStack.subList(0, expectedGenStartIndex),
           g.backSetInfos);
+      
+      GenerationInfo gd = GenerationInfo.candidateMerge(tableStack, MERGE_POLICY, i);
+      assertEquals(g, gd);
     }
+    
+    
   }
 
 
@@ -236,6 +242,272 @@ public class GenerationInfoTest {
           tableStack.subList(0, expectedGenStartIndex),
           g.backSetInfos);
     }
+  }
+  
+  
+  
+  @Test
+  public void testReduceBy() {
+    long[] preIds = {
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        27,
+        32,
+    };
+    long[] preSizes = {
+        U*F*F*F*F + 1,
+        U*F*F*F*F + 6,
+        U*F*F*F + 1,
+        U*F*F*F + 1,
+        U*F*F + 1,
+        U*F*F + 1,
+        U,
+        U,
+        U,
+    };
+    
+    
+    long[] postIds = {
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        27,
+        32,
+        11,
+        53,
+        121,
+        44,
+        345,
+    };
+    long[] postSizes = {
+        U*F*F*F*F + 1,
+        U*F*F*F*F + 6,
+        U*F*F*F + 1,
+        U*F*F*F + 1,
+        U*F*F + 1,
+        U*F*F + 1,
+        U,
+        U,
+        U,
+        U,
+        U,
+        U,
+        U,
+        U-1,
+    };
+    
+    List<TableInfo> preStack = generateTableStack(preIds, preSizes);
+    List<TableInfo> postStack = generateTableStack(postIds, postSizes);
+    
+    GenerationInfo young0 = GenerationInfo.candidateMerge(preStack, MERGE_POLICY, 0);
+    GenerationInfo young1 = GenerationInfo.candidateMerge(postStack, MERGE_POLICY, 0);
+    GenerationInfo yReduced = young1.reduceBy(young0);
+    
+    assertEquals(
+        young1.srcInfos.size() - young0.srcInfos.size(),
+        yReduced.srcInfos.size());
+    
+    Object expected =
+        young1.srcInfos.subList(young0.srcInfos.size(), young1.srcInfos.size());
+    
+    assertEquals(expected, yReduced.srcInfos);
+    
+    assertEquals(
+        young0.backSetInfos.size() + young0.srcInfos.size(),
+        yReduced.backSetInfos.size());
+    
+    assertEquals(young0.backSetInfos, young1.backSetInfos);
+    assertEquals(
+        young0.backSetInfos,
+        yReduced.backSetInfos.subList(0, young0.backSetInfos.size()));
+    assertEquals(
+        young0.srcInfos,
+        yReduced.backSetInfos.subList(
+            young0.backSetInfos.size(),
+            yReduced.backSetInfos.size()));
+  }
+  
+  
+  
+  @Test
+  public void testReduceBy2() {
+    long[] preIds = {
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        27,
+        32,
+    };
+    long[] preSizes = {
+        U*F*F*F*F + 1,
+        U*F*F*F*F + 6,
+        U*F*F*F + 1,
+        U*F*F*F + 1,
+        U*F*F + 1,
+        U*F*F + 1,
+        U,
+        U,
+        U,
+    };
+    
+    
+    long[] postIds = {
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        27,
+        32,
+        11,
+        53,
+        121,
+        44,
+        345,
+    };
+    long[] postSizes = {
+        U*F*F*F*F + 1,
+        U*F*F*F*F + 6,
+        U*F*F*F + 1,
+        U*F*F*F + 1,
+        U*F*F + 1,
+        U*F*F + 1,
+        U,
+        U,
+        U,
+        U,
+        U,
+        U,
+        U,
+        U-1,
+    };
+    
+    List<TableInfo> preStack = generateTableStack(preIds, preSizes);
+    List<TableInfo> postStack = generateTableStack(postIds, postSizes);
+    
+    GenerationInfo young0 = GenerationInfo.candidateMerge(preStack, MERGE_POLICY, 0);
+    GenerationInfo young1 = GenerationInfo.candidateMerge(postStack, MERGE_POLICY, 0);
+    GenerationInfo yReduced1 = young1.reduceBy(young0);
+    
+    List<TableInfo> stack = new ArrayList<>(postStack);
+    long nextId = 1000;
+    
+    final int count = 3;
+    for (int countDown = count; countDown-- > 0;)
+      stack.add(new TableInfo(nextId++, U));
+    
+    GenerationInfo young2 = GenerationInfo.candidateMerge(stack, MERGE_POLICY, 0);
+    GenerationInfo yReduced2 = young2.reduceBy(yReduced1);
+    
+    assertEquals(count, yReduced2.srcInfos.size());
+
+    Object expected = stack.subList(stack.size() - count, stack.size());
+    assertEquals(expected, yReduced2.srcInfos);
+    
+    assertEquals(
+        yReduced1.backSetInfos,
+        yReduced2.backSetInfos.subList(0, yReduced1.backSetInfos.size()));
+    
+    assertEquals(
+        yReduced1.srcInfos,
+        yReduced2.backSetInfos.subList(
+            yReduced1.backSetInfos.size(),
+            yReduced2.backSetInfos.size()));
+  }
+  
+  
+  @Test
+  public void testReduceBy3() {
+    long[] preIds = {
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        27,
+        32,
+    };
+    long[] preSizes = {
+        U*F*F*F*F + 1,
+        U*F*F*F*F + 6,
+        U*F*F*F + 1,
+        U*F*F*F + 1,
+        U*F*F + 1,
+        U*F*F + 1,
+        U,
+        U,
+        U,
+    };
+    
+    
+    long[] postIds = {
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        27,
+        32,
+        11,
+        53,
+        121,
+        44,
+        345,
+    };
+    long[] postSizes = {
+        U*F*F*F*F + 1,
+        U*F*F*F*F + 6,
+        U*F*F*F + 1,
+        U*F*F*F + 1,
+        U*F*F + 1,
+        U*F*F + 1,
+        U,
+        U,
+        U,
+        U,
+        U,
+        U,
+        U,
+        U-1,
+    };
+    
+    List<TableInfo> preStack = generateTableStack(preIds, preSizes);
+    List<TableInfo> postStack = generateTableStack(postIds, postSizes);
+    
+    GenerationInfo young0 = GenerationInfo.candidateMerge(preStack, MERGE_POLICY, 0);
+    GenerationInfo young1 = GenerationInfo.candidateMerge(postStack, MERGE_POLICY, 0);
+    GenerationInfo yReduced1 = young1.reduceBy(young0);
+    
+    List<TableInfo> stack = new ArrayList<>(postStack);
+    long nextId = 1000;
+    
+    final int count = 2;
+    for (int countDown = count; countDown-- > 0;)
+      stack.add(new TableInfo(nextId++, U));
+    
+    GenerationInfo young2 = GenerationInfo.candidateMerge(stack, MERGE_POLICY, 0);
+    GenerationInfo yReduced2 = young2.reduceBy(yReduced1);
+    
+    assertEquals(young0, yReduced2);
   }
   
   

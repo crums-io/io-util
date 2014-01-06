@@ -47,12 +47,17 @@ public class TStore implements Channel {
       processMerged(srcIds, result);
     }
     
+    public void discardTable(long tableId) {
+      File tableFile = getSortedTablePath(tableId);
+      discardFile(tableFile);
+    }
+    
     public TStore store() {
       return TStore.this;
     }
   }
   
-  private final static Logger LOG = Logger.getLogger(TStore.class);
+  protected final static Logger LOG = Logger.getLogger(TStore.class);
   private final static long INIT_COUNTER_VALUE = 0L;
   
   public final static String COUNTERS_FILENAME = "tc.counts";
@@ -267,46 +272,7 @@ public class TStore implements Channel {
     }
   }
   
-  
-  private void commitWriteAheadOnClose() {
-    try {
-      if (!writeAhead.isEmpty()) {
-        long walId = deriveFileId(
-            TABLE_PREFIX, UNSORTED_TABLE_EXT, writeAhead.getWriteAheadFile());
-        if (walId != walTableNumber.get())
-          throw new IoStateException(
-              "assertion failure. expected walId " + walId + "; actual was " + walTableNumber.get());
-        File sortedWalFile = getSortedTablePath(walId, false);
-        FileChannel ch = new FileOutputStream(sortedWalFile).getChannel();
-        try {
-          writeAhead.flush(ch);
-        } finally {
-          ch.close();
-        }
-        writeAhead.close();
-        List<SidTable> tables = activeTableSet().sidTables();
-        List<Long> tableIds = new ArrayList<>(tables.size() + 1);
-        for (int i = 0; i < tables.size(); ++i) {
-          SidTable table = tables.get(i);
-          tableIds.add(table.id());
-        }
-        tableIds.add(walId);
-        final long prevCommitId = commitNumber.get();
-        final long commitId = prevCommitId + 1;
-        File file = getCommitPath(commitId);
-        CommitRecord.write(file, tableIds);
-        commitNumber.set(commitId);
-        
-        discardFile(writeAhead.getWriteAheadFile());
-        if (prevCommitId != INIT_COUNTER_VALUE)
-          discardFile(getCommitPath(prevCommitId));
-      }
-    } catch (Exception x) {
-      LOG.error("commitWriteAheadOnClose: " + x.getMessage(), x);
-    }
-  }
-  
-  
+
   
   
   /**
@@ -371,7 +337,7 @@ public class TStore implements Channel {
    * @throws IllegalStateException
    *         if the <tt>file</tt> cannot be moved to the trash directory
    */
-  protected void discardFile(File file) throws IOException {
+  protected void discardFile(File file) {
     if (!file.delete()) {
       LOG.warn("Failed to deleted " + file.getPath());
     }
@@ -443,13 +409,18 @@ public class TStore implements Channel {
       return new SidTableSet(
           config.getRowOrder(), config.getRowWidth(), config.getDeleteCodec(), record.getId());
     
-    SidTable[] tables = new SidTable[record.getTableIds().size()];
-    for (int i = 0; i < tables.length; ++i) {
-      long tableId = record.getTableIds().get(i);
-      File tableFile = getSortedTablePath(tableId, true);
-      tables[i] = loadSortedTable(tableFile, tableId);
+    try (TaskStack closeOnFail = new TaskStack(LOG)) {
+      SidTable[] tables = new SidTable[record.getTableIds().size()];
+      for (int i = 0; i < tables.length; ++i) {
+        long tableId = record.getTableIds().get(i);
+        File tableFile = getSortedTablePath(tableId, true);
+        tables[i] = loadSortedTable(tableFile, tableId);
+        closeOnFail.pushClose(tables[i]);
+      }
+      SidTableSet tableSet = new SidTableSet(tables, config.getDeleteCodec(), record.getId());
+      closeOnFail.clear();
+      return tableSet;
     }
-    return new SidTableSet(tables, config.getDeleteCodec(), record.getId());
   }
   
 
@@ -468,11 +439,21 @@ public class TStore implements Channel {
   }
 
 
+  /**
+   * Returns the table's simple file name given its <tt>tableId</tt>. Hook for a
+   * subclass wishing to change the file naming scheme.
+   */
   protected String getTableFilename(long tableId) {
     return TABLE_PREFIX + tableId + "." + SORTED_TABLE_EXT;
   }
   
   
+  /**
+   * Returns the file size of the table with the given <tt>tableId</tt>.
+   * 
+   * @throws FileNotFoundException
+   *         if there is no such table
+   */
   public long getTableFileSize(long tableId) throws IOException {
     return getSortedTablePath(tableId, true).length();
   }
@@ -616,8 +597,8 @@ public class TStore implements Channel {
         
         // commit
         commitNumber.set(postCommitId);
-        setCurrentCommit(postCommitRecord);
         activeTableSet(postMergeTableSet);
+        setCurrentCommit(postCommitRecord);
       } // synchronized (backSetLock) { .. }
       
       failed = false;
@@ -631,8 +612,8 @@ public class TStore implements Channel {
     // clean up the left overs..
     if (preMergeCommit.getFile() != null)
       discardFile(preMergeCommit.getFile());
-    for (long srcId : srcIds)
-      discardFile(getSortedTablePath(srcId));
+//    for (long srcId : srcIds)
+//      discardFile(getSortedTablePath(srcId));
   }
   
   

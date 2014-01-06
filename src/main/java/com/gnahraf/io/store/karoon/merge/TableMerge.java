@@ -8,8 +8,7 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.AbstractList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -32,6 +31,7 @@ public class TableMerge implements Runnable, Closeable {
   
   private final static Logger LOG = Logger.getLogger(TableMerge.class);
   
+  private final GenerationInfo gInfo;
   private final SidTable[] sources;
   private final DeleteCodec deleteCodec;
   private final TableSet backSet;
@@ -46,12 +46,14 @@ public class TableMerge implements Runnable, Closeable {
   
   
   TableMerge(
+      GenerationInfo gInfo,
       SidTable[] sources,
       DeleteCodec deleteCodec,
       TableSet backSet,
       File outputFile,
       long outTableId) {
     
+    this.gInfo = gInfo;
     this.sources = sources;
     this.deleteCodec = deleteCodec;
     this.backSet = backSet;
@@ -181,19 +183,26 @@ public class TableMerge implements Runnable, Closeable {
   
   
   public List<Long> getSourceIds() {
-    List<Long> srcIds = new ArrayList<>(getSources().size());
-    for (SidTable table : getSources())
-      srcIds.add(table.id());
-    return srcIds;
+    return new AbstractList<Long>() {
+      @Override
+      public Long get(int index) {
+        return sources[index].id();
+      }
+      @Override
+      public int size() {
+        return sources.length;
+      }
+    };
   }
 
 
   public String toString() {
     return
-        "[srcs=" + Arrays.asList(sources) +
+        "[srcs=" + getSourceIds() +
         ", bset=" + backSet +
         ", out=" + outputFile.getName() +
-        ", state=" + state + "]";
+        ", state=" + state +
+        ", gen=" + gInfo.generation + "]";
   }
 
 }

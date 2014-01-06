@@ -41,12 +41,16 @@ public class TStoreTest extends TestMethodHarness {
       this.trashDir = new File(config.getRootDir(), TRASH_DIRNAME);
       Files.ensureDir(this.trashDir);
     }
-    
 
-    protected void discardFile(File file) throws IOException {
+    @Override
+    protected void discardFile(File file) {
       
       if (file.exists()) {
-        Files.moveToDir(file, this.trashDir);
+        try {
+          Files.moveToDir(file, this.trashDir);
+        } catch (FileNotFoundException fnfx) {
+          LOG.warn(fnfx.getMessage());
+        }
       }
     }
     

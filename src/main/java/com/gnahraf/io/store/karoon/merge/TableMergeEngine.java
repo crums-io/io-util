@@ -22,6 +22,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 
+import com.gnahraf.io.Releaseable;
+import com.gnahraf.io.store.karoon.CommitRecord;
 import com.gnahraf.io.store.karoon.KaroonException;
 import com.gnahraf.io.store.karoon.SidTable;
 import com.gnahraf.io.store.karoon.TStore;
@@ -36,6 +38,16 @@ import com.gnahraf.util.cc.RunState;
  * @author Babak
  */
 public class TableMergeEngine implements Channel {
+  
+  private static class YoungMerge {
+    final GenerationInfo g;
+    final TableMerge tmerge;
+    
+    YoungMerge(GenerationInfo g, TableMerge tmerge) {
+      this.g = g;
+      this.tmerge = tmerge;
+    }
+  }
   
   private final static Logger LOG = Logger.getLogger(TableMergeEngine.class);
   
@@ -52,13 +64,17 @@ public class TableMergeEngine implements Channel {
   private final Map<Integer, TableMerge> activeMerges =
       Collections.synchronizedMap(new HashMap<Integer, TableMerge>());
   
+  private final List<YoungMerge> youngActiveMerges =
+      Collections.synchronizedList(new ArrayList<YoungMerge>());
+  
   private final Object oldGenerationLock = new Object();
   
-  
+  private final TableRegistry tableRegistry;
 
   private final String gclLabel;
+  private final String yclLabel;
   private final String gmLabel;
-  private final String ymlLabel;
+  private final String ymLabel;
   
   private RunState state = RunState.INIT;
   
@@ -76,9 +92,21 @@ public class TableMergeEngine implements Channel {
             storeContext.store().getConfig().getMergePolicy().getMergeThreadPriority());
     this.threadPool = Executors.newCachedThreadPool(threadFactory);
     
+    TableLifecycleListener lifecycleListener = new TableLifecycleListener() {
+      @Override
+      public void released(long tableId) {
+        TableMergeEngine.this.storeContext.discardTable(tableId);
+      }
+      @Override
+      public void inited(long tableId) {
+      }
+    };
+    this.tableRegistry = new TableRegistry(lifecycleListener);
+    
     this.gclLabel = this + " - Generational control loop: ";
+    this.yclLabel = this + " - Young control loop: ";
     this.gmLabel = this + " - Generational merge: ";
-    this.ymlLabel = this + " - Young table merge loop: ";
+    this.ymLabel = this + " - Young table merge: ";
   }
   
   public void notifyFreshMeat() {
@@ -106,6 +134,13 @@ public class TableMergeEngine implements Channel {
   }
   
   
+  private Runnable youngMergeLoop() {
+    return new Runnable() {
+      @Override
+      public void run() { performYoungMerges(); }
+    };
+  }
+
   public boolean await(long millis) throws InterruptedException {
     return threadPool.awaitTermination(millis, TimeUnit.MILLISECONDS);
   }
@@ -117,81 +152,92 @@ public class TableMergeEngine implements Channel {
     }
   }
   
-  private List<TableInfo> getInfoSnapshot() throws IOException {
-    List<Long> tableIds = tableStore.getCurrentCommit().getTableIds();
-    ArrayList<TableInfo> tfs = new ArrayList<>(tableIds.size());
-    for (Long tableId : tableIds) {
-      long size = tableStore.getTableFileSize(tableId);
-      tfs.add(new TableInfo(tableId, size));
+  private CommitInfo getCommitInfo() throws IOException {
+    // table file deletions are mediated through the table registry
+    // (via the lifecycle listener set up in the constructor)
+    // So we lock the registry so that files don't slip away underneath
+    // us while we check their sizes..
+    synchronized (tableRegistry) {
+      CommitRecord commit = tableStore.getCurrentCommit();
+      return CommitInfo.getCommitInfo(commit, tableStore);
     }
-    return Collections.unmodifiableList(tfs);
   }
   
-  protected Runnable youngMergeLoop() {
-    return new Runnable() {
-      @Override
-      public void run() {
-        LOG.info(ymlLabel + "STARTED");
-        LOG.info(ymlLabel + "Thread ID = " + Thread.currentThread().getId());
-        while (!stopped) {
-          TaskStack closer = new TaskStack();
-          try {
-            TableMerge merge = prepareYoungMerge();
-            if (merge == null) {
-              synchronized (freshMeatLock) {
-                while ((merge = prepareYoungMerge()) == null && !stopped) {
-                  LOG.debug(ymlLabel + "waiting for fresh meat..");
-                  freshMeatLock.wait();
-                  LOG.debug(ymlLabel + "notified");
-                }
-              }
-              if (stopped)
-                break;
-            }
-            closer.pushClose(merge);
-            closer.pushRun(removeFromActiveMergesOp(0));
-            
-            LOG.debug(ymlLabel + "merge prepared.");
-            activeMerges.put(0, merge);
-            merge.run();
-            
-            if (stopped) {
-              // we have to check for this corner case..
-              if (merge.getOutTable() != null)
-                closer.pushClose(merge.getOutTable());
-              break;
-            }
-            
-            if (!merge.getState().succeeded()) {
-              if (merge.getException() != null)
-                throw merge.getException();
-              else {
-                // should never end up here
-                if (merge.getOutTable() != null)
-                  closer.pushClose(merge.getOutTable());
-                throw new KaroonException("Unspecified failure with merge " + merge);
-              }
-            }
-            
-            storeContext.tablesMerged(merge.getSourceIds(), merge.getOutTable());
-            if (merge.getOutputFile().length() > tableStore.getConfig().getMergePolicy().getMaxYoungSize())
-              notifyOldGeneration();
-            
-          } catch (Exception x) {
-            LOG.error(ymlLabel + "aborting on error. Detail: " + x.getMessage(), x);
-            break;
-          } finally {
-            closer.close();
+  
+  private void performYoungMerges() {
+    LOG.info(yclLabel + "STARTED");
+    LOG.info(yclLabel + "Thread ID = " + Thread.currentThread().getId());
+    while (!stopped) {
+      try {
+        
+        // If there are 2 concurrent merges already running, wait..
+        if (youngActiveMerges.size() > 1) {
+          synchronized (youngActiveMerges) {
+            while (youngActiveMerges.size() > 1)
+              youngActiveMerges.wait();
           }
+          continue;
         }
-        if (!stopped) {
-          LOG.warn(ymlLabel + "stopping merge engine on abort");
-          stop();
+        
+        CommitInfo commitInfo = getCommitInfo();
+        GenerationInfo g = getYoungGenerationInfo(commitInfo);
+        if (g == null) {
+          synchronized (freshMeatLock) {
+            while (!stopped) {
+              
+              commitInfo = getCommitInfo();
+              g = getYoungGenerationInfo(commitInfo);
+              if (g != null)
+                break;
+              
+              LOG.debug(yclLabel + "waiting for fresh meat..");
+              freshMeatLock.wait();
+              LOG.debug(yclLabel + "notified");
+            }
+          }
+          if (stopped)
+            break;
         }
-        LOG.info(ymlLabel + "STOPPED");
+        // true: g != null
+        
+        synchronized (youngActiveMerges) {
+          // if there's another concurrent zero generation merge running
+          // reduce the job
+          if (!youngActiveMerges.isEmpty()) {
+            GenerationInfo priorGi = youngActiveMerges.get(0).g;
+            g = g.reduceBy(priorGi);
+          }
+          
+          // if, as a result of the reduction, we got nothing to merge..
+          if (g == null)
+            continue;
+          
+          Runnable mergeTask = newYoungMerge(g, commitInfo);
+          if (mergeTask != null)
+            threadPool.execute(mergeTask);
+        }
+        
+        
+      } catch (Exception x) {
+        LOG.error(yclLabel + "aborting on error. Detail: " + x.getMessage(), x);
+        break;
       }
-    };
+    }
+    if (!stopped) {
+      LOG.warn(yclLabel + "stopping merge engine on abort");
+      stop();
+    }
+    LOG.info(yclLabel + "STOPPED");
   }
+  
+  
+  
+  private GenerationInfo getYoungGenerationInfo(CommitInfo commitInfo) throws IOException {
+    MergePolicy mergePolicy = tableStore.getConfig().getMergePolicy();
+    return GenerationInfo.candidateMerge(commitInfo.tableInfos(), mergePolicy, 0);
+  }
+  
+  
   
   private final static Comparator<GenerationInfo> MERGE_BANG_4_BUCK_RANK =
       new Comparator<GenerationInfo>() {
@@ -219,7 +265,8 @@ public class TableMergeEngine implements Channel {
         while (!stopped) {
           TaskStack closer = new TaskStack();
           try {
-            
+
+            final CommitInfo commitInfo;
             List<GenerationInfo> mergeCandidates;
             
             synchronized (oldGenerationLock) {
@@ -229,10 +276,13 @@ public class TableMergeEngine implements Channel {
               if (stopped)
                 break;
               
-              List<TableInfo> tableStack = getInfoSnapshot();
+              commitInfo = getCommitInfo();
+              
               MergePolicy mergePolicy = tableStore.getConfig().getMergePolicy();
               mergeCandidates =
-                  GenerationInfo.generationalMergeCandidates(tableStack, mergePolicy);
+                  GenerationInfo.generationalMergeCandidates(
+                      commitInfo.tableInfos(),
+                      mergePolicy);
               
               // wait if there are no merge candidates
               if (mergeCandidates.isEmpty()) {
@@ -253,12 +303,15 @@ public class TableMergeEngine implements Channel {
               if (activeMerges.containsKey(g.generation))
                 continue;
               try {
-                Runnable mergeOp = newGenerationMerge(g);
-                threadPool.execute(mergeOp);
+                
+                Runnable mergeOp = newGenerationMerge(g, commitInfo);
+                if (mergeOp != null) {
+                  threadPool.execute(mergeOp);
+                }
               } catch (FileNotFoundException fnfx) {
                 // This is a an expected race between the control loop and the merge threads.
-                // I can make the race go away with some careful synchronization, but
-                // honestly, it's not worth it.
+                // We can make the race go away with some careful synchronization, but
+                // honestly, it's not worth it. Taking the optimistic approach wherever possible
                 
                 // sanity check nothing really amiss..
                 List<Long> committedTableIds = tableStore.getCurrentCommit().getTableIds();
@@ -300,7 +353,71 @@ public class TableMergeEngine implements Channel {
   }
   
   
-  protected Runnable newGenerationMerge(GenerationInfo g) throws IOException {
+  protected Runnable newYoungMerge(GenerationInfo g, CommitInfo commitInfo) throws IOException {
+    
+    final Releaseable checkout = tableRegistry.checkOut(
+        g.srcIds(),
+        g.backSetIds(),
+        commitInfo.commitRecord());
+    if (checkout == null)
+      return null;
+      
+    final TableMerge tmerge = prepareGenerationalMerge(g);
+    final YoungMerge youngMerge = new YoungMerge(g, tmerge);
+    youngActiveMerges.add(youngMerge);
+    return new Runnable() {
+      @Override
+      public void run() {
+
+        boolean panick = false;
+        tmerge.run();
+        
+        try {
+          
+          if (tmerge.getState().succeeded()) {
+            storeContext.tablesMerged(tmerge.getSourceIds(), tmerge.getOutTable());
+            tableRegistry.advanceCommit(tableStore.getCurrentCommit());
+            if (tmerge.getOutputFile().length() > tableStore.getConfig().getMergePolicy().getMaxYoungSize())
+              notifyOldGeneration();
+          } else if (stopped) {
+            LOG.info(ymLabel + "aborted on stop");
+            if (tmerge.getOutTable() != null)
+              tmerge.getOutTable().close();
+          }
+          else {
+            // shouldn't ever get here
+            LOG.error(ymLabel + "[FAILED] - " + tmerge.getException());
+            panick = true;
+          }
+          
+        } catch (Exception x) {
+          LOG.error(ymLabel + "[FAILED]. Detail: " + x.getMessage(), x);
+          panick = true;
+        } finally {
+          tmerge.close();
+          checkout.close();
+          if (panick) {
+            LOG.error("Stopping..");
+            stop();
+          } else {
+            synchronized (youngActiveMerges) {
+              youngActiveMerges.remove(youngMerge);
+              youngActiveMerges.notifyAll();
+            }
+          }
+        }
+      }
+    };
+  }
+  
+  protected Runnable newGenerationMerge(GenerationInfo g, CommitInfo commitInfo) throws IOException {
+    final Releaseable checkout = tableRegistry.checkOut(
+        g.srcIds(),
+        g.backSetIds(),
+        commitInfo.commitRecord());
+    
+    if (checkout == null)
+      return null;
     final TableMerge merge = prepareGenerationalMerge(g);
     final int generation = g.generation;
     activeMerges.put(generation, merge);
@@ -313,9 +430,10 @@ public class TableMergeEngine implements Channel {
         
         try {
           
-          if (merge.getState().succeeded())
+          if (merge.getState().succeeded()) {
             storeContext.tablesMerged(merge.getSourceIds(), merge.getOutTable());
-          else if (stopped)
+            tableRegistry.advanceCommit(tableStore.getCurrentCommit());
+          } else if (stopped)
             LOG.info(gmLabel + "aborted generation " + generation + " on stop");
           else {
             // shouldn't ever get here
@@ -329,20 +447,12 @@ public class TableMergeEngine implements Channel {
         } finally {
           merge.close();
           removeFromActiveMerges(generation);
+          checkout.close();
           if (panick) {
             LOG.error("Stopping..");
             stop();
           }
         }
-      }
-    };
-  }
-  
-  private Runnable removeFromActiveMergesOp(final int generation) {
-    return new Runnable() {
-      @Override
-      public void run() {
-        removeFromActiveMerges(generation);
       }
     };
   }
@@ -362,7 +472,19 @@ public class TableMergeEngine implements Channel {
       for (TableMerge merge : activeMerges.values()) {
         try {
           merge.abort();
-        } catch (Exception x) {  }
+        } catch (Exception x) {
+          LOG.debug("On active merge abort: " + merge, x);
+        }
+      }
+    }
+    
+    synchronized (youngActiveMerges) {
+      for (YoungMerge ymerge : youngActiveMerges) {
+        try {
+          ymerge.tmerge.abort();
+        } catch (Exception x) {
+          LOG.debug("On young active merge abort: " + ymerge.tmerge, x);
+        }
       }
     }
     notifyFreshMeat();
@@ -376,73 +498,73 @@ public class TableMergeEngine implements Channel {
     stop();
     threadPool.shutdownNow();
   }
-  
-  private TableMerge prepareYoungMerge() throws IOException {
-    List<Long> tableIds = tableStore.getCurrentCommit().getTableIds();
-    MergePolicy mergePolicy = tableStore.getConfig().getMergePolicy();
-    
-    if (tableIds.size() < mergePolicy.getMinYoungMergeTableCount())
-      return null;
-    
-    final int youngCount;
-    {
-      int count = 0;
-      for (int i = tableIds.size(); i-- > 0; ) {
-        long size = tableStore.getTableFileSize(tableIds.get(i));
-        if (size <= mergePolicy.getMaxYoungSize())
-          ++count;
-        else
-          break;
-      }
-      youngCount = count;
-    }
-    
-    if (youngCount < mergePolicy.getMinYoungMergeTableCount() || youngCount < 2)
-      return null;
-    
-
-    final int backSetTableCount = tableIds.size() - youngCount;
-    
-    TaskStack closerOnFail = new TaskStack();
-    boolean failed = true;
-    try {
-      TableSet backSet;
-      if (backSetTableCount == 0) {
-        backSet = null;
-      } else {
-        SidTable[] backTables = new SidTable[backSetTableCount];
-        for (int i = 0; i < backSetTableCount; ++i) {
-          backTables[i] = tableStore.loadSortedTable(tableIds.get(i));
-          closerOnFail.pushClose(backTables[i]);
-        }
-        backSet = new TableSet(backTables);
-      }
-      
-      SidTable[] sources = new SidTable[youngCount];
-      for (int i = 0; i < youngCount; ++i) {
-        sources[i] = tableStore.loadSortedTable(tableIds.get(i + backSetTableCount));
-        closerOnFail.pushClose(sources[i]);
-      }
-      
-      long mergedTableId = storeContext.newTableId();
-      File mergedTableFile = storeContext.newTablePath(mergedTableId);
-      
-      TableMerge merge = new TableMerge(
-          sources,
-          tableStore.getConfig().getDeleteCodec(),
-          backSet,
-          mergedTableFile,
-          mergedTableId);
-      
-      failed = false;
-      return merge;
-      
-    } finally {
-      if (failed)
-        closerOnFail.close();
-    }
-  }
-  
+//  
+//  private TableMerge prepareYoungMerge() throws IOException {
+//    List<Long> tableIds = tableStore.getCurrentCommit().getTableIds();
+//    MergePolicy mergePolicy = tableStore.getConfig().getMergePolicy();
+//    
+//    if (tableIds.size() < mergePolicy.getMinYoungMergeTableCount())
+//      return null;
+//    
+//    final int youngCount;
+//    {
+//      int count = 0;
+//      for (int i = tableIds.size(); i-- > 0; ) {
+//        long size = tableStore.getTableFileSize(tableIds.get(i));
+//        if (size <= mergePolicy.getMaxYoungSize())
+//          ++count;
+//        else
+//          break;
+//      }
+//      youngCount = count;
+//    }
+//    
+//    if (youngCount < mergePolicy.getMinYoungMergeTableCount() || youngCount < 2)
+//      return null;
+//    
+//
+//    final int backSetTableCount = tableIds.size() - youngCount;
+//    
+//    TaskStack closerOnFail = new TaskStack();
+//    boolean failed = true;
+//    try {
+//      TableSet backSet;
+//      if (backSetTableCount == 0) {
+//        backSet = null;
+//      } else {
+//        SidTable[] backTables = new SidTable[backSetTableCount];
+//        for (int i = 0; i < backSetTableCount; ++i) {
+//          backTables[i] = tableStore.loadSortedTable(tableIds.get(i));
+//          closerOnFail.pushClose(backTables[i]);
+//        }
+//        backSet = new TableSet(backTables);
+//      }
+//      
+//      SidTable[] sources = new SidTable[youngCount];
+//      for (int i = 0; i < youngCount; ++i) {
+//        sources[i] = tableStore.loadSortedTable(tableIds.get(i + backSetTableCount));
+//        closerOnFail.pushClose(sources[i]);
+//      }
+//      
+//      long mergedTableId = storeContext.newTableId();
+//      File mergedTableFile = storeContext.newTablePath(mergedTableId);
+//      
+//      TableMerge merge = new TableMerge(
+//          sources,
+//          tableStore.getConfig().getDeleteCodec(),
+//          backSet,
+//          mergedTableFile,
+//          mergedTableId);
+//      
+//      failed = false;
+//      return merge;
+//      
+//    } finally {
+//      if (failed)
+//        closerOnFail.close();
+//    }
+//  }
+//  
 
   
   private TableMerge prepareGenerationalMerge(GenerationInfo g) throws IOException {
@@ -462,6 +584,7 @@ public class TableMergeEngine implements Channel {
       File mergedTableFile = storeContext.newTablePath(mergedTableId);
        
       TableMerge merge = new TableMerge(
+          g,
           sources,
           tableStore.getConfig().getDeleteCodec(),
           backSet,
