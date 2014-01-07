@@ -91,7 +91,6 @@ To generate javadocs
 These get generated in the `target/site/apidocs` directory. Move that directory to a more
 permanent location, if you don't want it wiped out on the next build.
 
-(Btw, if anyone knows how to publish javadocs to github.com projects, please share how.)
 
 ### Early performance results
 
@@ -99,9 +98,10 @@ There's one write-heavy stress test for karoon. To run it
 
 `$ mvn clean test -Dtest=TStoreBigTest`
 
-This inserts 1M randomly generated 64-byte rows. Typical insertion rates are over 10,000 rows
+This inserts 1M randomly generated 64-byte rows. Typical insertion rates are around 20,000 rows
 per second. Note that the randomness actually works against the store: more real world, lumpy
-data sets should perform better than what this test generates.
+data sets should perform better than what this test generates. It's not a rigorous performance
+test as it includes the time taken to generate the data.
 
 ## Roadmap
 
@@ -110,8 +110,10 @@ here are some things I'd like to work on next, with stuff at the top of the list
 priority than those further down.
 
 
-* Explore implementing secondary indexes in karoon.
-* Hook karoon to netty.
+* Implement secondary indexes in karoon.
+* Hook karoon to netty
+  * Chaining set up for failover.
+    * Failover strategy?
 * Performance / stress testing.
 * Performance improvements.
   * The searcher can easily improve on disk I/O, by lazily caching certain rows, for example.
@@ -124,4 +126,4 @@ This roadmap addresses some of my own itches, and I hope some of yours too.
 Enjoy! And remember, contributions, whether in the form of suggestions, ideas, code, or forks, are welcome.
 
 Babak<br/>
-Dec. 23, 2013
+Jan. 7, 2014

@@ -8,5 +8,3 @@ TODOs
 * Test iterator functionality and expose from karoon
 * Secondary table indexes in karoon.
 * karoon wire protocol using netty
-* karron leader/follower via zk
-
