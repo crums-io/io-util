@@ -80,17 +80,31 @@ public class TableMergeEngine implements Channel {
   
   /**
    * @throws NullPointerException
+   *         if <tt>storeContext</tt> is <tt>null</tt>
    */
   public TableMergeEngine(TmeContext storeContext) {
+    this(storeContext, null);
+  }
+  
+  /**
+   * @throws NullPointerException
+   *         if <tt>storeContext</tt> is <tt>null</tt>
+   */
+  public TableMergeEngine(TmeContext storeContext, ExecutorService threadPool) {
     this.storeContext = storeContext;
     this.tableStore = storeContext.store();
     if (!tableStore.isOpen())
       throw new IllegalArgumentException("closed tableStore: " + tableStore);
     
-    ThreadFactory threadFactory =
-        new FixedPriorityThreadFactory(
-            storeContext.store().getConfig().getMergePolicy().getMergeThreadPriority());
-    this.threadPool = Executors.newCachedThreadPool(threadFactory);
+    if (threadPool == null) {
+      ThreadFactory threadFactory =
+          new FixedPriorityThreadFactory(
+              storeContext.store().getConfig().getMergePolicy().getMergeThreadPriority());
+      threadPool = Executors.newCachedThreadPool(threadFactory);
+    } else if (threadPool.isShutdown())
+      throw new IllegalArgumentException("threadPool is shutdown: " + threadPool);
+    
+    this.threadPool = threadPool;
     
     TableLifecycleListener lifecycleListener = new TableLifecycleListener() {
       @Override

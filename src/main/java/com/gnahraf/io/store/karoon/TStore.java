@@ -24,7 +24,10 @@ import com.gnahraf.io.store.karoon.merge.TableMergeEngine;
 import com.gnahraf.io.store.ks.CachingKeystone;
 import com.gnahraf.io.store.ks.Keystone;
 import com.gnahraf.io.store.table.TableSet;
+import com.gnahraf.math.stats.MovingAverage;
 import com.gnahraf.util.TaskStack;
+import com.gnahraf.util.cc.throt.FuzzySpeed;
+import com.gnahraf.util.cc.throt.FuzzyThrottler;
 
 /**
  * Single thread access table store.
@@ -57,6 +60,142 @@ public class TStore implements Channel {
     }
   }
   
+
+  private class LoadMeter extends FuzzySpeed {
+    
+    private final MovingAverage tableCount;;
+    private CommitRecord commit;
+    
+    LoadMeter() {
+      commit = currentCommit;
+      tableCount = new MovingAverage(10, commit.getTableIds().size());
+    }
+    
+    
+    public synchronized void update() {
+      if (commit != currentCommit) {
+        commit = currentCommit;
+        tableCount.observe(commit.getTableIds().size());
+      }
+    }
+
+    @Override
+    public synchronized double accelerating() {
+      long delta = delta();
+      if (delta <= 0)
+        return 0;
+      return absAcc(delta);
+    }
+    
+    private long delta() {
+      return tableCount.lastValue() - tableCount.valueAt(0);
+    }
+    
+    private double absAcc(long delta) {
+      if (delta < 2)
+        return 0.1;
+      else if (delta < 3)
+        return 0.3;
+      else if (delta < 5)
+        return 0.6;
+      else if (delta < 8)
+        return 0.8;
+      else
+        return 1;
+    }
+
+    @Override
+    public synchronized double cruising() {
+      long delta = Math.abs(delta());
+      if (delta < 2)
+        return 1;
+      else if (delta < 3)
+        return 0.9;
+      else if (delta < 4)
+        return 0.75;
+      else if (delta < 5)
+        return 0.5;
+      else if (delta < 7)
+        return 0.25;
+      else
+        return 0;
+    }
+
+    @Override
+    public synchronized double decelerating() {
+      long delta = delta();
+      if (delta >= 0)
+        return 0;
+      return absAcc(-delta);
+    }
+
+    @Override
+    public synchronized double tooFast() {
+      long overheatCount = overheatCount();
+          
+      if (overheatCount <= -2)
+        return 0;
+      
+      if (overheatCount < 0)
+        return 0.1;
+      else if (overheatCount < 1)
+        return 0.2;
+      else if (overheatCount < 3)
+        return 0.4;
+      else if (overheatCount < 5)
+        return 0.5;
+      else if (overheatCount < 7)
+        return 0.75;
+      else
+        return 1;
+    }
+    
+    
+    private long overheatCount() {
+      return tableCount.lastValue() - config.getMergePolicy().getEngineOverheatTableCount();
+    }
+    
+    private long avgOverheatCount() {
+      return tableCount.average() - config.getMergePolicy().getEngineOverheatTableCount();
+    }
+
+    @Override
+    public synchronized double justRight() {
+      long avgOverheatCount = avgOverheatCount();
+      long overheatCount = overheatCount();
+      if (overheatCount <= 0) {
+        if (avgOverheatCount <= 3)
+          return 1;
+        else if (avgOverheatCount < 5)
+          return 0.9;
+        else if (avgOverheatCount < 7)
+          return 0.75;
+        else
+          return 0.5;
+      } else if (overheatCount < 3)
+        return 0.8;
+      else if (overheatCount < 7)
+        return 0.4;
+      else
+        return 0;
+    }
+
+    @Override
+    public synchronized double tooSlow() {
+      long lastTableCount = tableCount.lastValue();
+      long overheatCount = config.getMergePolicy().getEngineOverheatTableCount();
+      if (lastTableCount >= overheatCount / 2)
+        return 0;
+      else if (lastTableCount >= overheatCount / 3)
+        return 0.3;
+      else if (lastTableCount >= overheatCount / 4)
+        return 0.6;
+      else
+        return 1;
+    }
+    
+  }
+  
   protected final static Logger LOG = Logger.getLogger(TStore.class);
   private final static long INIT_COUNTER_VALUE = 0L;
   
@@ -79,6 +218,8 @@ public class TStore implements Channel {
   private final Keystone walTableNumber;
   
   private final TableMergeEngine tableMergeEngine;
+  private final LoadMeter loadMeter;
+  private final FuzzyThrottler throttle;
   
   
   private WriteAheadTableBuilder writeAhead;
@@ -124,6 +265,8 @@ public class TStore implements Channel {
 
       this.currentCommit = loadCommitRecord(commitNumber.get());
       this.activeTableSet = load(currentCommit);
+      this.loadMeter = new LoadMeter();
+      this.throttle = new FuzzyThrottler(loadMeter);
       
       // find the last working (unsorted) table, if any..
       long walTableId = walTableNumber.get();
@@ -149,7 +292,7 @@ public class TStore implements Channel {
         setNextWriteAhead();
       }
       
-      this.tableMergeEngine = new TableMergeEngine(new TmeContext());
+      this.tableMergeEngine = new TableMergeEngine(new TmeContext(), config.getMergeThreadPool());
       closer.pushClose(tableMergeEngine);
       tableMergeEngine.start();
       
@@ -322,6 +465,7 @@ public class TStore implements Channel {
       setNextWriteAhead();
     }
     this.tableMergeEngine.notifyFreshMeat();
+    throttle.throttledTicker().tick();
   }
   
   
@@ -627,6 +771,8 @@ public class TStore implements Channel {
   
   private void setCurrentCommit(CommitRecord newCommitRecord) {
     currentCommit = newCommitRecord;
+    loadMeter.update();
+    throttle.updateThrottle();
     notifyNewCommit();
   }
   

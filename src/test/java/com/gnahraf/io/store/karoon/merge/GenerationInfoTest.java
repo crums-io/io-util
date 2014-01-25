@@ -25,7 +25,7 @@ public class GenerationInfoTest {
   
   private final static long U = MERGE_POLICY.getWriteAheadFlushTrigger();
   
-  private final static int F = MERGE_POLICY.getGenerationalFactor();
+  private final static double F = MERGE_POLICY.getGenerationalFactor();
   
 
   @Test
@@ -142,7 +142,7 @@ public class GenerationInfoTest {
   @Test
   public void testThreeOldOneFresh() {
     long[] ids =   { 1,   2,     15,  99, };
-    long[] sizes = { U*U, F*U+1, U*U, U   };
+    long[] sizes = { U*U, (long) (F*U+1), U*U, U   };
     
     List<TableInfo> tableStack = generateTableStack(ids, sizes);
     List<GenerationInfo> mergeCandidates =
@@ -170,14 +170,14 @@ public class GenerationInfoTest {
         718,
     };
     long[] sizes = {
-        U*F*F*F*F + 1,
-        U*F*F*F*F + 6,
-        U*F*F*F + 1,
-        U*F*F*F + 1,
-        U*F*F + 1,
-        U*F*F + 1,
-        U*F + 1,
-        U*F + 1,
+        (long) (U*F*F*F*F + 1),
+        (long) (U*F*F*F*F + 6),
+        (long) (U*F*F*F + 1),
+        (long) (U*F*F*F + 1),
+        (long) ( U*F*F + 1),
+        (long) (U*F*F + 1),
+        (long) (U*F + 1),
+        (long) (U*F + 1),
         U,
         U-1,
     };
@@ -218,12 +218,12 @@ public class GenerationInfoTest {
         718,
     };
     long[] sizes = {
-        U*F*F*F*F + 1,
-        U*F*F*F*F + 6,
-        U*F*F*F + 1,
-        U*F*F*F + 1,
-        U*F*F + 1,
-        U*F*F + 1,
+        (long) (U*F*F*F*F + 1),
+        (long) (U*F*F*F*F + 6),
+        (long) (U*F*F*F + 1),
+        (long) (U*F*F*F + 1),
+        (long) (U*F*F + 1),
+        (long) (U*F*F + 1),
         U,
         U-1,
     };
@@ -260,12 +260,12 @@ public class GenerationInfoTest {
         32,
     };
     long[] preSizes = {
-        U*F*F*F*F + 1,
-        U*F*F*F*F + 6,
-        U*F*F*F + 1,
-        U*F*F*F + 1,
-        U*F*F + 1,
-        U*F*F + 1,
+        (long) (U*F*F*F*F + 1),
+        (long) (U*F*F*F*F + 6),
+        (long) (U*F*F*F + 1),
+        (long) (U*F*F*F + 1),
+        (long) (U*F*F + 1),
+        (long) (U*F*F + 1),
         U,
         U,
         U,
@@ -289,12 +289,12 @@ public class GenerationInfoTest {
         345,
     };
     long[] postSizes = {
-        U*F*F*F*F + 1,
-        U*F*F*F*F + 6,
-        U*F*F*F + 1,
-        U*F*F*F + 1,
-        U*F*F + 1,
-        U*F*F + 1,
+        (long) (U*F*F*F*F + 1),
+        (long) (U*F*F*F*F + 6),
+        (long) (U*F*F*F + 1),
+        (long) (U*F*F*F + 1),
+        (long) (U*F*F + 1),
+        (long) (U*F*F + 1),
         U,
         U,
         U,
@@ -352,12 +352,12 @@ public class GenerationInfoTest {
         32,
     };
     long[] preSizes = {
-        U*F*F*F*F + 1,
-        U*F*F*F*F + 6,
-        U*F*F*F + 1,
-        U*F*F*F + 1,
-        U*F*F + 1,
-        U*F*F + 1,
+        (long) (U*F*F*F*F + 1),
+        (long) (U*F*F*F*F + 6),
+        (long) (U*F*F*F + 1),
+        (long) (U*F*F*F + 1),
+        (long) (U*F*F + 1),
+        (long) (U*F*F + 1),
         U,
         U,
         U,
@@ -381,12 +381,12 @@ public class GenerationInfoTest {
         345,
     };
     long[] postSizes = {
-        U*F*F*F*F + 1,
-        U*F*F*F*F + 6,
-        U*F*F*F + 1,
-        U*F*F*F + 1,
-        U*F*F + 1,
-        U*F*F + 1,
+        (long) (U*F*F*F*F + 1),
+        (long) (U*F*F*F*F + 6),
+        (long) (U*F*F*F + 1),
+        (long) (U*F*F*F + 1),
+        (long) (U*F*F + 1),
+        (long) (U*F*F + 1),
         U,
         U,
         U,
@@ -445,12 +445,12 @@ public class GenerationInfoTest {
         32,
     };
     long[] preSizes = {
-        U*F*F*F*F + 1,
-        U*F*F*F*F + 6,
-        U*F*F*F + 1,
-        U*F*F*F + 1,
-        U*F*F + 1,
-        U*F*F + 1,
+        (long) (U*F*F*F*F + 1),
+        (long) (U*F*F*F*F + 6),
+        (long) (U*F*F*F + 1),
+        (long) (U*F*F*F + 1),
+        (long) (U*F*F + 1),
+        (long) (U*F*F + 1),
         U,
         U,
         U,
@@ -474,12 +474,12 @@ public class GenerationInfoTest {
         345,
     };
     long[] postSizes = {
-        U*F*F*F*F + 1,
-        U*F*F*F*F + 6,
-        U*F*F*F + 1,
-        U*F*F*F + 1,
-        U*F*F + 1,
-        U*F*F + 1,
+        (long) (U*F*F*F*F + 1),
+        (long) (U*F*F*F*F + 6),
+        (long) (U*F*F*F + 1),
+        (long) (U*F*F*F + 1),
+        (long) (U*F*F + 1),
+        (long) (U*F*F + 1),
         U,
         U,
         U,

@@ -119,7 +119,7 @@ public class CommitRecordTest extends TestMethodHarness {
     File recordFile = new File(this.testDir, filename);
     List<Long> tableIds = Collections.emptyList();
     try (FileWriter writer = new FileWriter(recordFile)) {
-      writer.append(" , ,, \n\t,, ");
+      writer.append("  \n\t \n ");
     }
     CommitRecord record = CommitRecord.load(recordFile, 0);
     assertEquals(tableIds, record.getTableIds());
@@ -137,7 +137,7 @@ public class CommitRecordTest extends TestMethodHarness {
       tableIds = CollectionUtils.asReadOnlyList(values);
     }
     try (FileWriter writer = new FileWriter(recordFile)) {
-      writer.append(" , 89 ,4, 30\n\t,, 52, 21, ");
+      writer.append("  89 4 30\n\t 52 21 ");
     }
     CommitRecord record = CommitRecord.load(recordFile, 0);
     assertEquals(tableIds, record.getTableIds());

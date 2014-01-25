@@ -89,13 +89,10 @@ public final class CommitRecord {
           "commit file size exceeds limit: " + file.length() + "bytes");
     ArrayList<Long> tableIds = new ArrayList<>();
     String contents = Files.loadAsString(file, MAX_COMMIT_FILE_LENGTH);
-    StringTokenizer idTokenizer = new StringTokenizer(contents, ",");
+    StringTokenizer idTokenizer = new StringTokenizer(contents);
     try {
       while (idTokenizer.hasMoreTokens()) {
-        String token = idTokenizer.nextToken().trim();
-        if (token.isEmpty())
-          continue;
-        long id = Long.parseLong(token);
+        long id = Long.parseLong(idTokenizer.nextToken());
         tableIds.add(id);
       }
     } catch (NumberFormatException nfx) {
@@ -138,7 +135,7 @@ public final class CommitRecord {
     
     try (FileWriter writer = new FileWriter(file)) {
       for (Long tableId : tableIds)
-        writer.append(tableId.toString()).append(',');
+        writer.append(tableId.toString()).append('\n');
     }
   }
   

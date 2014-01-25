@@ -171,6 +171,13 @@ public class SortedTableBuilder {
   }
   
   
+  public int putRows(ByteBuffer[] rows) throws IOException {
+    // TODO
+    return 0;
+  }
+  
+  
+  
   public boolean isEmpty() {
     return sortedView.isEmpty();
   }

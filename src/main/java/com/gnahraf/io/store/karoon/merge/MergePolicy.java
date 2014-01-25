@@ -20,19 +20,19 @@ public abstract class MergePolicy {
    * @return <tt>getWriteAheadFlushTrigger() * getGenerationalFactor()</tt>
    */
   public long getMaxYoungSize() {
-    return getWriteAheadFlushTrigger() * getGenerationalFactor();
+    return (long) (getWriteAheadFlushTrigger() * getGenerationalFactor());
   }
   
   /**
    * Returns the factor that determines each successive generation's maximum
    * table size.
    */
-  public abstract int getGenerationalFactor();
+  public abstract double getGenerationalFactor();
   
   public long getGenerationMaxSize(int gen) {
     if (gen == 0)
       return getMaxYoungSize();
-    long factor = getGenerationalFactor();
+    double factor = getGenerationalFactor();
     return (long) (getMaxYoungSize() * Math.pow(factor, gen));
   }
   
@@ -41,5 +41,8 @@ public abstract class MergePolicy {
   
   
   public abstract int getMergeThreadPriority();
+  
+  
+  public abstract int getEngineOverheatTableCount();
 
 }

@@ -9,12 +9,12 @@ package com.gnahraf.io.store.karoon.merge;
  */
 public class MergePolicyBuilder extends MergePolicy {
   
-  private int writeAheadFlushTrigger = 8 * 1024;
+  private int writeAheadFlushTrigger = 32 * 1024;
   private int youngThreshold = 2;
-  private int generationalFactor = 6;
-  private int maxMergeThreads = 3;
+  private double generationalFactor = 2.6;
+  private int maxMergeThreads = 8;
   private int mergeThreadPriority = 3;
-  
+  private int engineOverheatTableCount = 64;
 
   
   
@@ -40,14 +40,14 @@ public class MergePolicyBuilder extends MergePolicy {
 
 
 
-  public void setGenerationalFactor(int factor) {
+  public void setGenerationalFactor(double factor) {
     if (factor < 2)
       throw new IllegalArgumentException("factor: " + factor);
     this.generationalFactor = factor;
   }
 
   @Override
-  public int getGenerationalFactor() {
+  public double getGenerationalFactor() {
     return generationalFactor;
   }
 
@@ -76,12 +76,19 @@ public class MergePolicyBuilder extends MergePolicy {
   }
 
 
+  @Override
+  public int getEngineOverheatTableCount() {
+    return engineOverheatTableCount;
+  }
+
+
   public MergePolicy snapshot() {
     final int waft = getWriteAheadFlushTrigger();
     final int yt = getMinYoungMergeTableCount();
-    final int gf = getGenerationalFactor();
+    final double gf = getGenerationalFactor();
     final int mt = getMaxMergeThreads();
     final int mp = getMergeThreadPriority();
+    final int oc = getEngineOverheatTableCount();
     return
         new MergePolicy() {
           @Override
@@ -93,7 +100,7 @@ public class MergePolicyBuilder extends MergePolicy {
             return yt;
           }
           @Override
-          public int getGenerationalFactor() {
+          public double getGenerationalFactor() {
             return gf;
           }
           @Override
@@ -105,6 +112,10 @@ public class MergePolicyBuilder extends MergePolicy {
             return mp;
           }
           @Override
+          public int getEngineOverheatTableCount() {
+            return oc;
+          }
+          @Override
           public String toString() {
             return
                 "[waft=" + waft +
@@ -112,6 +123,7 @@ public class MergePolicyBuilder extends MergePolicy {
                 ", gf=" + gf +
                 ", mt=" + mt +
                 ", mp=" + mp +
+                ", oc=" + oc +
                 "]";
           }
         };

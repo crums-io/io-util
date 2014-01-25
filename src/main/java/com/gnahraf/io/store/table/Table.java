@@ -10,6 +10,7 @@ import java.nio.channels.Channel;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.FileChannel;
 import java.nio.channels.WritableByteChannel;
+import java.util.Arrays;
 
 import org.apache.log4j.Logger;
 
@@ -160,6 +161,33 @@ public class Table implements Channel {
       throw new IOException("sanity check failure: " + newRowCount + " != " + currentRowCount + " + " + newRows);
     return currentRowCount;
   }
+  
+  
+  /**
+   * Appends one or more rows to the table and returns the index (row number) of
+   * the first row appended. Note this method temporarily modifies the file's position
+   * 
+   * @param rows
+   *        non-zero length array of row buffers. The total number of remaining bytes
+   *        must be an exact, non-zero multiple of the table's {@linkplain #getRowWidth() rowWidth}.
+   * 
+   * @throws NullPointerException
+   *         if the <tt>rows</tt> array is <tt>null</tt>, or if any of its elements is <tt>null</tt>
+   * @throws IllegalArgumentException
+   *         if the total number of remaining bytes in the given <tt>rows</tt> is not a non-zero
+   *         multiple of the table's {@linkplain #getRowWidth() rowWidth}
+   */
+  public long append(ByteBuffer[] rows) throws IOException {
+    long newRows = numRowsInBuffers(rows);
+    long firstRowNumber = rowCount.get();
+    long rowOffsetInFile = rowOffset(firstRowNumber);
+    file.position(rowOffsetInFile);
+    ChannelUtils.writeRemaining(file, rows);
+    long newRowCount = rowCount.increment(newRows);
+    if (newRowCount != firstRowNumber + newRows)
+      throw new IOException("sanity check failure: " + newRowCount + " != " + firstRowNumber + " + " + newRows);
+    return firstRowNumber;
+  }
 
 
   /**
@@ -301,6 +329,19 @@ public class Table implements Channel {
       throw new IllegalArgumentException(
           "buffer size (" + size + " bytes) not a multiple of row size (" + rowSize + " bytes)");
     return size / rowSize;
+  }
+  
+  
+  
+  private int numRowsInBuffers(ByteBuffer[] buffers) {
+    long remaining = 0;
+    for (int index = buffers.length; index-- > 0; ) {
+      remaining += buffers[index].remaining();
+    }
+    if (remaining == 0 || remaining % getRowWidth() != 0)
+      throw new IllegalArgumentException(
+          "illegal remaining bytes in rows: " + Arrays.asList(buffers).toString() + "; remaining = " + remaining);
+    return (int) (remaining / getRowWidth());
   }
 
 

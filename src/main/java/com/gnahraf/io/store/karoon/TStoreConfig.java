@@ -4,6 +4,7 @@
 package com.gnahraf.io.store.karoon;
 
 import java.io.File;
+import java.util.concurrent.ExecutorService;
 
 import com.gnahraf.io.store.karoon.merge.MergePolicy;
 import com.gnahraf.io.store.table.del.DeleteCodec;
@@ -20,15 +21,23 @@ public class TStoreConfig {
   private final DeleteCodec deleteCodec;
   private final File rootDir;
   private final MergePolicy policy;
+  private final ExecutorService mergeThreadPool;
   
   
-  public TStoreConfig(RowOrder rowOrder, int rowWidth, DeleteCodec deleteCodec, File rootDir, MergePolicy policy)
+  public TStoreConfig(
+      RowOrder rowOrder,
+      int rowWidth,
+      DeleteCodec deleteCodec,
+      File rootDir,
+      MergePolicy policy,
+      ExecutorService mergeThreadPool)
       throws IllegalArgumentException {
     this.rowOrder = rowOrder;
     this.rowWidth = rowWidth;
     this.deleteCodec = deleteCodec;
     this.rootDir = rootDir;
     this.policy = policy;
+    this.mergeThreadPool = mergeThreadPool;
     
     if (rowOrder == null)
       throw new IllegalArgumentException("null rowOrder");
@@ -73,7 +82,9 @@ public class TStoreConfig {
   }
   
   
-  
+  public final ExecutorService getMergeThreadPool() {
+    return mergeThreadPool;
+  }
 
 
 
@@ -85,6 +96,7 @@ public class TStoreConfig {
     builder.append(", deleteCodec=").append(deleteCodec);
     builder.append(", rootDir=").append(rootDir);
     builder.append(", policy=").append(policy);
+    builder.append(", mergeThreadPool=").append(mergeThreadPool);
     builder.append("]");
     return builder.toString();
   }
@@ -108,7 +120,18 @@ public class TStoreConfig {
     private DeleteCodec deleteCodec;
     private File rootDir;
     private MergePolicy policy;
+    private ExecutorService mergeThreadPool;
     
+    
+    public Builder load(TStoreConfig config) {
+      setRowOrder(config.getRowOrder());
+      setRowWidth(config.getRowWidth());
+      setDeleteCodec(config.getDeleteCodec());
+      setRootDir(config.getRootDir());
+      setMergePolicy(config.getMergePolicy());
+      setMergeThreadPool(config.getMergeThreadPool());
+      return this;
+    }
     
     public RowOrder getRowOrder() {
       return rowOrder;
@@ -150,8 +173,17 @@ public class TStoreConfig {
       return this;
     }
     
+    public ExecutorService getMergeThreadPool() {
+      return mergeThreadPool;
+    }
+    
+    public Builder setMergeThreadPool(ExecutorService mergeThreadPool) {
+      this.mergeThreadPool = mergeThreadPool;
+      return this;
+    }
+    
     public TStoreConfig toConfig() throws IllegalArgumentException {
-      return new TStoreConfig(rowOrder, rowWidth, deleteCodec, rootDir, policy);
+      return new TStoreConfig(rowOrder, rowWidth, deleteCodec, rootDir, policy, mergeThreadPool);
     }
     
   }

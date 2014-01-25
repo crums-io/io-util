@@ -33,11 +33,18 @@ import com.gnahraf.test.TestMethodHarness;
 public class TStoreBigTest extends TestMethodHarness {
   
   public final static String RUN_PROPERTY = TStoreBigTest.class.getSimpleName();
-
+  public final static String COUNT_PROPERTY = "count";
+  public final static String ROW_WIDTH_PROPERTY = "rowWidth";
+  public final static String SEED_PROPERTY = "seed";
+  
   private final static RowOrder order = RowOrders.LONG_ORDER;
   private final static long CODEC_MAGIC = -1;
   private final static DeleteCodec deleteCodec = MagicNumDeleteCodec.newLongInstance(8, CODEC_MAGIC);
 
+  
+  private String propertyUsage(String property) {
+    return ". To set use the -D" + property + "=... option.";
+  }
   @Test
   public void test64ByteRow() throws Exception {
     initUnitTestDir(new Object() { });
@@ -52,22 +59,46 @@ public class TStoreBigTest extends TestMethodHarness {
     
     final long startTime = System.currentTimeMillis();
     
-    final int rowWidth = 64;
-    final long rowCount = 1024 * 1024;
-    final long randomSeed = 0;
+    final int rowWidth;
+    {
+      String width = System.getProperty(ROW_WIDTH_PROPERTY);
+      if (width == null)
+        rowWidth = 64;
+      else
+        rowWidth = Integer.parseInt(width);
+      log.info("Row byte width: " + rowWidth + propertyUsage(ROW_WIDTH_PROPERTY));
+      if (rowWidth < 16 || rowWidth % 8 != 0)
+        fail(ROW_WIDTH_PROPERTY + " must be a multiple of 8 and >= 16; actual was " + rowWidth);
+    }
+    final long rowCount;
+    {
+      String count = System.getProperty(COUNT_PROPERTY);
+      if (count == null)
+        rowCount = 1024 * 1024;
+      else
+        rowCount = Long.parseLong(count);
+      log.info("Number of rows to be inserted: " + new DecimalFormat("#,###").format(rowCount) + propertyUsage(COUNT_PROPERTY));
+    }
+    final long randomSeed;
+    {
+      String seed = System.getProperty(SEED_PROPERTY);
+      if (seed == null)
+        randomSeed = System.currentTimeMillis();
+      else
+        randomSeed = Long.parseLong(seed);
+      log.info("Random number generator seed: " + seed + propertyUsage(SEED_PROPERTY));
+    }
     final int seedRate = 256;
     
-    final int backTestRate = 487 * 13;
-    final int backTestSampleSize = 13;
+    final int backTestSampleSize = 487 * 13;
     
     MergePolicy mergePolicy;
     {
       MergePolicyBuilder builder = new MergePolicyBuilder();
       builder.setWriteAheadFlushTrigger(rowWidth * 1024);
-      builder.setMaxMergeThreads(5);
-      builder.setMergeThreadPriority(7);
-      builder.setGenerationalFactor(4);
-      builder.setWriteAheadFlushTrigger(64 * 1024);
+      builder.setMaxMergeThreads(8);
+      builder.setMergeThreadPriority(3);
+      builder.setGenerationalFactor(3);
       mergePolicy = builder.snapshot();
       log.info("Merge policy settings: " + mergePolicy);
     }
@@ -96,7 +127,6 @@ public class TStoreBigTest extends TestMethodHarness {
     
     ByteBuffer buffer = ByteBuffer.allocate(tableStore.getConfig().getRowWidth());
     RandomSequence testSeq = new RandomSequence(randomSeed, seedRate);
-    long backTestPoint = backTestRate;
     
     DecimalFormat numFormatter = new DecimalFormat("#,###");
     
@@ -110,31 +140,10 @@ public class TStoreBigTest extends TestMethodHarness {
         tableStore.setRows(writeOnceBuffer, Covenant.WONT_MOD);
         writeOnceBuffer = ByteBuffer.allocate(writeAllocSize);
         
-        if (index > backTestPoint) {
-          log.info("Back testing at sequence index: " + numFormatter.format(index));
-          for (long incr = index / backTestSampleSize, ti = incr; ti < index; ti += incr) {
-            testSeq.jumpTo(ti);
-            buffer.clear();
-            long key = testSeq.next();
-            buffer.putLong(key).rewind();
-            ByteBuffer row = tableStore.getRow(buffer);
-            assertNotNull(row);
-            assertNotSame(buffer, row);
-            ByteBuffer expected = buffer;
-            prepare64ByteRow(expected, key);
-            expected.flip();
-            assertEquals(expected, row);
-          }
-           // revert the test sequence to _index_
-          testSeq.jumpTo(index);
-          backTestPoint += backTestRate;
-          log.info("Back testing passed.");
-        }
-        
       }
       
       long key = testSeq.next();
-      prepare64ByteRow(writeOnceBuffer, key);
+      prepareRow(writeOnceBuffer, key, rowWidth);
     }
     
 
@@ -187,16 +196,39 @@ public class TStoreBigTest extends TestMethodHarness {
     log.info("| amortized insertion rate: " + numFormatter.format(rowCount / amortizedSeconds) + " rows/sec");
     log.info("|");
     log.info("+----------------------------------------------");
+    
+    log.info("");
+    log.info("Back testing on reload..");
+    log.info("");
+    tableStore = new TStore(config, false);
+    log.info("Reloaded table store " + tableStore);
+    log.info("Back test sample size: " + backTestSampleSize);
+    for (long incr = rowCount / backTestSampleSize, ti = 0; ti < rowCount; ti += incr) {
+      testSeq.jumpTo(ti);
+      buffer.clear();
+      long key = testSeq.next();
+      buffer.putLong(key).rewind();
+      ByteBuffer row = tableStore.getRow(buffer);
+      assertNotNull(row);
+      assertNotSame(buffer, row);
+      ByteBuffer expected = buffer;
+      prepareRow(expected, key, rowWidth);
+      expected.flip();
+      assertEquals(expected, row);
+    }
+    
+    log.info("Back testing passed.");
+    tableStore.close();
   }
   
   
   
-  private void prepare64ByteRow(ByteBuffer row, long key) {
+  private void prepareRow(ByteBuffer row, long key, int rowWidth) {
 //    row.clear();
     row.putLong(key);
     if (++key == CODEC_MAGIC)
       ++key;
-    for (int countDown = 7; countDown-- > 0; )
+    for (int countDown = rowWidth / 8; --countDown > 0; )
       row.putLong(key++);
 //    row.flip();
   }
