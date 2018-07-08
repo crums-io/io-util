@@ -8,8 +8,7 @@ import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import com.gnahraf.io.buffer.SortedBlock;
 import com.gnahraf.io.store.Sorted;
@@ -27,7 +26,7 @@ import com.gnahraf.test.PerfProf;
  */
 public class SortedTable extends Table implements Sorted {
   
-  private final static Logger LOG = Logger.getLogger(SortedTable.class);
+  private final static Logger LOG = Logger.getLogger(SortedTable.class.getName());
   
   public enum Hint {
     BEFORE,
@@ -127,7 +126,7 @@ public class SortedTable extends Table implements Sorted {
           "zero row offset is " + zeroRowFileOffset + "; file length is " + file.size());
 
     if (byteLength % rowSize != 0)
-      LOG.warn(
+      LOG.warning(
           "Table length (" + byteLength + " bytes) not a multiple of row size (" + rowSize +
           " bytes). File position: " + file.position() + " .. Ignoring incomplete trailing row.");
     return new VolatileKeystone(byteLength / rowSize);

@@ -3,7 +3,7 @@
  */
 package com.gnahraf.math.stats;
 
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 /**
  * Keeps track of a moving average over a fixed size window. This class is
@@ -15,7 +15,7 @@ import org.apache.log4j.Logger;
  */
 public class MovingAverage {
   
-  private final static Logger LOG = Logger.getLogger(MovingAverage.class);
+  private final static Logger LOG = Logger.getLogger(MovingAverage.class.getName());
   
   
   private final long[] window;
@@ -45,7 +45,7 @@ public class MovingAverage {
   public MovingAverage(int windowSize, long initValue) {
     if (windowSize < 2) {
       if (windowSize == 1)
-        LOG.warn("Useless, but perhaps pedantic instance: windowSize = " + windowSize);
+        LOG.warning("Useless, but perhaps pedantic instance: windowSize = " + windowSize);
       else
         throw new IllegalArgumentException("windowSize: " + windowSize);
     }

@@ -9,7 +9,7 @@ import static com.gnahraf.io.buffer.BufferUtils.*;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 /**
  * A contiguous block of cells.
@@ -18,7 +18,7 @@ import org.apache.log4j.Logger;
  */
 public class Block {
   
-  private final static Logger LOG = Logger.getLogger(Block.class);
+  private final static Logger LOG = Logger.getLogger(Block.class.getName());
   
   /**
    * Array of equal capacity cells, windows into the block, in block-offset order.
@@ -66,7 +66,7 @@ public class Block {
     block.clear();
     
     if (block.capacity() % cellByteWidth != 0) {
-      LOG.debug("slicing off trailing cell fragment from end of buffer");
+      LOG.fine("slicing off trailing cell fragment from end of buffer");
       block.limit(cellCount * cellByteWidth);
       block = block.slice();
     }

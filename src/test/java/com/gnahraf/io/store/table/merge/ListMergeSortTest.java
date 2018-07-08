@@ -14,8 +14,8 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.logging.Logger;
 
-import org.apache.log4j.Logger;
 import org.junit.Test;
 
 import com.gnahraf.io.store.table.SortedTable;
@@ -31,7 +31,7 @@ import com.gnahraf.test.TestDirs;
  */
 public class ListMergeSortTest {
   
-  private final static Logger LOG = Logger.getLogger(ListMergeSortTest.class);
+  private final static Logger LOG = Logger.getLogger(ListMergeSortTest.class.getName());
   private final static File TEST_DIR = TestDirs.getTestDir(ListMergeSortTest.class);
   
   
@@ -40,7 +40,7 @@ public class ListMergeSortTest {
   private void initUnitTestDir(String method) {
     if (unitTestDir != null)
       fail();
-    LOG.debug("Creating test directory for " + method);
+    LOG.fine("Creating test directory for " + method);
     File dir = new File(TEST_DIR, method);
     assertFalse(dir.exists());
     assertTrue( dir.mkdirs() );
@@ -357,7 +357,7 @@ public class ListMergeSortTest {
       }
     }
     
-    LOG.debug("merge.getCompZeroEdgeCase(): " + merge.getCompZeroEdgeCase());
+    LOG.fine("merge.getCompZeroEdgeCase(): " + merge.getCompZeroEdgeCase());
     
     
     // clean up

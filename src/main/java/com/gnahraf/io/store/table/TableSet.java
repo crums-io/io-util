@@ -6,10 +6,8 @@ package com.gnahraf.io.store.table;
 import java.io.Closeable;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.List;
-
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import com.gnahraf.io.store.Sorted;
 import com.gnahraf.io.store.table.SortedTable.Searcher;
@@ -25,7 +23,7 @@ import com.gnahraf.util.TaskStack;
  */
 public class TableSet implements Sorted, Closeable {
   
-  private final Logger LOG = Logger.getLogger(TableSet.class);
+  private final Logger LOG = Logger.getLogger(TableSet.class.getName());
   
   protected final static SortedTable[] EMPTY_TABLE_ARRAY = { };
   

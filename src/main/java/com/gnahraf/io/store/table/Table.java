@@ -11,8 +11,7 @@ import java.nio.channels.ClosedChannelException;
 import java.nio.channels.FileChannel;
 import java.nio.channels.WritableByteChannel;
 import java.util.Arrays;
-
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import com.gnahraf.io.channels.ChannelUtils;
 import com.gnahraf.io.store.ks.CachingKeystone;
@@ -43,7 +42,7 @@ import com.gnahraf.io.store.ks.VolatileKeystone;
  */
 public class Table implements Channel {
   
-  private final static Logger LOG = Logger.getLogger(Table.class);
+  private final static Logger LOG = Logger.getLogger(Table.class.getName());
   
   protected final Object filePositionLock = new Object();
 
@@ -378,7 +377,7 @@ public class Table implements Channel {
     checkArgs(file, rowSize);
     long byteLength = file.size() - file.position();
     if (byteLength % rowSize != 0)
-      LOG.warn(
+      LOG.warning(
           "Table length (" + byteLength + " bytes) not a multiple of row size (" + rowSize +
           " bytes). File position: " + file.position() + " .. Ignoring incomplete trailing row.");
     Keystone rowCount = new VolatileKeystone(byteLength / rowSize);

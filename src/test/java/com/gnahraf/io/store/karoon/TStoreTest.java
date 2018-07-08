@@ -49,7 +49,7 @@ public class TStoreTest extends TestMethodHarness {
         try {
           Files.moveToDir(file, this.trashDir);
         } catch (FileNotFoundException fnfx) {
-          LOG.warn(fnfx.getMessage());
+          LOG.warning(fnfx.getMessage());
         }
       }
     }

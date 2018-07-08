@@ -7,8 +7,7 @@ import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 
 /**
@@ -20,7 +19,7 @@ public class TestDirs {
   
   private TestDirs() { }
 
-  private final static Logger LOG = Logger.getLogger(TestDirs.class);
+  private final static Logger LOG = Logger.getLogger(TestDirs.class.getName());
 
   private static File PROC_ROOT_OUTPUT_DIR;
   

@@ -19,8 +19,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
-
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import com.gnahraf.io.Releaseable;
 import com.gnahraf.io.store.karoon.CommitRecord;
@@ -49,7 +48,7 @@ public class TableMergeEngine implements Channel {
     }
   }
   
-  private final static Logger LOG = Logger.getLogger(TableMergeEngine.class);
+  private final static Logger LOG = Logger.getLogger(TableMergeEngine.class.getName());
   
   private final TmeContext storeContext;
   private final TStore tableStore;
@@ -139,7 +138,7 @@ public class TableMergeEngine implements Channel {
     try {
       Thread.sleep(100);
     } catch (InterruptedException ix) {
-      LOG.error(this + " interrupted: " + ix.getMessage() + " - stopping..");
+      LOG.severe(this + " interrupted: " + ix.getMessage() + " - stopping..");
       stop();
       return;
     }
@@ -204,9 +203,9 @@ public class TableMergeEngine implements Channel {
               if (g != null)
                 break;
               
-              LOG.debug(yclLabel + "waiting for fresh meat..");
+              LOG.fine(yclLabel + "waiting for fresh meat..");
               freshMeatLock.wait();
-              LOG.debug(yclLabel + "notified");
+              LOG.fine(yclLabel + "notified");
             }
           }
           if (stopped)
@@ -233,12 +232,12 @@ public class TableMergeEngine implements Channel {
         
         
       } catch (Exception x) {
-        LOG.error(yclLabel + "aborting on error. Detail: " + x.getMessage(), x);
+        LOG.severe(yclLabel + "aborting on error. Detail: " + x.getMessage());
         break;
       }
     }
     if (!stopped) {
-      LOG.warn(yclLabel + "stopping merge engine on abort");
+      LOG.warning(yclLabel + "stopping merge engine on abort");
       stop();
     }
     LOG.info(yclLabel + "STOPPED");
@@ -336,7 +335,7 @@ public class TableMergeEngine implements Channel {
                       ". Cascading on FNF error: " + fnfx.getMessage(), fnfx);
                 }
 
-                LOG.warn(gclLabel + "Skipping already merged " + g + " - expected low frequency event");
+                LOG.warning(gclLabel + "Skipping already merged " + g + " - expected low frequency event");
               }
             }
             
@@ -344,7 +343,7 @@ public class TableMergeEngine implements Channel {
             if (stopped)
               break;
           } catch (Exception x) {
-            LOG.error(gclLabel + "aborting on error. Detail: " + x.getMessage(), x);
+            LOG.severe(gclLabel + "aborting on error. Detail: " + x.getMessage());
             break;
           } finally {
             closer.close();
@@ -352,7 +351,7 @@ public class TableMergeEngine implements Channel {
         }
         
         if (!stopped) {
-          LOG.warn(gclLabel + "stopping merge engine on abort");
+          LOG.warning(gclLabel + "stopping merge engine on abort");
           stop();
         }
         LOG.info(gclLabel + "STOPPED");
@@ -400,18 +399,18 @@ public class TableMergeEngine implements Channel {
           }
           else {
             // shouldn't ever get here
-            LOG.error(ymLabel + "[FAILED] - " + tmerge.getException());
+            LOG.severe(ymLabel + "[FAILED] - " + tmerge.getException());
             panick = true;
           }
           
         } catch (Exception x) {
-          LOG.error(ymLabel + "[FAILED]. Detail: " + x.getMessage(), x);
+          LOG.severe(ymLabel + "[FAILED]. Detail: " + x.getMessage());
           panick = true;
         } finally {
           tmerge.close();
           checkout.close();
           if (panick) {
-            LOG.error("Stopping..");
+            LOG.severe("Stopping..");
             stop();
           } else {
             synchronized (youngActiveMerges) {
@@ -451,19 +450,19 @@ public class TableMergeEngine implements Channel {
             LOG.info(gmLabel + "aborted generation " + generation + " on stop");
           else {
             // shouldn't ever get here
-            LOG.error(gmLabel + "[FAILED] - " + merge.getException());
+            LOG.severe(gmLabel + "[FAILED] - " + merge.getException());
             panick = true;
           }
         
         } catch (Exception x) {
-          LOG.error(gmLabel + "[FAILED]. Detail: " + x.getMessage(), x);
+          LOG.severe(gmLabel + "[FAILED]. Detail: " + x.getMessage());
           panick = true;
         } finally {
           merge.close();
           removeFromActiveMerges(generation);
           checkout.close();
           if (panick) {
-            LOG.error("Stopping..");
+            LOG.severe("Stopping..");
             stop();
           }
         }
@@ -487,7 +486,7 @@ public class TableMergeEngine implements Channel {
         try {
           merge.abort();
         } catch (Exception x) {
-          LOG.debug("On active merge abort: " + merge, x);
+          LOG.fine("On active merge abort: " + merge + " -- " + x);
         }
       }
     }
@@ -497,7 +496,7 @@ public class TableMergeEngine implements Channel {
         try {
           ymerge.tmerge.abort();
         } catch (Exception x) {
-          LOG.debug("On young active merge abort: " + ymerge.tmerge, x);
+          LOG.fine("On young active merge abort: " + ymerge.tmerge + " -- " + x);
         }
       }
     }

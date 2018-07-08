@@ -12,8 +12,8 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.logging.Logger;
 
-import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Test;
 
@@ -28,7 +28,7 @@ import com.gnahraf.test.TestDirs;
 
 public class TableTest {
 
-  private final Logger LOG = Logger.getLogger(getClass());
+  private final Logger LOG = Logger.getLogger(getClass().getName());
 
   private FileChannel file;
 

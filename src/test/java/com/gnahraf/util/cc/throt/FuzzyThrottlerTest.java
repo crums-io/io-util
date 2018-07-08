@@ -6,7 +6,7 @@ package com.gnahraf.util.cc.throt;
 
 import static org.junit.Assert.*;
 
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 import org.junit.Test;
 
 import com.gnahraf.test.TestHelper;
@@ -18,7 +18,7 @@ import com.gnahraf.test.TestHelper;
  */
 public class FuzzyThrottlerTest {
   
-  private final static Logger LOG = Logger.getLogger(FuzzyThrottlerTest.class);
+  private final static Logger LOG = Logger.getLogger(FuzzyThrottlerTest.class.getName());
 
   @Test
   public void demo() {

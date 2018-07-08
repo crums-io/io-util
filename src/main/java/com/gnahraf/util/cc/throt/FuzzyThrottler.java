@@ -5,8 +5,7 @@ package com.gnahraf.util.cc.throt;
 
 
 import java.text.DecimalFormat;
-
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import com.gnahraf.util.ticker.Ticker;
 
@@ -18,7 +17,7 @@ import com.gnahraf.util.ticker.Ticker;
  */
 public class FuzzyThrottler {
   
-  private final static Logger LOG = Logger.getLogger(FuzzyThrottler.class);
+  private final static Logger LOG = Logger.getLogger(FuzzyThrottler.class.getName());
   
   private final ThrottledTicker ticker = new ThrottledTicker();
   /**

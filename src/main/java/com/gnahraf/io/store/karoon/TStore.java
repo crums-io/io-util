@@ -14,8 +14,7 @@ import java.nio.channels.Channel;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import com.gnahraf.io.Files;
 import com.gnahraf.io.IoStateException;
@@ -196,7 +195,7 @@ public class TStore implements Channel {
     
   }
   
-  protected final static Logger LOG = Logger.getLogger(TStore.class);
+  protected final static Logger LOG = Logger.getLogger(TStore.class.getName());
   private final static long INIT_COUNTER_VALUE = 0L;
   
   public final static String COUNTERS_FILENAME = "tc.counts";
@@ -277,7 +276,7 @@ public class TStore implements Channel {
         //       i.e. we haven't yet ensured the merger thread could not have merged walTableId
         //       away before the last instance was abnormally shutdown
         if (currentCommit.getTableIds().contains(walTableId)) {
-          LOG.warn("Recovering from abnormal shutdown..");
+          LOG.warning("Recovering from abnormal shutdown..");
           discardFile(writeAheadFile);
         } else {
           writeAhead = new WriteAheadTableBuilder(
@@ -301,7 +300,7 @@ public class TStore implements Channel {
     } finally {
       if (failed) {
         close();
-        LOG.error("Init failed [config=" + config + ", create=" + create + "]");
+        LOG.severe("Init failed [config=" + config + ", create=" + create + "]");
       }
     }
   }
@@ -483,7 +482,7 @@ public class TStore implements Channel {
    */
   protected void discardFile(File file) {
     if (!file.delete()) {
-      LOG.warn("Failed to deleted " + file.getPath());
+      LOG.warning("Failed to deleted " + file.getPath());
     }
   }
   
@@ -659,7 +658,7 @@ public class TStore implements Channel {
       try {
         finished = tableMergeEngine.await(3 * 1000);
       } catch (InterruptedException rx) {
-        LOG.warn("interrupted on tableMergeEngine.await(3 * 1000). Ignoring..");
+        LOG.warning("interrupted on tableMergeEngine.await(3 * 1000). Ignoring..");
         finished = false;
       }
     
@@ -688,7 +687,7 @@ public class TStore implements Channel {
     // it's theoretically possible that 2 or more tables cancel each other out perfectly
     // Rather than handle this case, we'll just wait until until the condition changes..
     if (result.getRowCount() == 0) {
-      LOG.warn("Discarding empty merge result. This should be a rare corner case. srcIds=" + srcIds);
+      LOG.warning("Discarding empty merge result. This should be a rare corner case. srcIds=" + srcIds);
       result.close();
       return;
     }

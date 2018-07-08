@@ -4,7 +4,7 @@
 package com.gnahraf.util.cc.throt;
 
 
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import com.gnahraf.util.cc.ThreadUtils;
 import com.gnahraf.util.ticker.Ticker;
@@ -54,7 +54,7 @@ public class ThrottledTicker extends Ticker {
     try {
       ThreadUtils.ensureSleepNanos(throttleNanos);
     } catch (InterruptedException ix) {
-      Logger.getLogger(ThrottledTicker.class).warn("Interrupted while throttling tick()");
+      Logger.getLogger(ThrottledTicker.class.getName()).warning("Interrupted while throttling tick()");
       Thread.currentThread().interrupt();   // reset the interrupt flag
     }
   }

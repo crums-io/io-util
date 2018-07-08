@@ -11,8 +11,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
+import java.util.logging.Logger;
 
-import org.apache.log4j.Logger;
 import org.junit.Test;
 
 import com.gnahraf.io.store.ks.Keystone;
@@ -33,7 +33,7 @@ public class KeystoneImplTest {
 
   public KeystoneImplTest() {
     testDir = TestDirs.getTestDir(getClass());
-    log = Logger.getLogger(getClass());
+    log = Logger.getLogger(getClass().getName());
   }
 
 

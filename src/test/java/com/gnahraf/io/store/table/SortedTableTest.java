@@ -13,8 +13,8 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.text.DecimalFormat;
 import java.util.Random;
+import java.util.logging.Logger;
 
-import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Test;
 
@@ -29,7 +29,7 @@ public class SortedTableTest {
   
   public final static String PERF_TEST_PROPERTY = "perf_test";
 
-  private final Logger log = Logger.getLogger(getClass());
+  private final Logger log = Logger.getLogger(getClass().getName());
 
   private FileChannel file;
 

@@ -10,8 +10,8 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.logging.Logger;
 
-import org.apache.log4j.Logger;
 import org.junit.Test;
 
 import com.gnahraf.io.Releaseable;
@@ -34,13 +34,13 @@ public class TableRegistryTest extends TestMethodHarness {
     
     @Override
     public void inited(long tableId) {
-      log.debug("lc: inited   " + tableId);
+      log.fine("lc: inited   " + tableId);
       assertTrue(initedIds.add(tableId));
     }
 
     @Override
     public void released(long tableId) {
-      log.debug("lc: released " + tableId);
+      log.fine("lc: released " + tableId);
       assertTrue(releasedIds.add(tableId));
       assertTrue(initedIds.contains(tableId));
     }

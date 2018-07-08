@@ -10,8 +10,7 @@ import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 import java.util.AbstractList;
 import java.util.List;
-
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import com.gnahraf.io.store.karoon.SidTable;
 import com.gnahraf.io.store.table.TableSet;
@@ -29,7 +28,7 @@ import com.gnahraf.util.cc.RunState;
  */
 public class TableMerge implements Runnable, Closeable {
   
-  private final static Logger LOG = Logger.getLogger(TableMerge.class);
+  private final static Logger LOG = Logger.getLogger(TableMerge.class.getName());
   
   private final GenerationInfo gInfo;
   private final SidTable[] sources;
@@ -81,7 +80,7 @@ public class TableMerge implements Runnable, Closeable {
     if (state.hasStarted())
       throw new IllegalStateException("already started: " + this);
     state = RunState.STARTED;
-    LOG.info(this);
+    LOG.info(this.toString());
     boolean failed = true;
     FileChannel out = null;
     try {
@@ -98,12 +97,12 @@ public class TableMerge implements Runnable, Closeable {
       failed = false;
     } catch (Exception x) {
       this.x = x;
-      LOG.error(this, x);
+      LOG.severe(this + " -- " + x);
       if (out != null)
         closer.pushClose(out);
     } finally {
         state = failed || sorter.isAborted() ? RunState.FAILED : RunState.SUCCEEDED;
-        LOG.info(this);
+        LOG.info(this.toString());
     }
   }
   

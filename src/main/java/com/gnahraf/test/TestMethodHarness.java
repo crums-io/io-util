@@ -5,8 +5,7 @@ package com.gnahraf.test;
 
 
 import java.io.File;
-
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 
 
@@ -20,7 +19,7 @@ public class TestMethodHarness {
   
   public final static String PERF_TEST_PROPERTY = "perf_test";
 
-  protected final Logger log = Logger.getLogger(getClass());
+  protected final Logger log = Logger.getLogger(getClass().getName());
   protected final File testDir = TestDirs.getTestDir(getClass());
   private File unitTestDir;
 
@@ -39,7 +38,7 @@ public class TestMethodHarness {
       throw new IllegalStateException("already set to " + unitTestDir);
 
     String method = TestHelper.method(methodAnon);
-    log.debug("Creating test directory for " + method);
+    log.fine("Creating test directory for " + method);
     File dir = new File(testDir, method);
     if (dir.exists())
       throw new IllegalStateException("dir already exists: " + dir);

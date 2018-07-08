@@ -8,8 +8,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import com.gnahraf.io.Files;
 import com.gnahraf.io.buffer.SortedViewBlock;
@@ -21,7 +20,7 @@ import com.gnahraf.io.store.table.order.RowOrder;
  */
 public class TableSorter {
   
-  private final static Logger LOG = Logger.getLogger(TableSorter.class);
+  private final static Logger LOG = Logger.getLogger(TableSorter.class.getName());
   
   private final ByteBuffer memoryBuffer;
   
@@ -34,7 +33,7 @@ public class TableSorter {
     if (memoryBuffer == null)
       throw new IllegalArgumentException("null memoryBuffer");
     if (memoryBuffer.capacity() < 128)
-      LOG.warn("memory buffer size seems a bit small. Pedantic exercise? " + memoryBuffer);
+      LOG.warning("memory buffer size seems a bit small. Pedantic exercise? " + memoryBuffer);
     if (order == null)
       throw new IllegalArgumentException("null order");
   }

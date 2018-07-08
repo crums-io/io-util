@@ -110,7 +110,7 @@ public class TStoreBigTest extends TestMethodHarness {
           "logical corpus size (" + rowWidth * rowCount +
           " bytes) > 5% of available disk space (" +
           new DecimalFormat("#,###").format(rootDir.getFreeSpace()) + " bytes)";
-      log.error(message);
+      log.severe(message);
       fail(message);
     }
     

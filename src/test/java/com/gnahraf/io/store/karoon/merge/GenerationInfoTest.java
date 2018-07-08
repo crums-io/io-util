@@ -9,8 +9,8 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Logger;
 
-import org.apache.log4j.Logger;
 import org.junit.Test;
 
 /**
@@ -19,7 +19,7 @@ import org.junit.Test;
  */
 public class GenerationInfoTest {
   
-  private static Logger LOG = Logger.getLogger(GenerationInfoTest.class);
+  private static Logger LOG = Logger.getLogger(GenerationInfoTest.class.getName());
   
   private final static MergePolicy MERGE_POLICY = new MergePolicyBuilder().snapshot();
   
@@ -34,7 +34,7 @@ public class GenerationInfoTest {
     List<GenerationInfo> mergeCandidates =
         GenerationInfo.candidateMerges(tableStack, MERGE_POLICY, 0);
     assertTrue(mergeCandidates.isEmpty());
-    LOG.info(MERGE_POLICY);
+    LOG.info(MERGE_POLICY.toString());
   }
 
   @Test

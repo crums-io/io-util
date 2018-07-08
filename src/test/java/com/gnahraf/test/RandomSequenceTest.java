@@ -3,8 +3,8 @@ import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.logging.Logger;
 
-import org.apache.log4j.Logger;
 import org.junit.Test;
 
 /*
@@ -17,7 +17,7 @@ import org.junit.Test;
  */
 public class RandomSequenceTest {
   
-  private final static Logger LOG = Logger.getLogger(RandomSequenceTest.class);
+  private final static Logger LOG = Logger.getLogger(RandomSequenceTest.class.getName());
 
   @Test
   public void testPedagogical1() {

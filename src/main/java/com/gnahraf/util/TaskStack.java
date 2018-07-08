@@ -9,8 +9,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
-
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 /**
  * Utility for resource releasing.  Mostly, this has to do
@@ -75,7 +74,7 @@ public class TaskStack implements Channel {
   }
   
   public TaskStack(Logger log) {
-    this.log = log == null ? Logger.getLogger(getClass()) : log;
+    this.log = log == null ? Logger.getLogger(getClass().getName()) : log;
   }
   
   
@@ -138,8 +137,8 @@ public class TaskStack implements Channel {
     try {
       resource.close();
     } catch (Exception x) {
-      log.error(
-          "On closing resource[" + removedIndex + "] ("  + resource + "): "+ x.getMessage(), x);
+      log.severe(
+          "On closing resource[" + removedIndex + "] ("  + resource + "): "+ x.getMessage());
     }
     return removedIndex;
   }

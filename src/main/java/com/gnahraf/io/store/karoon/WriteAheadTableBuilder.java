@@ -10,8 +10,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.Channel;
 import java.nio.channels.FileChannel;
 import java.nio.channels.GatheringByteChannel;
-
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import com.gnahraf.io.buffer.Covenant;
 import com.gnahraf.io.store.table.SortedTableBuilder;
@@ -24,7 +23,7 @@ import com.gnahraf.io.store.table.order.RowOrder;
  */
 public class WriteAheadTableBuilder extends SortedTableBuilder implements Channel {
   
-  private final static Logger LOG = Logger.getLogger(WriteAheadTableBuilder.class);
+  private final static Logger LOG = Logger.getLogger(WriteAheadTableBuilder.class.getName());
   
   private final File writeAheadFile;
   private final Table writeAheadTable;

@@ -8,8 +8,8 @@ import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.gnahraf.util.CollectionUtils;
 
@@ -22,7 +22,7 @@ import com.gnahraf.util.CollectionUtils;
  */
 public final class GenerationInfo {
   
-  private final static Logger LOG = Logger.getLogger(GenerationInfo.class);
+  private final static Logger LOG = Logger.getLogger(GenerationInfo.class.getName());
   
   public final int generation;
   public final List<TableInfo> srcInfos;
@@ -235,11 +235,11 @@ public final class GenerationInfo {
   public static List<GenerationInfo> candidateMerges(
       List<TableInfo> tableStack, MergePolicy mergePolicy, int minGeneration, int maxGeneration) {
     
-    if (LOG.isDebugEnabled()) {
-      LOG.debug("mergeCandidates: tableStack=" + tableStack);
-      LOG.debug("mergeCandidates: mergePolicy=" + mergePolicy);
-      LOG.debug("mergeCandidates: minGeneration=" + minGeneration);
-      LOG.debug("mergeCandidates: maxGeneration=" + maxGeneration);
+    if (LOG.isLoggable(Level.FINE)) {
+      LOG.fine("mergeCandidates: tableStack=" + tableStack);
+      LOG.fine("mergeCandidates: mergePolicy=" + mergePolicy);
+      LOG.fine("mergeCandidates: minGeneration=" + minGeneration);
+      LOG.fine("mergeCandidates: maxGeneration=" + maxGeneration);
     }
     
     if (minGeneration < 0 || maxGeneration < minGeneration)
