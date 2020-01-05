@@ -109,10 +109,10 @@ public class Files {
   }
 
 
-  public static void delete(File writeAheadFile) throws IllegalStateException {
-    writeAheadFile.delete();
-    if (writeAheadFile.exists())
-      throw new IllegalStateException("failed to delete " + writeAheadFile.getAbsolutePath());
+  public static void delete(File file) throws IllegalStateException {
+    file.delete();
+    if (file.exists())
+      throw new IllegalStateException("failed to delete " + file.getAbsolutePath());
   }
 
 }
