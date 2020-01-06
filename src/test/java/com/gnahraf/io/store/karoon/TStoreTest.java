@@ -16,7 +16,7 @@ import java.util.Random;
 import org.junit.Test;
 
 import com.gnahraf.test.TestMethodHarness;
-import com.gnahraf.io.Files;
+import com.gnahraf.io.FileUtils;
 import com.gnahraf.io.store.karoon.TStoreConfig.Builder;
 import com.gnahraf.io.store.karoon.merge.MergePolicy;
 import com.gnahraf.io.store.karoon.merge.MergePolicyBuilder;
@@ -39,7 +39,7 @@ public class TStoreTest extends TestMethodHarness {
     public AuditTStore(TStoreConfig config, boolean create) throws IOException {
       super(config, create);
       this.trashDir = new File(config.getRootDir(), TRASH_DIRNAME);
-      Files.ensureDir(this.trashDir);
+      FileUtils.ensureDir(this.trashDir);
     }
 
     @Override
@@ -47,7 +47,7 @@ public class TStoreTest extends TestMethodHarness {
       
       if (file.exists()) {
         try {
-          Files.moveToDir(file, this.trashDir);
+          FileUtils.moveToDir(file, this.trashDir);
         } catch (FileNotFoundException fnfx) {
           LOG.warning(fnfx.getMessage());
         }

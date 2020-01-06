@@ -13,7 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import com.gnahraf.io.Files;
+import com.gnahraf.io.FileUtils;
 
 /**
  * 
@@ -83,12 +83,12 @@ public final class CommitRecord {
   
   
   public static CommitRecord load(File file, long commitId) throws IOException {
-    Files.assertFile(file);
+    FileUtils.assertFile(file);
     if (file.length() > MAX_COMMIT_FILE_LENGTH)
       throw new KaroonException(
           "commit file size exceeds limit: " + file.length() + "bytes");
     ArrayList<Long> tableIds = new ArrayList<>();
-    String contents = Files.loadAsString(file, MAX_COMMIT_FILE_LENGTH);
+    String contents = FileUtils.loadAsString(file, MAX_COMMIT_FILE_LENGTH);
     StringTokenizer idTokenizer = new StringTokenizer(contents);
     try {
       while (idTokenizer.hasMoreTokens()) {

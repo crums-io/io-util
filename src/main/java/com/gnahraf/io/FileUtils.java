@@ -11,16 +11,19 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.CharBuffer;
+import java.nio.file.CopyOption;
+import java.nio.file.StandardCopyOption;
+import java.util.Objects;
 
 /**
  * 
  * @author Babak
  */
-public class Files {
+public class FileUtils {
   
   public final static long LOAD_AS_STRING_DEFAULT_MAX_FILE_SIZE = 512 * 1024;
 
-  private Files() {  }
+  private FileUtils() {  }
   
   
   public static void assertDirArg(File dir) throws IllegalArgumentException {
@@ -109,10 +112,70 @@ public class Files {
   }
 
 
+  
   public static void delete(File file) throws IllegalStateException {
     file.delete();
     if (file.exists())
       throw new IllegalStateException("failed to delete " + file.getAbsolutePath());
+  }
+
+  
+  
+  public static int copyRecurse(File source, File target) throws IOException {
+    return copyRecurse(source, target, false);
+  }
+  
+  
+  /**
+   * Recursively copies.
+   * 
+   * @param source       an existing path. If it's a directory, its files/subdirectories
+   *                     are recursively copied/created
+   * @param target       the target path
+   * @param overwrite    if <tt>true</tt>, and <tt>target</tt> is an existing file, then
+   *                     the file will be overwritten; o.w. an {@linkplain IllegalArgumentException}
+   *                     is raised. If <tt>target</tt> is a directory (and <tt>source</tt> is too),
+   *                     then this argument doesn't matter
+   * @return             the number of <em>files</em> (not directories) copied
+   * @throws IOException
+   */
+  public static int copyRecurse(File source, File target, boolean overwrite) throws IOException {
+    copy(source, target, overwrite);
+    if (source.isFile())
+      return 1;
+    int count = 0;
+    String[] subpaths = source.list();
+    for (String subpath : subpaths)
+      count += copyRecurse(new File(source, subpath), new File(target, subpath), overwrite);
+    return count;
+  }
+  
+
+  
+  
+  public static void copy(File source, File target) throws IOException {
+    copy(source, target, false);
+  }
+  
+  
+  public static void copy(File source, File target, boolean overwrite) throws IOException {
+    Objects.requireNonNull(source, "source");
+    Objects.requireNonNull(target, "target");
+    if (source.isFile()) {
+      if (target.exists()) {
+        if (target.isDirectory())
+          throw new IllegalArgumentException(
+              "target " + target + " is a dir while source " + source + " is not");
+        if (!overwrite)
+          throw new IllegalArgumentException("attempt to overwrite " + target);
+
+        java.nio.file.Files.copy(source.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
+      } else
+        java.nio.file.Files.copy(source.toPath(), target.toPath());
+    } else if (source.isDirectory())
+      ensureDir(target);
+    else
+      throw new IllegalArgumentException("source does not exist: " + source);
   }
 
 }

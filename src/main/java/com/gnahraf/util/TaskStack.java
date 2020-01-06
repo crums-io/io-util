@@ -70,7 +70,18 @@ public class TaskStack implements Channel {
   
   
   public TaskStack() {
-    this(null);
+    this.log = Logger.getLogger(getClass().getName());
+  }
+  
+  /**
+   * Creates an instance using the given <tt>user</tt> object's class to determine
+   * the logger.
+   * 
+   * @param user the user object, or <tt>null</tt>
+   */
+  public TaskStack(Object user) {
+    Class<?> logClass = user == null ? getClass() : user.getClass();
+    this.log = user instanceof Logger ? (Logger) user : Logger.getLogger(logClass.getName());
   }
   
   public TaskStack(Logger log) {
@@ -116,6 +127,18 @@ public class TaskStack implements Channel {
       }
     };
     opStack.add(asClose);
+  }
+  
+  /**
+   * Pops <tt>count</tt> many times and returns the result.
+   * 
+   * @param count only meaningful if &gt; 0
+   * @return
+   */
+  public int pop(int count) {
+    while (count-- > 1)
+      pop();
+    return pop();
   }
   
   /**

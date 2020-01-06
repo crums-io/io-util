@@ -10,7 +10,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.logging.Logger;
 
-import com.gnahraf.io.Files;
+import com.gnahraf.io.FileUtils;
 import com.gnahraf.io.buffer.SortedViewBlock;
 import com.gnahraf.io.store.table.order.RowOrder;
 
@@ -47,7 +47,7 @@ public class TableSorter {
   public void sort(Table table, File output) throws IOException {
     if (table == null)
       throw new IllegalArgumentException("null table");
-    Files.assertDoesntExist(output);
+    FileUtils.assertDoesntExist(output);
     final long size = table.getRowCount() * table.getRowWidth();
     if (size > memoryBuffer.capacity()) {
       throw new IllegalArgumentException(

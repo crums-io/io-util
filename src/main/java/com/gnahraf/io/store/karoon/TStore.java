@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import com.gnahraf.io.Files;
+import com.gnahraf.io.FileUtils;
 import com.gnahraf.io.IoStateException;
 import com.gnahraf.io.buffer.Covenant;
 import com.gnahraf.io.store.karoon.merge.TableMergeEngine;
@@ -235,13 +235,13 @@ public class TStore implements Channel {
     boolean failed = true;
     try {
       if (create)
-        Files.ensureDir(config.getRootDir());
+        FileUtils.ensureDir(config.getRootDir());
       else
-        Files.assertDir(config.getRootDir());
+        FileUtils.assertDir(config.getRootDir());
       
       File counterFile = new File(config.getRootDir(), COUNTERS_FILENAME);
       if (counterFile.exists()) {
-        Files.assertFile(counterFile);
+        FileUtils.assertFile(counterFile);
         FileChannel file = new RandomAccessFile(counterFile, "rw").getChannel();
         file.position(0);
         tableCounter = new CachingKeystone(Keystone.loadInstance(file));
@@ -283,7 +283,7 @@ public class TStore implements Channel {
               config.getRowWidth(), config.getRowOrder(), writeAheadFile);
           // 
           File sortedTableFile = getSortedTablePath(walTableId);
-          Files.delete(sortedTableFile);
+          FileUtils.delete(sortedTableFile);
         }
       }
       
@@ -309,7 +309,7 @@ public class TStore implements Channel {
   private void setNextWriteAhead() throws IOException {
     long walTableId = tableCounter.increment(1);
     File writeAheadFile = getWriteAheadPath(walTableId);
-    Files.assertDoesntExist(writeAheadFile);
+    FileUtils.assertDoesntExist(writeAheadFile);
     writeAhead = new WriteAheadTableBuilder(
         config.getRowWidth(), config.getRowOrder(), writeAheadFile);
     walTableNumber.set(walTableId);
@@ -571,9 +571,9 @@ public class TStore implements Channel {
   private File getSortedTablePath(long tableId, boolean exists) throws IOException {
     File file = getSortedTablePath(tableId);
     if (exists)
-      Files.assertFile(file);
+      FileUtils.assertFile(file);
     else
-      Files.assertDoesntExist(file);
+      FileUtils.assertDoesntExist(file);
     return file;
   }
 
