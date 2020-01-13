@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.CharBuffer;
-import java.nio.file.CopyOption;
 import java.nio.file.StandardCopyOption;
 import java.util.Objects;
 
@@ -140,13 +139,25 @@ public class FileUtils {
    * @throws IOException
    */
   public static int copyRecurse(File source, File target, boolean overwrite) throws IOException {
-    copy(source, target, overwrite);
+    Objects.requireNonNull(source, "source");
+    Objects.requireNonNull(target, "target");
+    if (source.equals(target))
+      return 0;
+    if (target.getAbsoluteFile().toPath().startsWith(source.getAbsoluteFile().toPath()))
+      throw new IllegalArgumentException("target " + target + " is a subpath of source " + source);
+    
+    return copyRecurseImpl(source, target, overwrite);
+  }
+  
+  
+  private static int copyRecurseImpl(File source, File target, boolean overwrite) throws IOException {
+    copyImpl(source, target, overwrite);
     if (source.isFile())
       return 1;
     int count = 0;
     String[] subpaths = source.list();
     for (String subpath : subpaths)
-      count += copyRecurse(new File(source, subpath), new File(target, subpath), overwrite);
+      count += copyRecurseImpl(new File(source, subpath), new File(target, subpath), overwrite);
     return count;
   }
   
@@ -161,6 +172,12 @@ public class FileUtils {
   public static void copy(File source, File target, boolean overwrite) throws IOException {
     Objects.requireNonNull(source, "source");
     Objects.requireNonNull(target, "target");
+    if (source.equals(target))
+      return;
+    copyImpl(source, target, overwrite);
+  }
+  
+  private static void copyImpl(File source, File target, boolean overwrite) throws IOException {
     if (source.isFile()) {
       if (target.exists()) {
         if (target.isDirectory())
@@ -172,6 +189,7 @@ public class FileUtils {
         java.nio.file.Files.copy(source.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
       } else
         java.nio.file.Files.copy(source.toPath(), target.toPath());
+    
     } else if (source.isDirectory())
       ensureDir(target);
     else
