@@ -242,6 +242,7 @@ public class TStore implements Channel {
       File counterFile = new File(config.getRootDir(), COUNTERS_FILENAME);
       if (counterFile.exists()) {
         FileUtils.assertFile(counterFile);
+        @SuppressWarnings("resource")
         FileChannel file = new RandomAccessFile(counterFile, "rw").getChannel();
         file.position(0);
         tableCounter = new CachingKeystone(Keystone.loadInstance(file));
@@ -250,6 +251,7 @@ public class TStore implements Channel {
         walTableNumber = new CachingKeystone(Keystone.loadInstance(file));
         
       } else if (create) {
+        @SuppressWarnings("resource")
         FileChannel file = new RandomAccessFile(counterFile, "rw").getChannel();
         file.position(0);
         tableCounter = new CachingKeystone(Keystone.createInstance(file, INIT_COUNTER_VALUE));
@@ -625,6 +627,7 @@ public class TStore implements Channel {
   
   
   private SidTable loadSortedTable(File tableFile, long id) throws IOException {
+    @SuppressWarnings("resource")
     FileChannel ch = new RandomAccessFile(tableFile, "r").getChannel();
     return new SidTable(ch, 0, config.getRowWidth(), config.getRowOrder(), id);
   }

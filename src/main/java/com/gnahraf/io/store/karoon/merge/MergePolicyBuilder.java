@@ -18,8 +18,9 @@ public class MergePolicyBuilder extends MergePolicy {
 
   
   
-  public void setWriteAheadFlushTrigger(int bytes) {
+  public MergePolicyBuilder setWriteAheadFlushTrigger(int bytes) {
     this.writeAheadFlushTrigger = bytes;
+    return this;
   }
 
   
@@ -29,8 +30,9 @@ public class MergePolicyBuilder extends MergePolicy {
   }
   
 
-  public void setYoungThreshold(int youngThreshold) {
+  public MergePolicyBuilder setYoungThreshold(int youngThreshold) {
     this.youngThreshold = youngThreshold;
+    return this;
   }
 
   @Override
@@ -40,10 +42,11 @@ public class MergePolicyBuilder extends MergePolicy {
 
 
 
-  public void setGenerationalFactor(double factor) {
+  public MergePolicyBuilder setGenerationalFactor(double factor) {
     if (factor < 2)
       throw new IllegalArgumentException("factor: " + factor);
     this.generationalFactor = factor;
+    return this;
   }
 
   @Override
@@ -58,10 +61,11 @@ public class MergePolicyBuilder extends MergePolicy {
   }
 
 
-  public void setMaxMergeThreads(int maxMergeThreads) {
+  public MergePolicyBuilder setMaxMergeThreads(int maxMergeThreads) {
     if (maxMergeThreads < 1)
       throw new IllegalArgumentException("maxMergeThreads: " + maxMergeThreads);
     this.maxMergeThreads = maxMergeThreads;
+    return this;
   }
 
 
@@ -71,8 +75,9 @@ public class MergePolicyBuilder extends MergePolicy {
   }
 
 
-  public void setMergeThreadPriority(int mergeThreadPriority) {
+  public MergePolicyBuilder setMergeThreadPriority(int mergeThreadPriority) {
     this.mergeThreadPriority = mergeThreadPriority;
+    return this;
   }
 
 
