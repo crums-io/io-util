@@ -19,12 +19,4 @@ public final class LexicalRowOrder extends RowOrder {
     return rowA.compareTo(rowB);
   }
 
-  /**
-   * @return <tt>true</tt>
-   */
-  @Override
-  public boolean isRelative() {
-    return true;
-  }
-
 }

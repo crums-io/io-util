@@ -48,20 +48,5 @@ public abstract class RowOrder extends ClassEquivalent implements Comparator<Byt
   public final int compare(ByteBuffer rowA, ByteBuffer rowB) {
     return compareRows(rowA, rowB);
   }
-  
-  /**
-   * Indicates whether the implementation considers an input {@linkplain ByteBuffer}'s
-   * position (and possibly limit) when comparing it to another.
-   * 
-   * @return <tt>true</tt>, if an input buffer's position matters in comparisons
-   */
-  public abstract boolean isRelative();
-  
-  /**
-   * The opposite of <tt>isRelative()</tt>.
-   */
-  public final boolean isAbsolute() {
-    return !isRelative();
-  }
 
 }

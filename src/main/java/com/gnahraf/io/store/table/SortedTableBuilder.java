@@ -30,7 +30,6 @@ import com.gnahraf.io.store.table.order.RowOrder;
 public class SortedTableBuilder {
 
   private final int rowWidth;
-  private final RowOrder order;
   protected final TreeSet<ByteBuffer> sortedView;
   
   
@@ -42,7 +41,6 @@ public class SortedTableBuilder {
       throw new IllegalArgumentException("null row order");
     
     this.rowWidth = rowWidth;
-    this.order = order;
     this.sortedView = new TreeSet<>(order);
   }
   
@@ -66,7 +64,7 @@ public class SortedTableBuilder {
     
     ByteBuffer tableRow;
     if (promise.wontModify()) {
-      if (row.position() == 0 || order.isRelative())
+      if (row.position() == 0)
         tableRow = row;
       else 
         tableRow = row.slice();

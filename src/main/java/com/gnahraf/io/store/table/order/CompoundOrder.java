@@ -33,13 +33,10 @@ public final class CompoundOrder extends RowOrder {
     if (orders == null || orders.length < 1)
       throw new IllegalArgumentException("empty orders: " + orders);
     RowOrder[] copy = new RowOrder[orders.length];
-    final boolean relative = orders[0].isRelative();
     for (int i = orders.length, j = 0; i-- > 0; ++j) {
       copy[j] = orders[i];
       if (orders[i] == null)
         throw new IllegalArgumentException("null order at index " + i);
-      if (orders[i].isRelative() != relative)
-        throw new IllegalArgumentException("input orders contain a mix of relative and absolute RowOrders");
     }
     this.orders = copy;
   }
@@ -53,12 +50,6 @@ public final class CompoundOrder extends RowOrder {
         return comp;
     }
     return 0;
-  }
-
-
-  @Override
-  public boolean isRelative() {
-    return orders[0].isRelative();
   }
   
   
