@@ -63,5 +63,12 @@ public class BitDeleteCodec extends DeleteCodec {
     out |= onBit;
     row.put(offset, out);
   }
+  
+  @Override
+  public String toString() {
+    return BitDeleteCodec.class.getSimpleName() +
+        "[" + offset + ":" +
+        Integer.toBinaryString(Byte.toUnsignedInt(onBit)) + "]";
+  }
 
 }
