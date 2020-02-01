@@ -23,6 +23,9 @@ import com.gnahraf.io.store.karoon.merge.TableMergeEngine;
 import com.gnahraf.io.store.ks.CachingKeystone;
 import com.gnahraf.io.store.ks.Keystone;
 import com.gnahraf.io.store.table.TableSet;
+import com.gnahraf.io.store.table.iter.Direction;
+import com.gnahraf.io.store.table.iter.RowIterator;
+import com.gnahraf.io.store.table.iter.TableSetIterator;
 import com.gnahraf.math.stats.MovingAverage;
 import com.gnahraf.util.TaskStack;
 import com.gnahraf.util.cc.throt.FuzzySpeed;
@@ -336,6 +339,44 @@ public class TStore implements Channel {
     else
       return row;
   }
+  
+  
+  
+  public ByteBuffer nextRow(ByteBuffer key, Direction direction, boolean includeKey) throws IOException {
+    
+    ByteBuffer war; // row from write-ahead table
+    ByteBuffer sr;  // row from sorted-table set
+    
+    synchronized (apiLock) {
+      
+      RowIterator walIterator = writeAhead.iterator(key, direction, includeKey);
+      war = walIterator.next();
+      
+      synchronized (backSetLock) {
+        
+        TableSetIterator iter = activeTableSet().iterator();
+        iter.init(key, direction);
+        
+        sr = iter.next();
+        if (sr != null && !includeKey && config.getRowOrder().compare(key, sr) == 0)
+          sr = iter.next();
+        
+        while (war != null && config.getDeleteCodec().isDeleted(war)) {
+          if (sr != null && config.getRowOrder().compare(war, sr) == 0)
+            sr = iter.next();
+          war = walIterator.next();
+        }
+      }
+      
+    }
+    
+    if (war == null)
+      return sr;
+    else if (sr == null)
+      return war;
+    else
+      return direction.effectiveComp(config.getRowOrder().compare(war, sr)) > 0 ? sr : war;
+  }
 
   
   
@@ -376,12 +417,38 @@ public class TStore implements Channel {
     }
   }
   
-  
+
+  /**
+   * Inserts or updates the given <tt>row</tt> with no promise/covenant. Shorthand for
+   * {@linkplain #setRow(ByteBuffer, Covenant) setRow(row, Covenant.NONE)}
+   * 
+   * @param row
+   *        the remaining bytes in this buffer represent the row being input. The
+   *        remaining bytes must be exactly equal to
+   *        {@linkplain TStoreConfig#getRowWidth() row width}.
+   */
   public void setRow(ByteBuffer row) throws IOException {
     setRow(row, Covenant.NONE);
   }
   
+
   
+  /**
+   * Inserts or updates the given <tt>row</tt>. The operation is fail-safe (all-or-nothing).
+   * <p/>
+   * Pay attention to the <tt>promise</tt> parameter. It has a huge impact on performance,
+   * but just as importantly, if you break the promise, you break the data set.
+   * 
+   * @param row
+   *        the remaining bytes in this buffer represent the row being input. The
+   *        remaining bytes must be exactly equal to
+   *        {@linkplain TStoreConfig#getRowWidth() row width}.
+   * @param promise
+   *        declares how and whether the caller <em>agrees not to later modify</em> the
+   *        given <tt>rows</tt> parameter. <em><strong>If the caller breaks the promise, then
+   *        the table will almost certainly get corrupted!</strong></em>. May be <tt>null</tt>
+   *        (no promise), but that would be a shame.
+   */
   public void setRow(ByteBuffer row, Covenant promise) throws IOException {
     synchronized (apiLock) {
       writeAhead.putRow(row, promise);
