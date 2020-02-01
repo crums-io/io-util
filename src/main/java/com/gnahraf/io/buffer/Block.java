@@ -134,7 +134,7 @@ public class Block {
    * this instance's cells.
    */
   public final ByteBuffer buffer() {
-    return buffer;
+    return buffer.duplicate();
   }
   
   /**
@@ -173,14 +173,16 @@ public class Block {
    * especially unsuitable for concurrent read access.
    * 
    * @throws BufferOverflowException
+   * @deprecated use {@linkplain #cell(int)} instead: for the reason above I removed
+   *             
    */
   public void copyCellInto(int index, ByteBuffer buffer) throws BufferOverflowException {
-    ByteBuffer cell = cells[index];
+    ByteBuffer cell = cell(index);
     if (cell.remaining() != cell.capacity())
       throw new IllegalStateException(
           "Assertion failure at cell[" + index + "]=" + cell + " Illegal concurrent access?");
     buffer.put(cell);
-    cell.rewind();
+//    cell.rewind();
   }
   
 }
