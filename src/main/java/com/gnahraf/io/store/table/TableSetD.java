@@ -21,17 +21,21 @@ public class TableSetD extends TableSet {
 
 
   private final DeleteCodec deleteCodec;
+  
+  private boolean hasDc() {
+    return deleteCodec != null;
+  }
 
   
 
   /**
    * Creates an empty instance.
+   * 
+   * @param deleteCodec <em>optional</em>
    */
   public TableSetD(RowOrder order, int rowWidth, DeleteCodec deleteCodec) {
     super(order, rowWidth);
     this.deleteCodec = deleteCodec;
-    if (deleteCodec == null)
-      throw new IllegalArgumentException("null deleteCodec");
   }
 
   public TableSetD(SortedTable table, DeleteCodec deleteCodec) throws IOException {
@@ -48,15 +52,13 @@ public class TableSetD extends TableSet {
   protected TableSetD(SortedTable[] tables, DeleteCodec deleteCodec, boolean checkAndClone) throws IOException {
     super(tables, checkAndClone);
     this.deleteCodec = deleteCodec;
-    if (deleteCodec == null)
-      throw new IllegalArgumentException("null deleteCodec");
   }
 
 
   @Override
   public ByteBuffer getRow(ByteBuffer key) throws IOException {
     ByteBuffer row = super.getRow(key);
-    if (row != null && deleteCodec.isDeleted(row))
+    if (row != null && hasDc() && deleteCodec.isDeleted(row))
       row = null;
     return row;
   }
@@ -64,7 +66,7 @@ public class TableSetD extends TableSet {
 
   @Override
   public TableSetIterator iterator() throws IOException {
-    return new TableSetDIterator(this);
+    return hasDc() ? new TableSetDIterator(this) : new TableSetIterator(this);
   }
   
 
@@ -80,6 +82,9 @@ public class TableSetD extends TableSet {
   }
 
 
+  /**
+   * May be <tt>null</tt>
+   */
   public final DeleteCodec getDeleteCodec() {
     return deleteCodec;
   }

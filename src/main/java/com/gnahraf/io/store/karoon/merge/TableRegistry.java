@@ -112,7 +112,7 @@ public class TableRegistry {
     };
   }
   
-  public boolean checkOutImpl(List<Long> sourceTableIds, List<Long> backSetTableIds, CommitRecord commit) {
+  private boolean checkOutImpl(List<Long> sourceTableIds, List<Long> backSetTableIds, CommitRecord commit) {
     // sanity check the arguments
 //    {
 //      int expectedCount = sourceTableIds.size() + backSetTableIds.size();

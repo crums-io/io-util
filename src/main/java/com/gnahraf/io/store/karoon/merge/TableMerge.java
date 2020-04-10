@@ -15,6 +15,7 @@ import java.util.logging.Logger;
 import com.gnahraf.io.store.karoon.SidTable;
 import com.gnahraf.io.store.table.TableSet;
 import com.gnahraf.io.store.table.del.DeleteCodec;
+import com.gnahraf.io.store.table.merge.SetMergeSort;
 import com.gnahraf.io.store.table.merge.SetMergeSortD;
 import com.gnahraf.io.store.table.order.RowOrder;
 import com.gnahraf.util.CollectionUtils;
@@ -38,7 +39,7 @@ public class TableMerge implements Runnable, Closeable {
   private final long outTableId;
   private final TaskStack closer;
   private SidTable outTable;
-  private SetMergeSortD sorter;
+  private SetMergeSort sorter;
 
   private RunState state = RunState.INIT;
   private Exception x;
@@ -75,6 +76,7 @@ public class TableMerge implements Runnable, Closeable {
   }
   
 
+  @SuppressWarnings("resource")
   @Override
   public void run() {
     if (state.hasStarted())
@@ -86,11 +88,11 @@ public class TableMerge implements Runnable, Closeable {
     try {
       out = new RandomAccessFile(outputFile, "rw").getChannel();
       outTable = new SidTable(out, getRowWidth(), getRowOrder(), outTableId);
-      sorter = new SetMergeSortD(
-          outTable,
-          sources,
-          deleteCodec,
-          backSet);
+      
+      if (deleteCodec == null)
+        sorter = new SetMergeSort(outTable, sources);
+      else
+        sorter = new SetMergeSortD(outTable, sources, deleteCodec, backSet);
       
       sorter.mergeToTarget();
       
@@ -125,7 +127,7 @@ public class TableMerge implements Runnable, Closeable {
   }
 
 
-  public SetMergeSortD getSorter() {
+  public SetMergeSort getSorter() {
     if (sorter == null)
       throw new IllegalStateException("not started: " + this);
     return sorter;

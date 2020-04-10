@@ -31,31 +31,6 @@ import com.gnahraf.io.store.table.order.RowOrders;
  */
 public class TStoreTest extends TestMethodHarness {
   
-  static class AuditTStore extends TStore {
-    
-    public final static String TRASH_DIRNAME = "removed";
-    private final File trashDir;
-
-    public AuditTStore(TStoreConfig config, boolean create) throws IOException {
-      super(config, create);
-      this.trashDir = new File(config.getRootDir(), TRASH_DIRNAME);
-      FileUtils.ensureDir(this.trashDir);
-    }
-
-    @Override
-    protected void discardFile(File file) {
-      
-      if (file.exists()) {
-        try {
-          FileUtils.moveToDir(file, this.trashDir);
-        } catch (FileNotFoundException fnfx) {
-          LOG.warning(fnfx.getMessage());
-        }
-      }
-    }
-    
-  }
-  
 
   @Test
   public void testLoadNonexistent() throws IOException {
@@ -63,7 +38,7 @@ public class TStoreTest extends TestMethodHarness {
     
     int rowWidth = 8;
     RowOrder order = RowOrders.INT_ORDER;
-    DeleteCodec deleteCodec = MagicNumDeleteCodec.newIntInstance(4, 0);
+    DeleteCodec deleteCodec = getDeleteCodec();
     MergePolicy mergePolicy = new MergePolicyBuilder().snapshot();
     File rootDir = unitTestDir();
     
@@ -90,7 +65,7 @@ public class TStoreTest extends TestMethodHarness {
     
     int rowWidth = 8;
     RowOrder order = RowOrders.INT_ORDER;
-    DeleteCodec deleteCodec = MagicNumDeleteCodec.newIntInstance(4, 0);
+    DeleteCodec deleteCodec = getDeleteCodec();
     MergePolicy mergePolicy = new MergePolicyBuilder().snapshot();
     File rootDir = unitTestDir();
     
@@ -118,7 +93,7 @@ public class TStoreTest extends TestMethodHarness {
     
     int rowWidth = 8;
     RowOrder order = RowOrders.INT_ORDER;
-    DeleteCodec deleteCodec = MagicNumDeleteCodec.newIntInstance(4, 0);
+    DeleteCodec deleteCodec = getDeleteCodec();
     MergePolicy mergePolicy = new MergePolicyBuilder().snapshot();
     File rootDir = unitTestDir();
     
@@ -146,7 +121,7 @@ public class TStoreTest extends TestMethodHarness {
     
     int rowWidth = 8;
     RowOrder order = RowOrders.INT_ORDER;
-    DeleteCodec deleteCodec = MagicNumDeleteCodec.newIntInstance(4, 0);
+    DeleteCodec deleteCodec = getDeleteCodec();
     MergePolicy mergePolicy = new MergePolicyBuilder().snapshot();
     File rootDir = unitTestDir();
     
@@ -192,7 +167,7 @@ public class TStoreTest extends TestMethodHarness {
     
     int rowWidth = 8;
     RowOrder order = RowOrders.INT_ORDER;
-    DeleteCodec deleteCodec = MagicNumDeleteCodec.newIntInstance(4, 0);
+    DeleteCodec deleteCodec = getDeleteCodec();
     MergePolicy mergePolicy = new MergePolicyBuilder().snapshot();
     File rootDir = unitTestDir();
     
@@ -238,7 +213,7 @@ public class TStoreTest extends TestMethodHarness {
     
     int rowWidth = 8;
     RowOrder order = RowOrders.INT_ORDER;
-    DeleteCodec deleteCodec = MagicNumDeleteCodec.newIntInstance(4, 0);
+    DeleteCodec deleteCodec = getDeleteCodec();
     MergePolicy mergePolicy = new MergePolicyBuilder().snapshot();
     File rootDir = unitTestDir();
     
@@ -317,7 +292,7 @@ public class TStoreTest extends TestMethodHarness {
 
     int rowWidth = 8;
     RowOrder order = RowOrders.INT_ORDER;
-    DeleteCodec deleteCodec = MagicNumDeleteCodec.newIntInstance(4, 0);
+    DeleteCodec deleteCodec = getDeleteCodec();
     MergePolicy mergePolicy = new MergePolicyBuilder().snapshot();
     File rootDir = unitTestDir();
     
@@ -355,6 +330,13 @@ public class TStoreTest extends TestMethodHarness {
     assertContainsExpected(tableStore, expected);
     
     tableStore.close();
+  }
+  
+  
+  
+  
+  protected DeleteCodec getDeleteCodec() {
+    return MagicNumDeleteCodec.newIntInstance(4, 0);
   }
   
   

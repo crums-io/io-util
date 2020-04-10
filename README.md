@@ -92,38 +92,28 @@ These get generated in the `target/site/apidocs` directory. Move that directory 
 permanent location, if you don't want it wiped out on the next build.
 
 
-### Early performance results
+### Performance results
 
 There's one write-heavy stress test for karoon. To run it
 
 `$ mvn clean test -Dtest=TStoreBigTest`
 
-This inserts 1M randomly generated 64-byte rows. Typical insertion rates are around 20,000 rows
+This inserts 1M randomly generated 64-byte rows. Typical insertion rates are around 7,000 rows
 per second. Note that the randomness actually works against the store: more real world, lumpy
 data sets should perform better than what this test generates. It's not a rigorous performance
 test as it includes the time taken to generate the data.
 
-## Roadmap
-
-Looking beyond the immediate TODOs (such as testing the table iterators, and lots more testing)
-here are some things I'd like to work on next, with stuff at the top of the list tending to be higher
-priority than those further down.
+Note: The above really measures performance on the write path. Back in 2014 using an HDD, the
+write-speed was at roughly 20k rows per second. Huh. Wikipedia suggests I might have a [cheap SSD
+drive] (https://en.wikipedia.org/wiki/Solid-state_drive#Hard_disk_drives). 
 
 
-* Implement secondary indexes in karoon.
-* Hook karoon to netty
-  * Chaining set up for failover.
-    * Failover strategy?
-* Performance / stress testing.
-* Performance improvements.
-  * The searcher can easily improve on disk I/O, by lazily caching certain rows, for example.
-    (The existing tests indicate the file system does a pretty good job caching these itself, but of course,
-    this varies by hardware, OS, and file system.)
-* Support for annotating references to arbitrary length blobs in fixed width tables.
 
-This roadmap addresses some of my own itches, and I hope some of yours too.
+## Milestones
 
-Enjoy! And remember, contributions, whether in the form of suggestions, ideas, code, or forks, are welcome.
+Apr. 10, 2020: Version 0.0.2 - Bug fix for karoon w/o DeleteCodec (append-only/overwrite mode).
 
-Babak<br/>
-Jan. 7, 2014
+A case when you blissfully assumed the simpler version must also work if the more complicated version already
+does. Version finalized for this important bug fix. New stuff goes into 0.0.3-SNAPSHOT.
+
+Jan. 7, 2014: Initial booha

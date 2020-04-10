@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.RandomAccess;
 import java.util.Set;
 
 /**
@@ -19,20 +20,32 @@ public class CollectionUtils {
   private CollectionUtils() {   }
   
   
+  /**
+   * Some algos check for the RA marker interface.
+   */
+  private final static class ReadOnlyList<T> extends AbstractList<T> implements RandomAccess {
+    
+    private final T[] array;
+    
+    ReadOnlyList(T[] array) {
+      this.array = array;
+    }
+    
+    @Override
+    public T get(int index) {
+      return array[index];
+    }
+    @Override
+    public int size() {
+      return array.length;
+    }
+  }
+  
+  
   public static <T> List<T> asReadOnlyList(final T[] array) {
     if (array.length == 0)
       return Collections.emptyList();
-    
-    return new AbstractList<T>() {
-      @Override
-      public T get(int index) {
-        return array[index];
-      }
-      @Override
-      public int size() {
-        return array.length;
-      }
-    };
+    return new ReadOnlyList<T>(array);
   }
   
   

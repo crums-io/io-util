@@ -4,6 +4,7 @@
 package com.gnahraf.io.store.karoon;
 
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -334,10 +335,15 @@ public class TStore implements Channel {
       }
     }
     
-    if (row != null && config.getDeleteCodec().isDeleted(row))
+    if (row != null && hasDc() && config.getDeleteCodec().isDeleted(row))
       return null;
     else
       return row;
+  }
+  
+  
+  private boolean hasDc() {
+    return config.getDeleteCodec() != null;
   }
   
   
@@ -361,10 +367,13 @@ public class TStore implements Channel {
         if (sr != null && !includeKey && config.getRowOrder().compare(key, sr) == 0)
           sr = iter.next();
         
-        while (war != null && config.getDeleteCodec().isDeleted(war)) {
-          if (sr != null && config.getRowOrder().compare(war, sr) == 0)
-            sr = iter.next();
-          war = walIterator.next();
+        
+        if (hasDc()) {
+          while (war != null && config.getDeleteCodec().isDeleted(war)) {
+            if (sr != null && config.getRowOrder().compare(war, sr) == 0)
+              sr = iter.next();
+            war = walIterator.next();
+          }
         }
       }
       
@@ -386,6 +395,9 @@ public class TStore implements Channel {
   
   
   public void deleteRow(ByteBuffer key, boolean checkExists) throws IOException {
+    
+    if (!hasDc())
+      throw new UnsupportedOperationException("append/overwrite-only table");
 
     synchronized (apiLock) {
       
@@ -716,7 +728,9 @@ public class TStore implements Channel {
           // FIXME: following is buggy (doesn't quite work)
           // ignoring: was a nice-to-have ..
 //          commitWriteAheadOnClose();
-          closer.pushClose(activeTableSet());
+          Closeable activeSet = activeTableSet();
+          if (activeSet != null)
+            closer.pushClose(activeTableSet());
           closer.close();
         }
       }

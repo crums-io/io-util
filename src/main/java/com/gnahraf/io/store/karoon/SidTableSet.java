@@ -64,10 +64,6 @@ public class SidTableSet extends TableSetD {
     return sidTables;
   }
   
-  public final long commitId() {
-    return commitId();
-  }
-  
   /**
    * Returns {@linkplain #sidTables()}<tt>.toString()</tt>.
    */
