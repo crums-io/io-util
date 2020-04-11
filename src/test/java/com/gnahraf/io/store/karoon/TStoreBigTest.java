@@ -3,14 +3,15 @@
  */
 package com.gnahraf.io.store.karoon;
 
-import static org.junit.Assert.*;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.fail;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.text.DecimalFormat;
-import java.text.NumberFormat;
 
 import org.junit.Test;
 
@@ -37,14 +38,18 @@ public class TStoreBigTest extends TestMethodHarness {
   public final static String ROW_WIDTH_PROPERTY = "rowWidth";
   public final static String SEED_PROPERTY = "seed";
   
-  private final static RowOrder order = RowOrders.LONG_ORDER;
+  private final static RowOrder ORDER = RowOrders.LONG_ORDER;
   private final static long CODEC_MAGIC = -1;
-  private final static DeleteCodec deleteCodec = MagicNumDeleteCodec.newLongInstance(8, CODEC_MAGIC);
+  
+  
+  protected DeleteCodec deleteCodec = MagicNumDeleteCodec.newLongInstance(8, CODEC_MAGIC);
 
   
   private String propertyUsage(String property) {
     return ". To set use the -D" + property + "=... option.";
   }
+  
+  
   @Test
   public void test64ByteRow() throws Exception {
     initUnitTestDir(new Object() { });
@@ -117,7 +122,7 @@ public class TStoreBigTest extends TestMethodHarness {
     TStoreConfig config = new Builder()
         .setRowWidth(rowWidth)
         .setDeleteCodec(deleteCodec)
-        .setRowOrder(order)
+        .setRowOrder(ORDER)
         .setRootDir(rootDir)
         .setMergePolicy(mergePolicy)
         .toConfig();

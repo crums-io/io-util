@@ -5,7 +5,8 @@ A small, scalable Java library for slicing and dicing fixed width tables on disk
 
 ## Objective
 
-The objective is to provide reusable blocks of code for building efficient, custom binary data stores.
+The objective is to provide reusable blocks of code for building efficient, custom binary data stores. Fail-safety
+(as in, for example, when the plug is pulled before an I/O operation completes) is a key design goal. 
 
 ## What does it do?
 
@@ -26,6 +27,7 @@ Here's an incomplete, but growing list of component features and attributes.
 
 * Persistent, fail-safe counter (called a Keystone). Keystones can be persisted at any offset of a file, provide
   all-or-nothing update semantics, and are designed to tolerate abnormal program shutdown (e.g. power failure).
+  These in turn can be combined with other structures (e.g. next item) to lend them durable atomicity.
   
 * A simple, fixed width table abstraction, coupled with a keystone to maintain row count. The abstraction doesn't
   divy up a row into columns. That's the user's business.
@@ -65,7 +67,7 @@ Here's an incomplete, but growing list of component features and attributes.
 
 ### Prerequisites
 
-* JDK 1.7
+* JDK 1.10
 * Maven 3.x
 * Internet connection (possible dependency downloads by maven)
 
