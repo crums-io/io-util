@@ -20,6 +20,13 @@ import com.gnahraf.util.CollectionUtils;
  * <li>Tracks table usage and notifies when a table may be safely deleted.</li>
  * </ol>
  * 
+ * <h4>Note to self</h4>
+ * 
+ * This referencing counting is a good idea, but only if used consistently.
+ * Also, abstracting away resources via numbers and callbacks is a good idea.
+ * But mixing in the <tt>srcIds</tt> (the merge sources) with all this ref counting
+ * is at best confusing. I'll revisit. Somewhere high on the priority list.
+ * 
  * @author Babak
  */
 public class TableRegistry {

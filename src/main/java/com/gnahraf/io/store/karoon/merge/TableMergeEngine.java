@@ -68,7 +68,8 @@ public class TableMergeEngine implements Channel {
   
   private final Object oldGenerationLock = new Object();
   
-  private final TableRegistry tableRegistry;
+  // Doesn't belong here
+//  private final TableRegistry tableRegistry;
 
   private final String gclLabel;
   private final String yclLabel;
@@ -105,16 +106,16 @@ public class TableMergeEngine implements Channel {
     
     this.threadPool = threadPool;
     
-    TableLifecycleListener lifecycleListener = new TableLifecycleListener() {
-      @Override
-      public void released(long tableId) {
-        TableMergeEngine.this.storeContext.discardTable(tableId);
-      }
-      @Override
-      public void inited(long tableId) {
-      }
-    };
-    this.tableRegistry = new TableRegistry(lifecycleListener);
+//    TableLifecycleListener lifecycleListener = new TableLifecycleListener() {
+//      @Override
+//      public void released(long tableId) {
+//        TableMergeEngine.this.storeContext.discardTable(tableId);
+//      }
+//      @Override
+//      public void inited(long tableId) {
+//      }
+//    };
+//    this.tableRegistry = new TableRegistry(lifecycleListener);
     
     this.gclLabel = this + " - Generational control loop: ";
     this.yclLabel = this + " - Young control loop: ";
@@ -170,7 +171,7 @@ public class TableMergeEngine implements Channel {
     // (via the lifecycle listener set up in the constructor)
     // So we lock the registry so that files don't slip away underneath
     // us while we check their sizes..
-    synchronized (tableRegistry) {
+    synchronized (storeContext.tableRegistry()) {
       CommitRecord commit = tableStore.getCurrentCommit();
       return CommitInfo.getCommitInfo(commit, tableStore);
     }
@@ -188,6 +189,8 @@ public class TableMergeEngine implements Channel {
           synchronized (youngActiveMerges) {
             while (youngActiveMerges.size() > 1)
               youngActiveMerges.wait();
+            
+            // ( notified by newYoungMerge(..) Runnable or stop() )
           }
           continue;
         }
@@ -204,7 +207,9 @@ public class TableMergeEngine implements Channel {
                 break;
               
               LOG.fine(yclLabel + "waiting for fresh meat..");
+              
               freshMeatLock.wait();
+              
               LOG.fine(yclLabel + "notified");
             }
           }
@@ -368,7 +373,7 @@ public class TableMergeEngine implements Channel {
   
   protected Runnable newYoungMerge(GenerationInfo g, CommitInfo commitInfo) throws IOException {
     
-    final Releaseable checkout = tableRegistry.checkOut(
+    final Releaseable checkout = storeContext.tableRegistry().checkOut(
         g.srcIds(),
         g.backSetIds(),
         commitInfo.commitRecord());
@@ -389,7 +394,7 @@ public class TableMergeEngine implements Channel {
           
           if (tmerge.getState().succeeded()) {
             storeContext.tablesMerged(tmerge.getSourceIds(), tmerge.getOutTable());
-            tableRegistry.advanceCommit(tableStore.getCurrentCommit());
+            storeContext.tableRegistry().advanceCommit(tableStore.getCurrentCommit());
             if (tmerge.getOutputFile().length() > tableStore.getConfig().getMergePolicy().getMaxYoungSize())
               notifyOldGeneration();
           } else if (stopped) {
@@ -424,7 +429,7 @@ public class TableMergeEngine implements Channel {
   }
   
   protected Runnable newGenerationMerge(GenerationInfo g, CommitInfo commitInfo) throws IOException {
-    final Releaseable checkout = tableRegistry.checkOut(
+    final Releaseable checkout = storeContext.tableRegistry().checkOut(
         g.srcIds(),
         g.backSetIds(),
         commitInfo.commitRecord());
@@ -445,7 +450,7 @@ public class TableMergeEngine implements Channel {
           
           if (merge.getState().succeeded()) {
             storeContext.tablesMerged(merge.getSourceIds(), merge.getOutTable());
-            tableRegistry.advanceCommit(tableStore.getCurrentCommit());
+            storeContext.tableRegistry().advanceCommit(tableStore.getCurrentCommit());
           } else if (stopped)
             LOG.info(gmLabel + "aborted generation " + generation + " on stop");
           else {
@@ -505,6 +510,7 @@ public class TableMergeEngine implements Channel {
     threadPool.shutdown();
     storeContext.store().close();
   }
+  
   
   
   public void stopImmediately() {

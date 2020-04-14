@@ -20,7 +20,9 @@ import java.util.logging.Logger;
 import com.gnahraf.io.FileUtils;
 import com.gnahraf.io.IoStateException;
 import com.gnahraf.io.buffer.Covenant;
+import com.gnahraf.io.store.karoon.merge.TableLifecycleListener;
 import com.gnahraf.io.store.karoon.merge.TableMergeEngine;
+import com.gnahraf.io.store.karoon.merge.TableRegistry;
 import com.gnahraf.io.store.ks.CachingKeystone;
 import com.gnahraf.io.store.ks.Keystone;
 import com.gnahraf.io.store.table.TableSet;
@@ -41,6 +43,8 @@ public class TStore implements Channel {
   
   public class TmeContext {
     
+    private TmeContext() { }
+    
     public long newTableId() throws IOException {
       return tableCounter.increment(1);
     }
@@ -60,6 +64,10 @@ public class TStore implements Channel {
     
     public TStore store() {
       return TStore.this;
+    }
+    
+    public TableRegistry tableRegistry() {
+      return tableRegistry;
     }
   }
   
@@ -211,6 +219,14 @@ public class TStore implements Channel {
   public final static String SORTED_TABLE_EXT = "stbl";
   public final static String UNSORTED_TABLE_EXT = "utbl";
   
+  
+  
+  
+  
+  
+  // I N S T A N C E   M E M B E R S
+  
+  
   private final TaskStack closer = new TaskStack(LOG);
   private final Object apiLock = new Object();
   private final Object backSetLock = new Object();
@@ -223,6 +239,7 @@ public class TStore implements Channel {
   private final TableMergeEngine tableMergeEngine;
   private final LoadMeter loadMeter;
   private final FuzzyThrottler throttle;
+  private final TableRegistry tableRegistry;
   
   
   private WriteAheadTableBuilder writeAhead;
@@ -272,6 +289,21 @@ public class TStore implements Channel {
       this.activeTableSet = load(currentCommit);
       this.loadMeter = new LoadMeter();
       this.throttle = new FuzzyThrottler(loadMeter);
+      
+      {
+        TableLifecycleListener lifecycleListener = new TableLifecycleListener() {
+          @Override
+          public void released(long tableId) {
+            File tableFile = getSortedTablePath(tableId);
+            discardFile(tableFile);
+          }
+          @Override
+          public void inited(long tableId) {
+          }
+        };
+        
+        this.tableRegistry = new TableRegistry(lifecycleListener);
+      }
       
       // find the last working (unsorted) table, if any..
       long walTableId = walTableNumber.get();

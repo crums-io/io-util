@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.gnahraf</groupId>
   <artifactId>io-util</artifactId>
-  <version>0.0.2</version>
+  <version>0.0.3-SNAPSHOT</version>
   <name>I/O Primitives</name>
   <description>Utilities for creating simple data structures for persistent storage.</description>
   
@@ -34,23 +34,7 @@
       </plugin>
       
       
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>appassembler-maven-plugin</artifactId>
-        <version>1.3</version>
-        <configuration>
-          <programs>
-            <program>
-              <mainClass>com.gnahraf.http.WebRequestEcho</mainClass>
-              <name>echoweb</name>
-            </program>
-            <program>
-              <mainClass>com.gnahraf.io.file.Files</mainClass>
-              <name>files</name>
-            </program>
-          </programs>
-        </configuration>
-      </plugin>
+      
       
       
     </plugins>
