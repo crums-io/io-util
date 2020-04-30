@@ -25,6 +25,7 @@ import com.gnahraf.io.store.karoon.merge.TableMergeEngine;
 import com.gnahraf.io.store.karoon.merge.TableRegistry;
 import com.gnahraf.io.store.ks.CachingKeystone;
 import com.gnahraf.io.store.ks.Keystone;
+import com.gnahraf.io.store.table.SortedTable;
 import com.gnahraf.io.store.table.TableSet;
 import com.gnahraf.io.store.table.iter.Direction;
 import com.gnahraf.io.store.table.iter.RowIterator;
@@ -737,9 +738,19 @@ public class TStore implements Channel {
   }
   
   
-  private SidTable loadSortedTable(File tableFile, long id) throws IOException {
+  /**
+   * Loads and returns the {@linkplain SortedTable} (a <tt>SidTable</tt>) in read-only mode.
+   * Invoked by {@linkplain #loadSortedTable(long)}.
+   */
+  protected SidTable loadSortedTable(File tableFile, long id) throws IOException {
     @SuppressWarnings("resource")
     FileChannel ch = new RandomAccessFile(tableFile, "r").getChannel();
+    
+    // Following test code, when uncommented, passed unit tests ~ 4/28/2020
+    
+    // SidTable table = new SidTable(ch, 0, config.getRowWidth(), config.getRowOrder(), id);
+    // return table.sliceTable(0, table.getRowCount());
+    
     return new SidTable(ch, 0, config.getRowWidth(), config.getRowOrder(), id);
   }
 

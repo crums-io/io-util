@@ -44,7 +44,7 @@ public class Table implements Channel {
   
   private final static Logger LOG = Logger.getLogger(Table.class.getName());
   
-  protected final Object filePositionLock = new Object();
+  protected final Object filePositionLock;
 
   private final Keystone rowCount;
   private final FileChannel file;
@@ -70,6 +70,7 @@ public class Table implements Channel {
    *          the size of each row in bytes (&gt; 0)
    */
   public Table(Keystone rowCount, FileChannel file, long zeroRowFileOffset, int rowSize) throws IOException {
+    this.filePositionLock = new Object();
     this.rowCount = rowCount;
     this.file = file;
     this.zeroRowFileOffset = zeroRowFileOffset;
@@ -82,6 +83,27 @@ public class Table implements Channel {
     long rows = checkRowCount(rowCount);
     if (file.size() < zeroRowFileOffset + rows * rowSize)
       throw new IOException("file size (" + file.size() + " bytes) too small; zeroRowFileOffset is " + zeroRowFileOffset + "; row count is " + rows + "; and row size is " + rowSize);
+  }
+  
+  
+  /**
+   * Copy constructor. Safe for read-only. Avoid write mode: hard to think thru.
+   */
+  protected Table(Table copy) {
+    this.filePositionLock = copy.filePositionLock;
+    this.rowCount = copy.rowCount;
+    this.file = copy.file;
+    this.zeroRowFileOffset = copy.zeroRowFileOffset;
+    this.rowSize = copy.rowSize;
+  }
+  
+  
+  private Table(Object filePositionLock, Keystone rowCount, FileChannel file, long zeroRowFileOffset, int rowSize) {
+    this.filePositionLock = filePositionLock;
+    this.rowCount = rowCount;
+    this.file = file;
+    this.zeroRowFileOffset = zeroRowFileOffset;
+    this.rowSize = rowSize;
   }
   
   
@@ -100,7 +122,7 @@ public class Table implements Channel {
     Keystone snapshot = new FixedKeystone(count);
     long zeroRowOffset = this.zeroRowFileOffset + firstRow * rowSize;
     
-    return new Table(snapshot, file, zeroRowOffset, rowSize) {
+    return new Table(this.filePositionLock, snapshot, this.file, zeroRowOffset, this.rowSize) {
 
       @Override
       public long append(ByteBuffer rowData) {

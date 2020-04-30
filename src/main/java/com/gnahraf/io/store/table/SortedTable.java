@@ -91,12 +91,36 @@ public class SortedTable extends Table implements Sorted {
   }
   
   
+  
+  
+  /**
+   * Copy constructor. Stick to read-only instances. Hard to reason otherwise.
+   */
+  protected SortedTable(SortedTable copy) {
+    super(copy);
+    this.order = copy.order;
+  }
+  
+  private SortedTable(Table table, RowOrder order) {
+    super(table);
+    this.order = order;
+  }
+  
+  
+
+
+
+  @Override
+  public SortedTable sliceTable(long firstRow, long count) throws IOException {
+    Table sliced = super.sliceTable(firstRow, count);
+    return new SortedTable(sliced, order);
+  }
+  
+  
   public final RowOrder order() {
     return order;
   }
   
-
-
   
   
   

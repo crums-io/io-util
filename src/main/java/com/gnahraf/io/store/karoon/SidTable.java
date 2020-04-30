@@ -6,8 +6,6 @@ package com.gnahraf.io.store.karoon;
 
 import java.io.IOException;
 import java.nio.channels.FileChannel;
-import java.util.HashMap;
-import java.util.Map;
 
 import com.gnahraf.io.store.table.SortedTable;
 import com.gnahraf.io.store.table.TableSet;
@@ -46,11 +44,24 @@ public class SidTable extends SortedTable {
     this.id = id;
   }
   
+  private SidTable(SortedTable table, long id) {
+    super(table);
+    this.id = id;
+  }
+  
   /**
    * Returns the table's ID.
    */
   public final long id() {
     return id;
+  }
+  
+  
+  
+  @Override
+  public SidTable sliceTable(long firstRow, long count) throws IOException {
+    SortedTable table = super.sliceTable(firstRow, count);
+    return new SidTable(table, id);
   }
   
   
