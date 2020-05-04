@@ -7,6 +7,12 @@ import java.nio.ByteBuffer;
 
 /**
  * Defines a reserved-bit <tt>DeleteCodec</tt>. Reads and writes only that bit.
+ * <p>
+ * Actually, this works with any number of on-bits in the byte, but it was
+ * designed for a single bit. (Why would you need more than 1 bit? No idea..
+ * Maybe if each bit represented a milestone in a lifecycle and you didn't want
+ * to delete until all they're all checked off (?).
+ * </p>
  */
 public class BitDeleteCodec extends DeleteCodec {
   
@@ -63,6 +69,25 @@ public class BitDeleteCodec extends DeleteCodec {
     out |= onBit;
     row.put(offset, out);
   }
+  
+  
+  @Override
+  public final boolean equals(Object o) {
+    if (o == this)
+      return true;
+    if (o instanceof BitDeleteCodec) {
+      BitDeleteCodec other = (BitDeleteCodec) o;
+      return offset == other.offset && onBit == other.onBit;
+    }
+    return false;
+  }
+  
+  
+  @Override
+  public final int hashCode() {
+    return offset ^ (int) onBit;
+  }
+  
   
   @Override
   public String toString() {

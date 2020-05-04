@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Babak Farhang 
+ * Copyright 2013-2020 Babak Farhang 
  */
 package com.gnahraf.io.store.karoon;
 
@@ -11,7 +11,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
-import java.nio.channels.Channel;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +19,7 @@ import java.util.logging.Logger;
 import com.gnahraf.io.FileUtils;
 import com.gnahraf.io.IoStateException;
 import com.gnahraf.io.buffer.Covenant;
+import com.gnahraf.io.store.karoon.merge.MergePolicy;
 import com.gnahraf.io.store.karoon.merge.TableLifecycleListener;
 import com.gnahraf.io.store.karoon.merge.TableMergeEngine;
 import com.gnahraf.io.store.karoon.merge.TableRegistry;
@@ -27,20 +27,63 @@ import com.gnahraf.io.store.ks.CachingKeystone;
 import com.gnahraf.io.store.ks.Keystone;
 import com.gnahraf.io.store.table.SortedTable;
 import com.gnahraf.io.store.table.TableSet;
+import com.gnahraf.io.store.table.del.DeleteCodec;
 import com.gnahraf.io.store.table.iter.Direction;
 import com.gnahraf.io.store.table.iter.RowIterator;
 import com.gnahraf.io.store.table.iter.TableSetIterator;
+import com.gnahraf.io.store.table.order.RowOrder;
 import com.gnahraf.math.stats.MovingAverage;
 import com.gnahraf.util.TaskStack;
 import com.gnahraf.util.cc.throt.FuzzySpeed;
 import com.gnahraf.util.cc.throt.FuzzyThrottler;
 
 /**
- * Single thread access table store.
- * 
- * @author Babak
+ * Single thread (but fail safe) access to a logical, sorted table on disk.
+ * This is implemented as a stack of sorted tables. The tables are write-once.
+ * Behind the scenes, there are typically 2 background threads merging tables
+ * into bigger ones: one for merging young tables, another for merging more
+ * mature ones. The design is inspired by how Apache Lucene merges tables--except
+ * here the data model is a good deal simpler so we are able to pull off a live
+ * view.
+ * <h4>Write-ahead Log</h4>
+ * <p>
+ * A <em>frontier</em> unsorted table serves as a write-ahead log. This is kept small
+ * enough so that it can fit (in sorted order) in memory.
+ * </p>
+ * <h4>Automatic Throttling</h4>
+ * <p>
+ * Early tests on the write path indicated as you'd throw more and more data faster and
+ * faster at a <tt>TStore</tt> instance, beyond a certain speed, performance would
+ * start to degrade as the background merging threads would fail to keep up. This wasn't
+ * a surprise: every software system must somehow throttle under maximum load, either
+ * "naturally" or by design. Here it had to be designed in.
+ * </p><p>
+ * Each instance uses a fuzzy controller to set the throttle--the maximum throughput
+ * (insertion) rate. It watches how many backing table files an instance has at any moment, how
+ * fast that number is rising and depending on how hot the situation has become slams, or
+ * touches lightly, on the brakes. Under load, the goal of the controller is to keep
+ * the backing-tables-count near {@linkplain  MergePolicy#getEngineOverheatTableCount()}.
+ * </p><p>
+ * There's no throttling on the reads: the read path is "naturally" throttled.
+ * </p>
+ * <h4>TODO</h4>
+ * <p>
+ * <ul>
+ * <li>
+ * <p>
+ * Fix threading model: make it message based -- collapse messages by recognizing
+ * duplicates; ignore messages for which some action is already being taken. Goal is
+ * fewer waiting threads: 2 threads per instance is a bit heavy handed if you have many
+ * <tt>TStore</tt>instances.
+ * </p>
+ * </li>
+ * <li>
+ * More documentation. The author forgets.
+ * </li>
+ * </ul>
+ * </p>
  */
-public class TStore implements Channel {
+public class TStore implements TableStore {
   
   public class TmeContext {
     
@@ -253,6 +296,10 @@ public class TStore implements Channel {
   public TStore(TStoreConfig config, boolean create) throws IOException {
     if (config == null)
       throw new IllegalArgumentException("null config");
+    
+    if (config.isReadOnly() && create)
+      throw new IllegalArgumentException("attempt to create a read read-only instance");
+    
     this.config = config;
     boolean failed = true;
     try {
@@ -353,9 +400,33 @@ public class TStore implements Channel {
         config.getRowWidth(), config.getRowOrder(), writeAheadFile);
     walTableNumber.set(walTableId);
   }
+
+  
+  @Override
+  public String name() {
+    return config.getRootDir().getName();
+  }
   
   
+  @Override
+  public int rowWidth() {
+    return config.getRowWidth();
+  }
   
+  
+  @Override
+  public RowOrder rowOrder() {
+    return config.getRowOrder();
+  }
+  
+  
+  @Override
+  public DeleteCodec deleteCodec() {
+    return config.getDeleteCodec();
+  }
+  
+  
+  @Override
   public ByteBuffer getRow(ByteBuffer key) throws IOException {
     ByteBuffer row;
     synchronized (apiLock) {
@@ -381,6 +452,7 @@ public class TStore implements Channel {
   
   
   
+  @Override
   public ByteBuffer nextRow(ByteBuffer key, Direction direction, boolean includeKey) throws IOException {
     
     ByteBuffer war; // row from write-ahead table
@@ -421,7 +493,7 @@ public class TStore implements Channel {
   }
 
   
-  
+  @Override
   public void deleteRow(ByteBuffer key) throws IOException {
     deleteRow(key, true);
   }
@@ -463,37 +535,23 @@ public class TStore implements Channel {
   }
   
 
-  /**
-   * Inserts or updates the given <tt>row</tt> with no promise/covenant. Shorthand for
-   * {@linkplain #setRow(ByteBuffer, Covenant) setRow(row, Covenant.NONE)}
-   * 
-   * @param row
-   *        the remaining bytes in this buffer represent the row being input. The
-   *        remaining bytes must be exactly equal to
-   *        {@linkplain TStoreConfig#getRowWidth() row width}.
-   */
-  public void setRow(ByteBuffer row) throws IOException {
-    setRow(row, Covenant.NONE);
-  }
+//  /**
+//   * Inserts or updates the given <tt>row</tt> with no promise/covenant. Shorthand for
+//   * {@linkplain #setRow(ByteBuffer, Covenant) setRow(row, Covenant.NONE)}
+//   * 
+//   * @param row
+//   *        the remaining bytes in this buffer represent the row being input. The
+//   *        remaining bytes must be exactly equal to
+//   *        {@linkplain TStoreConfig#getRowWidth() row width}.
+//   */
+//  @Override
+//  public void setRow(ByteBuffer row) throws IOException {
+//    setRow(row, Covenant.NONE);
+//  }
   
 
   
-  /**
-   * Inserts or updates the given <tt>row</tt>. The operation is fail-safe (all-or-nothing).
-   * <p/>
-   * Pay attention to the <tt>promise</tt> parameter. It has a huge impact on performance,
-   * but just as importantly, if you break the promise, you break the data set.
-   * 
-   * @param row
-   *        the remaining bytes in this buffer represent the row being input. The
-   *        remaining bytes must be exactly equal to
-   *        {@linkplain TStoreConfig#getRowWidth() row width}.
-   * @param promise
-   *        declares how and whether the caller <em>agrees not to later modify</em> the
-   *        given <tt>rows</tt> parameter. <em><strong>If the caller breaks the promise, then
-   *        the table will almost certainly get corrupted!</strong></em>. May be <tt>null</tt>
-   *        (no promise), but that would be a shame.
-   */
+  @Override
   public void setRow(ByteBuffer row, Covenant promise) throws IOException {
     synchronized (apiLock) {
       writeAhead.putRow(row, promise);
@@ -501,26 +559,7 @@ public class TStore implements Channel {
     }
   }
   
-  /**
-   * Inserts or updates the given <tt>rows</tt>. The rows are passed in <em>en bloc</em>:
-   * they may be ordered in any way. The operation is fail-safe (all-or-nothing).
-   * <p/>
-   * Pay attention to the <tt>promise</tt> parameter. It has a huge impact on performance,
-   * but just as importantly, if you break the promise, you break the data set.
-   * 
-   * @param rows
-   *        the remaining bytes in this buffer represent the rows being input. The
-   *        remaining bytes must be an exact multiple of the
-   *        {@linkplain TStoreConfig#getRowWidth() row width}. If the
-   *        same row (recall, the identity of a row is defined by the table's
-   *        {@linkplain RowOrder}) occurs twice in this buffer, then the last occurance
-   *        wins. 
-   * @param promise
-   *        declares how and whether the caller <em>agrees not to later modify</em> the
-   *        given <tt>rows</tt> parameter. <em><strong>If the caller breaks the promise, then
-   *        the table will almost certainly get corrupted!</strong></em>. May be <tt>null</tt>
-   *        (no promise), but that would be a shame.
-   */
+  @Override
   public void setRows(ByteBuffer rows, Covenant promise) throws IOException {
     synchronized (apiLock) {
       writeAhead.putRows(rows, promise);
@@ -917,13 +956,11 @@ public class TStore implements Channel {
   
   
   
-  
-  
   @Override
   public String toString() {
     CommitRecord c = currentCommit;
     StringBuilder string = new StringBuilder()
-      .append('[').append(config.getRootDir().getName());
+      .append('[').append(name());
     if (c != null) {
       string.append(':').append(c.getId()).append(':').append(c.getTableIds());
     }

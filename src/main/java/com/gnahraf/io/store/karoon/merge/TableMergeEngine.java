@@ -96,6 +96,7 @@ public class TableMergeEngine implements Channel {
     if (!tableStore.isOpen())
       throw new IllegalArgumentException("closed tableStore: " + tableStore);
     
+    
     if (threadPool == null) {
       ThreadFactory threadFactory =
           new FixedPriorityThreadFactory(

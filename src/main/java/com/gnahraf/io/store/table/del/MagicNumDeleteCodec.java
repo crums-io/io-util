@@ -31,6 +31,26 @@ public abstract class MagicNumDeleteCodec extends DeleteCodec {
   protected abstract long magicCellValue(ByteBuffer row);
   
 
+  @Override
+  public final boolean equals(Object o) {
+    if (o == this)
+      return true;
+    
+    if (o instanceof MagicNumDeleteCodec) {
+      if (!getClass().equals(o.getClass()))
+        return false;
+      MagicNumDeleteCodec other = (MagicNumDeleteCodec) o;
+      return offset == other.offset && magic == other.magic;
+    }
+    
+    return false;
+  }
+  
+  
+  @Override
+  public final int hashCode() {
+    return getClass().hashCode() ^ offset ^ Long.hashCode(magic);
+  }
   
   
   @Override

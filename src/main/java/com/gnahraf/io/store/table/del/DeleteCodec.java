@@ -15,6 +15,13 @@ import com.gnahraf.io.store.table.TableSet;
  * stipulate ahead of time how a deleted row is encoded (for example, by using a special byte in the row): there
  * should be many occasions where a certain value in a row would naturally represent a non-entry as a deleted entry.
  * 
+ * <h3>Equality semantics</h3>
+ * <p>
+ * Subclasses should override {@linkplain #hashCode()} and {@linkplain #equals(Object)}. Some classes
+ * check this as a sanity check. (Most cases it's the same instance, but it's certainly conceivable in
+ * some loading scenario to end up with more than one.)
+ * </p>
+ * 
  * @author Babak
  */
 public abstract class DeleteCodec {
@@ -32,24 +39,5 @@ public abstract class DeleteCodec {
   public abstract void markDeleted(ByteBuffer row);
   
   
-  
-  
-  
-  
-  
-  /**
-   * Noop codec. Never considers anything deleted. Note {@linkplain DeleteCodec#markDeleted(ByteBuffer)}
-   * throws <tt>UnsupportedOperationException</tt>.
-   */
-  public final static DeleteCodec NOOP = new DeleteCodec() {
-    @Override
-    public void markDeleted(ByteBuffer row) {
-      throw new UnsupportedOperationException();
-    }
-    @Override
-    public boolean isDeleted(ByteBuffer row) {
-      return false;
-    }
-  };
 
 }

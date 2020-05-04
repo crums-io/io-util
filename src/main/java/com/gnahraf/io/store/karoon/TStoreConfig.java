@@ -22,6 +22,7 @@ public class TStoreConfig {
   private final File rootDir;
   private final MergePolicy policy;
   private final ExecutorService mergeThreadPool;
+  private final boolean readOnly;
   
   
   public TStoreConfig(
@@ -30,7 +31,8 @@ public class TStoreConfig {
       DeleteCodec deleteCodec,
       File rootDir,
       MergePolicy policy,
-      ExecutorService mergeThreadPool)
+      ExecutorService mergeThreadPool,
+      boolean readOnly)
       throws IllegalArgumentException {
     this.rowOrder = rowOrder;
     this.rowWidth = rowWidth;
@@ -38,6 +40,7 @@ public class TStoreConfig {
     this.rootDir = rootDir;
     this.policy = policy;
     this.mergeThreadPool = mergeThreadPool;
+    this.readOnly = readOnly;
     
     if (rowOrder == null)
       throw new IllegalArgumentException("null rowOrder");
@@ -85,6 +88,11 @@ public class TStoreConfig {
   public final ExecutorService getMergeThreadPool() {
     return mergeThreadPool;
   }
+  
+  
+  public final boolean isReadOnly() {
+    return readOnly;
+  }
 
 
 
@@ -121,6 +129,7 @@ public class TStoreConfig {
     private File rootDir;
     private MergePolicy policy;
     private ExecutorService mergeThreadPool;
+    private boolean readOnly;
     
     
     public Builder load(TStoreConfig config) {
@@ -182,8 +191,17 @@ public class TStoreConfig {
       return this;
     }
     
+    public Builder setReadOnly(boolean readOnly) {
+      this.readOnly = readOnly;
+      return this;
+    }
+    
+    public boolean isReadOnly() {
+      return readOnly;
+    }
+    
     public TStoreConfig toConfig() throws IllegalArgumentException {
-      return new TStoreConfig(rowOrder, rowWidth, deleteCodec, rootDir, policy, mergeThreadPool);
+      return new TStoreConfig(rowOrder, rowWidth, deleteCodec, rootDir, policy, mergeThreadPool, readOnly);
     }
     
   }

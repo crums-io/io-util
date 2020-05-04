@@ -15,12 +15,19 @@ import com.gnahraf.util.ClassEquivalent;
  * row's <em>key</em> (or unique identifier), while the <em>unexamined region</em> of
  * the row represents its changeable <em>value</em>.
  * <p/>
+ * 
  * <h3>Importance of Equality Semantics</h3>
  * 
+ * <p>
  * Elsewhere the code makes a best effort to guard against mixing incompatible row orderings.
  * This compatibility is tested with the <tt>RowOrder.equals(..)</tt> method. It's important,
  * therefore, that subclasses have reasonable equality semantics. The default behavior by
  * the base class is to treat all instances of the same class equivalent.
+ * </p><p>
+ * Because the parent class, if a subclass <em>only</em> has a default constructor, then the correct
+ * semantics are already implemented.
+ * </p>
+ * 
  * 
  * @see RowOrders
  * @author Babak

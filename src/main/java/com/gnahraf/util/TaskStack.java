@@ -89,7 +89,7 @@ public class TaskStack implements Channel {
   }
   
   
-  public void pushRun(final Runnable task) {
+  public TaskStack pushRun(final Runnable task) {
     if (task == null)
       throw new IllegalArgumentException("null task");
     
@@ -100,23 +100,32 @@ public class TaskStack implements Channel {
       }
     };
     opStack.add(asClose);
+    return this;
   }
   
   
-  public void pushClose(AutoCloseable resource) {
+  public TaskStack pushClose(AutoCloseable resource) {
     if (resource == null)
       throw new IllegalArgumentException("null resource");
     opStack.add(resource);
+    return this;
   }
   
   
-  public void pushClose(AutoCloseable... resource) {
+  public TaskStack pushClose(AutoCloseable... resource) {
     for (AutoCloseable r : resource)
       pushClose(r);
+    return this;
+  }
+  
+  public TaskStack pushClose(Iterable<? extends AutoCloseable> resources) {
+    for (AutoCloseable r : resources)
+      pushClose(r);
+    return this;
   }
   
   
-  public void pushUnlock(final Lock lock) {
+  public TaskStack pushUnlock(final Lock lock) {
     if (lock == null)
       throw new IllegalArgumentException("null lock");
     
@@ -127,6 +136,7 @@ public class TaskStack implements Channel {
       }
     };
     opStack.add(asClose);
+    return this;
   }
   
   /**

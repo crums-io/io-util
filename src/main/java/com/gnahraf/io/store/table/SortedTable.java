@@ -14,7 +14,7 @@ import com.gnahraf.io.buffer.SortedBlock;
 import com.gnahraf.io.store.Sorted;
 import com.gnahraf.io.store.ks.Keystone;
 import com.gnahraf.io.store.ks.VolatileKeystone;
-import com.gnahraf.io.store.table.order.LexicalRowOrder;
+import com.gnahraf.io.store.table.order.NaturalRowOrder;
 import com.gnahraf.io.store.table.order.RowOrder;
 import com.gnahraf.math.stats.SimpleSampler;
 import com.gnahraf.test.PerfProf;
@@ -86,7 +86,7 @@ public class SortedTable extends Table implements Sorted {
           throws IOException {
     super(rowCount, file, zeroRowFileOffset, rowSize);
     if (order == null)
-      order = LexicalRowOrder.INSTANCE;
+      order = NaturalRowOrder.INSTANCE;
     this.order = order;
   }
   
