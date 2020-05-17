@@ -42,6 +42,8 @@ public class DirectoryRemover {
 
 
   public static boolean removeTree(File root) {
+    if (!root.exists())
+      return false;
     try {
       root = root.getCanonicalFile();
     } catch (IOException iox) {
