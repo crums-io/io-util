@@ -4,7 +4,9 @@
 package com.gnahraf.io.store.table;
 
 
+import java.io.File;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channel;
 import java.nio.channels.ClosedChannelException;
@@ -13,6 +15,7 @@ import java.nio.channels.WritableByteChannel;
 import java.util.Arrays;
 import java.util.logging.Logger;
 
+import com.gnahraf.io.FileUtils;
 import com.gnahraf.io.channels.ChannelUtils;
 import com.gnahraf.io.store.ks.CachingKeystone;
 import com.gnahraf.io.store.ks.FixedKeystone;
@@ -136,6 +139,10 @@ public class Table implements Channel {
       
     };
   }
+  
+  
+  
+  
 
 
   /**
@@ -200,14 +207,23 @@ public class Table implements Channel {
    */
   public long append(ByteBuffer[] rows) throws IOException {
     long newRows = numRowsInBuffers(rows);
-    long firstRowNumber = rowCount.get();
-    long rowOffsetInFile = rowOffset(firstRowNumber);
-    file.position(rowOffsetInFile);
-    ChannelUtils.writeRemaining(file, rows);
-    long newRowCount = rowCount.increment(newRows);
-    if (newRowCount != firstRowNumber + newRows)
-      throw new IOException("sanity check failure: " + newRowCount + " != " + firstRowNumber + " + " + newRows);
-    return firstRowNumber;
+    
+    synchronized (filePositionLock) {
+      long firstRowNumber = rowCount.get();
+      long rowOffsetInFile = rowOffset(firstRowNumber);
+      file.position(rowOffsetInFile);
+      ChannelUtils.writeRemaining(file, rows);
+      long newRowCount = rowCount.increment(newRows);
+      if (newRowCount != firstRowNumber + newRows)
+        throw new IOException("sanity check failure: " + newRowCount + " != " + firstRowNumber + " + " + newRows);
+      return firstRowNumber;
+    }
+  }
+  
+  
+  
+  public void flush() throws IOException {
+    file.force(false);
   }
 
 
@@ -378,6 +394,44 @@ public class Table implements Channel {
    */
   public static Table loadInstance(FileChannel file, int rowSize) throws IOException {
     return newInstanceImpl(file, rowSize, false);
+  }
+  
+  /**
+   * Creates and returns an instance in read-write mode; if it doesn't exist on the file system, creates it.
+   * 
+   * @param file      file path
+   * @param rowSize   bytes per row
+   */
+  public static Table createInstance(File file, int rowSize) throws IOException {
+    return createInstance(file, rowSize, false);
+  }
+  
+  /**
+   * Creates and returns an instance; if it doesn't exist on the file system, creates it.
+   * 
+   * @param file      file path
+   * @param rowSize   bytes per row
+   * @param readOnly  if <tt>true</tt>, then the table is opened in read-only mode. (Obviously, the
+   *                  table must already exist on the file system.)
+   */
+  public static Table createInstance(File file, int rowSize, boolean readOnly) throws IOException {
+    if (rowSize < 1)
+      throw new IllegalArgumentException("rowSize: " + rowSize);
+    
+    String mode = readOnly ? "r" : "rw";
+    boolean load = file.exists();
+    if (readOnly && !load)
+      throw new IllegalArgumentException("cannot load non-existent file in read-only mode: " + file);
+    
+    if (!load)
+      FileUtils.ensureDir(file.getParentFile());
+
+    @SuppressWarnings("resource")
+    FileChannel ch = new RandomAccessFile(file, mode).getChannel();
+    ch.position(0);
+    
+    return load ? loadInstance(ch, rowSize) : newEmptyInstance(ch, rowSize);
+    
   }
   
   

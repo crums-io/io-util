@@ -11,6 +11,11 @@ package com.gnahraf.math.stats;
  */
 public abstract class Sampler {
   
+  
+  public void observe(long value) {
+    observe((double) value);
+  }
+  
   /**
    * Observes the given sample <tt>value</tt>.
    */

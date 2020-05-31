@@ -12,7 +12,6 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.GatheringByteChannel;
 import java.util.logging.Logger;
 
-import com.gnahraf.io.buffer.Covenant;
 import com.gnahraf.io.store.table.SortedTableBuilder;
 import com.gnahraf.io.store.table.Table;
 import com.gnahraf.io.store.table.order.RowOrder;
@@ -36,7 +35,9 @@ public class WriteAheadTableBuilder extends SortedTableBuilder implements Channe
     if (writeAheadFile == null)
       throw new IllegalArgumentException("null writeAheadFile");
     boolean recover = writeAheadFile.exists();
+    @SuppressWarnings("resource")
     FileChannel tableChannel = new RandomAccessFile(writeAheadFile, "rw").getChannel();
+    boolean bail = true;
     try {
       if (recover) {
         this.writeAheadTable = Table.loadInstance(tableChannel, rowWidth);
@@ -62,10 +63,11 @@ public class WriteAheadTableBuilder extends SortedTableBuilder implements Channe
       } else {
         this.writeAheadTable = Table.newEmptyInstance(tableChannel, rowWidth);
       }
-    } catch (IOException iox) {
-      // we're bailing.. so close the write-ahead table before throwing the wrench
-      tableChannel.close();
-      throw iox;
+      bail = false;
+    } finally {
+      if (bail)
+        // we're bailing.. so close the write-ahead table before throwing the wrench
+        tableChannel.close();
     }
   }
 

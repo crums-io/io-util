@@ -9,7 +9,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.RandomAccessFile;
 import java.io.Reader;
+import java.io.UncheckedIOException;
 import java.nio.CharBuffer;
 import java.nio.file.StandardCopyOption;
 import java.util.Objects;
@@ -108,6 +110,25 @@ public class FileUtils {
       }
     }
     return buffer.toString();
+  }
+  
+  
+  public static boolean trimFileLength(File file, long trimmedLength)
+      throws IllegalArgumentException, UncheckedIOException{
+    // check arguments
+    long currentLength = file.length();
+    if (trimmedLength > currentLength)
+      throw new IllegalArgumentException(
+          "attempt to trim file from " + currentLength + " --> " + trimmedLength + ": " + file);
+    else if (trimmedLength == currentLength)
+      return false;
+    
+    try (RandomAccessFile stream = new RandomAccessFile(file, "rw")) {
+      stream.setLength(trimmedLength);
+    } catch (IOException iox) {
+      throw new UncheckedIOException(iox);
+    }
+    return true;
   }
 
 
