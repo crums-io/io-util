@@ -107,6 +107,8 @@ public class TaskStack implements Channel {
   public TaskStack pushClose(AutoCloseable resource) {
     if (resource == null)
       throw new IllegalArgumentException("null resource");
+    if (resource == this)
+      throw new IllegalArgumentException("circular close detected");
     opStack.add(resource);
     return this;
   }
