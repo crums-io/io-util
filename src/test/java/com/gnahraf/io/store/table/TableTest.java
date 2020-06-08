@@ -22,7 +22,6 @@ import com.gnahraf.io.store.ks.Keystone;
 import com.gnahraf.io.store.ks.KeystoneImpl;
 import com.gnahraf.io.store.ks.RollingKeystone;
 import com.gnahraf.io.store.ks.VolatileKeystone;
-import com.gnahraf.io.store.table.Table;
 import com.gnahraf.test.TestDirs;
 
 
@@ -43,6 +42,7 @@ public class TableTest {
   }
   
   
+  @SuppressWarnings("resource")
   private FileChannel openFile(String method, boolean exists) throws IOException {
     File testFile = new File(TestDirs.getTestDir(getClass()), method);
     if (testFile.exists() != exists)
@@ -58,6 +58,7 @@ public class TableTest {
   }
 
 
+  @SuppressWarnings("resource")
   @Test
   public void testContructorWithBadArgs() throws IOException {
     // boiler plate file setup..
@@ -73,6 +74,7 @@ public class TableTest {
   }
 
 
+  @SuppressWarnings("resource")
   @Test
   public void testContructorWithBadArgs2() throws IOException {
     // boiler plate file setup..
@@ -88,6 +90,7 @@ public class TableTest {
   }
 
 
+  @SuppressWarnings("resource")
   @Test
   public void testContructorWithBadArgs3() throws IOException {
     // boiler plate file setup..
@@ -103,6 +106,7 @@ public class TableTest {
   }
 
 
+  @SuppressWarnings("resource")
   @Test
   public void testContructorWithBadArgs4() throws IOException {
     // boiler plate file setup..
@@ -128,6 +132,7 @@ public class TableTest {
     Table table = new Table(rowCount, file, rowCount.size(), rowSize);
     assertEquals(0, table.getRowCount());
     assertEquals(rowSize, table.getRowWidth());
+    table.close();
   }
 
 
@@ -170,6 +175,8 @@ public class TableTest {
     buffer.clear();
 
     assertEquals(buffer, row);
+    
+    table.close();
   }
 
 
@@ -198,6 +205,8 @@ public class TableTest {
     buffer.clear();
 
     assertEquals(buffer, row);
+    
+    table.close();
   }
 
 
@@ -236,27 +245,29 @@ public class TableTest {
 
     final int rowSize = 32;
     Keystone rowCount = new RollingKeystone(file, 0, 0L);
-    Table table = new Table(rowCount, file, rowCount.size(), rowSize);
     ByteBuffer buffer = ByteBuffer.allocate(rowSize);
-    buffer.clear();
-    long[] row0 = new long[] { 1, -2, 3, -4 };
-    for (int i = 0; i < row0.length; ++i)
-      buffer.putLong(row0[i]);
-    buffer.flip();
-    table.append(buffer);
-    table.close();
+    try (Table table = new Table(rowCount, file, rowCount.size(), rowSize)) {
+      buffer.clear();
+      long[] row0 = new long[] { 1, -2, 3, -4 };
+      for (int i = 0; i < row0.length; ++i)
+        buffer.putLong(row0[i]);
+      buffer.flip();
+      table.append(buffer);
+    }
+    
     setup(method, true);
-    table = Table.loadInstance(file, rowSize);
-    assertEquals(1, table.getRowCount());
-
-    ByteBuffer row = ByteBuffer.allocate(rowSize);
-    row.clear();
-    table.read(0, row);
-    row.flip();
-
-    buffer.clear();
-
-    assertEquals(buffer, row);
+    try (Table table = Table.loadInstance(file, rowSize)) {
+      assertEquals(1, table.getRowCount());
+  
+      ByteBuffer row = ByteBuffer.allocate(rowSize);
+      row.clear();
+      table.read(0, row);
+      row.flip();
+  
+      buffer.clear();
+  
+      assertEquals(buffer, row);
+    }
   }
 
 
@@ -268,50 +279,52 @@ public class TableTest {
 
     final int rowSize = 32;
     Keystone rowCount = new RollingKeystone(file, 0, 0L);
-    Table table = new Table(rowCount, file, rowCount.size(), rowSize);
     ByteBuffer buffer = ByteBuffer.allocate(2 * rowSize);
-    buffer.clear();
-    long[] row0 = new long[] { 1, -2, 3, -4 };
-    long[] row1 = new long[] { 5, -6, 7, -8 };
-    for (int i = 0; i < row0.length; ++i)
-      buffer.putLong(row0[i]);
-    for (int i = 0; i < row0.length; ++i)
-      buffer.putLong(row1[i]);
-    
-    buffer.flip();
-    table.append(buffer);
-    table.close();
+    try (Table table = new Table(rowCount, file, rowCount.size(), rowSize)) {
+      buffer.clear();
+      long[] row0 = new long[] { 1, -2, 3, -4 };
+      long[] row1 = new long[] { 5, -6, 7, -8 };
+      for (int i = 0; i < row0.length; ++i)
+        buffer.putLong(row0[i]);
+      for (int i = 0; i < row0.length; ++i)
+        buffer.putLong(row1[i]);
+      
+      buffer.flip();
+      table.append(buffer);
+    }
     setup(method, true);
-    table = Table.loadInstance(file, rowSize);
-    assertEquals(2, table.getRowCount());
-
-    // test reading both rows
-    ByteBuffer row = ByteBuffer.allocate(2 * rowSize);
-    row.clear();
-    table.read(0, row);
-    row.flip();
-
-    buffer.clear();
-
-    assertEquals(buffer, row);
+    try (Table table = Table.loadInstance(file, rowSize)) {
+      assertEquals(2, table.getRowCount());
+  
+      // test reading both rows
+      ByteBuffer row = ByteBuffer.allocate(2 * rowSize);
+      row.clear();
+      table.read(0, row);
+      row.flip();
+  
+      buffer.clear();
+  
+      assertEquals(buffer, row);
+      
+      // test reading row 1 alone
+      row.clear().limit(rowSize);
+      table.read(1, row);
+      row.flip();
+      buffer.clear().position(rowSize);
+      
+      
+      assertEquals(buffer, row);
+      
+      // test reading row 0 alone
+      row.clear().limit(rowSize);
+      table.read(0, row);
+      row.flip();
+      buffer.clear().limit(rowSize);
+      
+      
+      assertEquals(buffer, row);
     
-    // test reading row 1 alone
-    row.clear().limit(rowSize);
-    table.read(1, row);
-    row.flip();
-    buffer.clear().position(rowSize);
-    
-    
-    assertEquals(buffer, row);
-    
-    // test reading row 0 alone
-    row.clear().limit(rowSize);
-    table.read(0, row);
-    row.flip();
-    buffer.clear().limit(rowSize);
-    
-    
-    assertEquals(buffer, row);
+    }
   }
 
 

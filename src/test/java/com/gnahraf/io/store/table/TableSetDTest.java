@@ -102,6 +102,8 @@ public class TableSetDTest extends TableTestDHarness {
       key.putInt(deleted).flip();
       assertNull(tableSet.getRow(key));
     }
+    
+    tableSet.close();
   }
 
 }

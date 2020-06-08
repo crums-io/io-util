@@ -6,7 +6,6 @@ package com.gnahraf.io.buffer;
 
 import static com.gnahraf.io.buffer.BufferUtils.binaryFirst;
 import static com.gnahraf.io.buffer.BufferUtils.binaryLast;
-import static com.gnahraf.io.buffer.BufferUtils.isSorted;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;

@@ -52,6 +52,7 @@ public class TableTestHarness extends TestMethodHarness {
     
   }
   
+  @SuppressWarnings("resource")
   protected FileChannel openFile(String filename, boolean exists) throws IOException {
     File testFile = new File(unitTestDir(), filename);
     if (testFile.exists() != exists)

@@ -20,6 +20,7 @@ public class FuzzyThrottlerTest {
   
   private final static Logger LOG = Logger.getLogger(FuzzyThrottlerTest.class.getName());
 
+  @SuppressWarnings("unused")
   @Test
   public void demo() {
     

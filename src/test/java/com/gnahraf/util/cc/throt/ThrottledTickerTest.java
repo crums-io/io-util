@@ -4,13 +4,11 @@
 package com.gnahraf.util.cc.throt;
 
 
-import static org.junit.Assert.*;
-
 import java.util.logging.Logger;
+
 import org.junit.Test;
 
 import com.gnahraf.test.TestHelper;
-import com.gnahraf.util.cc.throt.ThrottledTicker;
 
 /**
  * 

@@ -7,10 +7,6 @@ package com.gnahraf.io.store.ks;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 
-import com.gnahraf.io.store.ks.CachingKeystone;
-import com.gnahraf.io.store.ks.Keystone;
-
-
 /**
  * 
  * @author Babak

@@ -15,8 +15,6 @@ import java.util.logging.Logger;
 
 import org.junit.Test;
 
-import com.gnahraf.io.store.ks.Keystone;
-import com.gnahraf.io.store.ks.KeystoneImpl;
 import com.gnahraf.test.TestDirs;
 
 
@@ -145,6 +143,7 @@ public class KeystoneImplTest {
     File testFile = new File(testDir, filename);
     if (testFile.exists())
       fail("test file already exists: " + testFile);
+    @SuppressWarnings("resource")
     FileChannel fileChannel = new RandomAccessFile(testFile, "rw").getChannel();
     return createKeystone(fileChannel, startOffset, initValue);
   }
@@ -165,6 +164,7 @@ public class KeystoneImplTest {
     File testFile = new File(testDir, filename);
     if (!testFile.exists())
       fail("test file does not exist: " + testFile);
+    @SuppressWarnings("resource")
     FileChannel fileChannel = new RandomAccessFile(testFile, "rw").getChannel();
     return loadKeystone(fileChannel, startOffset);
   }

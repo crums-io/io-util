@@ -22,6 +22,7 @@ public class TaskStackTest {
 
   @Test
   public void testEmpty() {
+    @SuppressWarnings("resource")
     TaskStack stack = new TaskStack();
     assertEquals(-1, stack.pop());
   }

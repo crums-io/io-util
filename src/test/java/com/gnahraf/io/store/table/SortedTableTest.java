@@ -39,6 +39,7 @@ public class SortedTableTest {
   }
 
 
+  @SuppressWarnings("resource")
   private void setup(String method, boolean exists) throws IOException {
     File testFile = new File(TestDirs.getTestDir(getClass()), method);
     if (testFile.exists() != exists)
@@ -74,6 +75,8 @@ public class SortedTableTest {
     assertFalse( searcher.search(key) );
     assertFalse( searcher.isHit() );
     assertEquals(-1, searcher.getHitRowNumber());
+    
+    table.close();
   }
 
   @Test

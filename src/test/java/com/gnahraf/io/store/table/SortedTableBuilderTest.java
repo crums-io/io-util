@@ -3,7 +3,8 @@
  */
 package com.gnahraf.io.store.table;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,11 +13,8 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.TreeSet;
 
-import org.junit.Test;
-
 import com.gnahraf.io.buffer.Covenant;
 import com.gnahraf.io.store.table.SortedTable.Searcher;
-import com.gnahraf.test.TestMethodHarness;
 import com.gnahraf.util.MinMaxObserver;
 
 /**
@@ -44,6 +42,7 @@ public class SortedTableBuilderTest extends TableSorterTest {
     }
     work.flip();
     File sortedFile = new File(unitTestDir(), "sorted");
+    @SuppressWarnings("resource")
     FileChannel file = new RandomAccessFile(sortedFile, "rw").getChannel();
     SortedTableBuilder builder = new SortedTableBuilder(rowWidth, ORDER);
     beginSortNanos = System.nanoTime();

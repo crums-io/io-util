@@ -143,6 +143,7 @@ public class TableSetTest extends TableTestHarness {
       assertTrue(key.hasRemaining());
       assertEquals(v, row.getInt());
     }
+    tableSet.close();
   }
   
   
@@ -159,6 +160,7 @@ public class TableSetTest extends TableTestHarness {
       assertTrue(key.hasRemaining());
       assertEquals(expectedEntry.getValue().intValue(), guessIntTableIndexFromRow(row));
     }
+    tableSet.close();
   }
   
 

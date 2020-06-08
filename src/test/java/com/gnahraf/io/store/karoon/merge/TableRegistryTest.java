@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.logging.Logger;
 
 import org.junit.Test;
 
@@ -152,6 +151,7 @@ public class TableRegistryTest extends TestMethodHarness {
     
     CommitRecord commit = newCommitRecord(tableIds, 1);
     
+    @SuppressWarnings("unused")
     Releaseable checkout = checkout(commit, 1, 3);
     Releaseable checkout2 = checkout(commit, 3, 7);
     assertNotNull(checkout2);

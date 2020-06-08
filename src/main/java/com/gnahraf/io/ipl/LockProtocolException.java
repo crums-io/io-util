@@ -6,6 +6,7 @@ package com.gnahraf.io.ipl;
 /**
  * Indicates someone else seems not to have played by the rules.
  */
+@SuppressWarnings("serial")
 public class LockProtocolException extends IllegalStateException {
 
   /**

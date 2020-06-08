@@ -16,7 +16,6 @@ import org.junit.Test;
 
 import com.gnahraf.io.store.table.SortedTable;
 import com.gnahraf.io.store.table.SortedTable.Searcher;
-import com.gnahraf.io.store.table.TableSet;
 import com.gnahraf.io.store.table.TableTestHarness;
 
 /**

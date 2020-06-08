@@ -19,7 +19,6 @@ import java.util.logging.Logger;
 import org.junit.Test;
 
 import com.gnahraf.io.store.table.SortedTable;
-import com.gnahraf.io.store.table.merge.ListMergeSort;
 import com.gnahraf.io.store.table.order.RowOrder;
 import com.gnahraf.io.store.table.order.RowOrders;
 import com.gnahraf.test.TestDirs;
@@ -47,6 +46,7 @@ public class ListMergeSortTest {
     unitTestDir = dir;
   }
   
+  @SuppressWarnings("resource")
   private FileChannel openFile(String filename, boolean exists) throws IOException {
     File testFile = new File(unitTestDir, filename);
     if (testFile.exists() != exists)

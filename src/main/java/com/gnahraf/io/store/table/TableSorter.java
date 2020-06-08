@@ -63,7 +63,10 @@ public class TableSorter {
     SortedViewBlock blockSorter = new SortedViewBlock(memoryBuffer.slice(), table.getRowWidth(), order);
     
     
-    try (FileChannel out = new FileOutputStream(output).getChannel()) {
+    try (
+        @SuppressWarnings("resource")
+        FileChannel out = new FileOutputStream(output).getChannel()) {
+      
       blockSorter.writeSortedCells(out);
     }
   }

@@ -238,6 +238,7 @@ public class TableSorterTest extends TableTestHarness {
     endSortNanos = System.nanoTime();
     
     unsorted.close();
+    @SuppressWarnings("resource")
     Table sorted = Table.newSansKeystoneInstance(
         new RandomAccessFile(sortedFile, "rw").getChannel(), rowWidth);
     // sort the values so that they become the expected sequence

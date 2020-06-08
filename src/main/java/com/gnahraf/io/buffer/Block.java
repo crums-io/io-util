@@ -152,7 +152,7 @@ public class Block {
   
   
   /**
-   * Returns a new copy of the cell at the specified <tt>index</tt>. The returned
+   * Returns a new view of the cell at the specified <tt>index</tt>. The returned
    * cell is a view on to the backing buffer: modifications in the returned buffer's content
    * are visible in the backing {@linkplain #buffer()} and vice versa. The position and limit of
    * the returned cell (set to zero and capacity, resp.) are independent of any other buffer.
@@ -169,11 +169,9 @@ public class Block {
   /**
    * Copies the contents of the cell at the given <tt>index</tt> into the
    * <tt>buffer</tt>. The position of the given buffer is advanced by the
-   * {@linkplain #cellWidth() cell width}. Invoking this method makes the instance
-   * especially unsuitable for concurrent read access.
+   * {@linkplain #cellWidth() cell width}.
    * 
    * @throws BufferOverflowException
-   * @deprecated use {@linkplain #cell(int)} instead: for the reason above I removed
    *             
    */
   public void copyCellInto(int index, ByteBuffer buffer) throws BufferOverflowException {
@@ -182,7 +180,6 @@ public class Block {
       throw new IllegalStateException(
           "Assertion failure at cell[" + index + "]=" + cell + " Illegal concurrent access?");
     buffer.put(cell);
-//    cell.rewind();
   }
   
 }

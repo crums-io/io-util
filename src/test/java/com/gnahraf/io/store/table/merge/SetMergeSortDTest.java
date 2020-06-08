@@ -152,6 +152,8 @@ public class SetMergeSortDTest extends TableTestDHarness {
       assertNull(tableSet.getRow(key));
     }
     
+    tableSet.close();
+    
     end = System.nanoTime();
     if (profile) {
       log.info("Total time taken to test corpus post merge: " + (end - start) / 1000 + " microseconds");
