@@ -12,9 +12,13 @@ import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
 import java.io.Reader;
 import java.io.UncheckedIOException;
+import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
+import java.nio.channels.FileChannel;
 import java.nio.file.StandardCopyOption;
 import java.util.Objects;
+
+import com.gnahraf.io.channels.ChannelUtils;
 
 /**
  * 
@@ -110,6 +114,44 @@ public class FileUtils {
       }
     }
     return buffer.toString();
+  }
+
+  
+  /**
+   * Loads the file to memory.
+   * 
+   * @param file    the target file
+   * 
+   * @return buffer positioned at zero with remaining bytes equal to the file length
+   */
+  public static ByteBuffer loadFileToMemory(File file) throws IOException {
+    return loadFileToMemory(file, null);
+  }
+  
+  /**
+   * Loads the file to memory.
+   * 
+   * @param file    the target file
+   * @param out    the optional buffer to write to. If provided, then on return it will be flipped, i.e. the remaining bytes will be equal to the file length 
+   * 
+   * @return buffer positioned at zero with remaining bytes equal to the file length
+   */
+  public static ByteBuffer loadFileToMemory(File file, ByteBuffer out) throws IOException {
+    final long bytes = file.length();
+    if (bytes > LOAD_AS_STRING_DEFAULT_MAX_FILE_SIZE && (out == null || out.capacity() < bytes))
+      throw new IllegalArgumentException("file size " +  bytes + " for " + file + " exceeds max capacity");
+    if (out == null)
+      out = ByteBuffer.allocate((int) bytes);
+    else {
+      if (out.capacity() < bytes)
+        throw new IllegalArgumentException("file size " +  bytes + " for " + file + " exceeds buffer capacity " + out.capacity());
+      out.clear().limit((int) bytes);
+    }
+    try (@SuppressWarnings("resource") FileChannel ch = new FileInputStream(file).getChannel()) {
+      ChannelUtils.readRemaining(ch, out);
+      out.flip();
+    }
+    return out;
   }
   
   
