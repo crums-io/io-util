@@ -58,12 +58,6 @@ public class SidTable extends SortedTable {
   
   
   
-  @Override
-  public SidTable sliceTable(long firstRow, long count) throws IOException {
-    SortedTable table = super.sliceTable(firstRow, count);
-    return new SidTable(table, id);
-  }
-  
   
   /**
    * Returns the table's decimal ID.

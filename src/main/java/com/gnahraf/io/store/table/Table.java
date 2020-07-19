@@ -17,8 +17,8 @@ import java.util.logging.Logger;
 
 import com.gnahraf.io.FileUtils;
 import com.gnahraf.io.channels.ChannelUtils;
+import com.gnahraf.io.channels.SharedChannel;
 import com.gnahraf.io.store.ks.CachingKeystone;
-import com.gnahraf.io.store.ks.FixedKeystone;
 import com.gnahraf.io.store.ks.Keystone;
 import com.gnahraf.io.store.ks.RollingKeystone;
 import com.gnahraf.io.store.ks.VolatileKeystone;
@@ -40,6 +40,15 @@ import com.gnahraf.io.store.ks.VolatileKeystone;
  * <tt>FileChannel</tt>'s own spec: it would be changing the file position and then
  * setting it back.
  * 
+ * <h3>Instance Duplicates</h3>
+ * 
+ * Copy constructor semantics have special meaning. Instances share the underlying
+ * <tt>FileChannel</tt> while still implementing the <tt>Channel</tt> interface methods
+ * <tt>isOpen()</tt> and <tt>close()</tt> on the copied instance. This is done by
+ * maintained a reference count on the copied instances.  So the contract here is that
+ * every user agrees to do the right thing: namely close their instance when they're done using
+ * it.
+ * 
  * 
  * @author Babak
  */
@@ -51,6 +60,7 @@ public class Table implements Channel {
 
   private final Keystone rowCount;
   private final FileChannel file;
+  private final SharedChannel sharedFile;
   private final long zeroRowFileOffset;
   private final int rowSize;
 
@@ -76,6 +86,7 @@ public class Table implements Channel {
     this.filePositionLock = new Object();
     this.rowCount = rowCount;
     this.file = file;
+    this.sharedFile = new SharedChannel(file);
     this.zeroRowFileOffset = zeroRowFileOffset;
     this.rowSize = rowSize;
 
@@ -92,53 +103,16 @@ public class Table implements Channel {
   /**
    * Copy constructor. Safe for read-only. Avoid write mode: hard to think thru.
    */
-  protected Table(Table copy) {
+  public Table(Table copy) {
     this.filePositionLock = copy.filePositionLock;
     this.rowCount = copy.rowCount;
     this.file = copy.file;
+    this.sharedFile = new SharedChannel(copy.sharedFile);
     this.zeroRowFileOffset = copy.zeroRowFileOffset;
     this.rowSize = copy.rowSize;
   }
   
   
-  private Table(Object filePositionLock, Keystone rowCount, FileChannel file, long zeroRowFileOffset, int rowSize) {
-    this.filePositionLock = filePositionLock;
-    this.rowCount = rowCount;
-    this.file = file;
-    this.zeroRowFileOffset = zeroRowFileOffset;
-    this.rowSize = rowSize;
-  }
-  
-  
-  
-  public Table sliceTable(long firstRow, long count) throws IOException {
-    if (count <= 0)
-      throw new IllegalArgumentException("count: " + count);
-    if (firstRow < 0)
-      throw new IllegalArgumentException("firstRow: " + firstRow);
-
-    long rowCountNow = rowCount.get();
-    if (rowCountNow < firstRow + count)
-      throw new IllegalArgumentException(
-          "Overflow: firstRow=" + firstRow + "; count=" + count + "; current row count = " + rowCountNow);
-    
-    Keystone snapshot = new FixedKeystone(count);
-    long zeroRowOffset = this.zeroRowFileOffset + firstRow * rowSize;
-    
-    return new Table(this.filePositionLock, snapshot, this.file, zeroRowOffset, this.rowSize) {
-
-      @Override
-      public long append(ByteBuffer rowData) {
-        throw new UnsupportedOperationException();
-      }
-
-      @Override
-      public void appendRows(Table source, long row, long count) {
-        throw new UnsupportedOperationException();
-      }
-      
-    };
-  }
   
   
   
@@ -156,6 +130,7 @@ public class Table implements Channel {
    * @throws IOException
    */
   public void set(long row, ByteBuffer rowData) throws IOException {
+    checkOpen();
     if (row < 0)
       throw new IllegalArgumentException("row: " + row);
     long currentCount = rowCount.get();
@@ -180,6 +155,7 @@ public class Table implements Channel {
    *          {@linkplain #getRowWidth() row size}.
    */
   public long append(ByteBuffer rowData) throws IOException {
+    checkOpen();
     int newRows = numRowsInBuffer(rowData);
     long currentRowCount = rowCount.get();
     long rowOffsetInFile = rowOffset(currentRowCount);
@@ -207,7 +183,8 @@ public class Table implements Channel {
    */
   public long append(ByteBuffer[] rows) throws IOException {
     long newRows = numRowsInBuffers(rows);
-    
+
+    checkOpen();
     synchronized (filePositionLock) {
       long firstRowNumber = rowCount.get();
       long rowOffsetInFile = rowOffset(firstRowNumber);
@@ -223,6 +200,7 @@ public class Table implements Channel {
   
   
   public void flush() throws IOException {
+    checkOpen();
     file.force(false);
   }
 
@@ -248,6 +226,7 @@ public class Table implements Channel {
           "; number of rows to copy into rawData buffer is " + rows +
           "; current row count is " + rowCount.get());
     long fileOffset = rowOffset(row);
+    checkOpen();
     ChannelUtils.readRemaining(file, fileOffset, rowData);
   }
   
@@ -269,6 +248,7 @@ public class Table implements Channel {
       return;
     long offset = rowOffset(row);
     long blockLength = count * rowSize;
+    checkOpen();
     ChannelUtils.transferBytes(file, target, offset, blockLength);
   }
   
@@ -295,6 +275,7 @@ public class Table implements Channel {
     long offset = source.rowOffset(row);
     long blockLength = count * rowSize;
     
+    checkOpen();
     synchronized (filePositionLock) {
       file.position(rowOffset(getRowCount()));
       ChannelUtils.transferBytes(source.file, file, offset, blockLength);
@@ -506,18 +487,24 @@ public class Table implements Channel {
       throw new IOException("negative row count (" + rows + ") in keystone");
     return rows;
   }
+  
+  
+  protected final void checkOpen() throws ClosedChannelException {
+    if (!sharedFile.isOpen())
+      throw new ClosedChannelException();
+  }
 
 
   @Override
   public boolean isOpen() {
-    return file.isOpen();
+    return sharedFile.isOpen();
   }
 
 
   @Override
   public void close() throws IOException {
     rowCount.commit();
-    file.close();
+    sharedFile.close();
   }
 
 }

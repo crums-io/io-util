@@ -22,7 +22,8 @@ import com.gnahraf.test.PerfProf;
 /**
  * Marker class for a sorted table.
  * 
- * @author Babak
+ * @see RowOrder
+ * @see Table
  */
 public class SortedTable extends Table implements Sorted {
   
@@ -95,25 +96,12 @@ public class SortedTable extends Table implements Sorted {
   
   /**
    * Copy constructor. Stick to read-only instances. Hard to reason otherwise.
+   * Resources are reference counted. Meaning: the caller agrees to <em>close</em>
+   * the instance once done with it.
    */
-  protected SortedTable(SortedTable copy) {
+  public SortedTable(SortedTable copy) {
     super(copy);
     this.order = copy.order;
-  }
-  
-  private SortedTable(Table table, RowOrder order) {
-    super(table);
-    this.order = order;
-  }
-  
-  
-
-
-
-  @Override
-  public SortedTable sliceTable(long firstRow, long count) throws IOException {
-    Table sliced = super.sliceTable(firstRow, count);
-    return new SortedTable(sliced, order);
   }
   
   
