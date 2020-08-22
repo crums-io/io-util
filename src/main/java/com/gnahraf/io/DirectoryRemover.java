@@ -41,13 +41,21 @@ public class DirectoryRemover {
   }
 
 
-  public static boolean removeTree(File root) {
+  /**
+   * Remove the given file or directory and returns the number of files deleted. The directory
+   * structure is traversed and deleted in post-order.
+   * 
+   * @param root file or directory
+   * @return the number of deleted files and directories; negative, if an error was encountered
+   *  on the last delete.
+   */
+  public static int removeTree(File root) {
     if (!root.exists())
-      return false;
+      return 0;
     try {
       root = root.getCanonicalFile();
     } catch (IOException iox) {
-      return false;
+      return 0;
     }
     int dirDepth = 0;
     File d = root;
@@ -62,29 +70,34 @@ public class DirectoryRemover {
           "directory depth (" + dirDepth + ") for " + root +
           " is less than minDepthFromRoot (" +
           minDepthFromRoot + ")");
+    Deleter deleter = new Deleter();
     try {
       FileSystemTraverser traverser = new FileSystemTraverser(root);
-      traverser.setListener(new Deleter());
+      traverser.setListener(deleter);
       traverser.run();
     } catch (FailedToDelete dx) {
-      return false;
+      return -deleter.count;
     }
-    return true;
+    return deleter.count;
   }
 
 
   protected static class Deleter implements TraverseListener<File> {
+    
+    private int count = 0;
 
     @Override
     public void postorder(File node) {
       boolean deleted = node.delete();
       if (!deleted)
         throw new FailedToDelete(node);
+      ++count;
     }
 
     @Override
     public void preorder(File node) {
     }
+    
 
   }
 
