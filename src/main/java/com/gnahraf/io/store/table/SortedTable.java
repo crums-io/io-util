@@ -119,7 +119,17 @@ public class SortedTable extends Table implements Sorted {
         Searcher.MIN_BUFFER_ROWS,
         Math.min(SortedTable.this.getRowCount(), rowsInBuffer));
     ByteBuffer buffer = ByteBuffer.allocate(rowsInBuffer * getRowWidth());
-    return new Searcher(buffer, getRowWidth(), order);
+    return newSearcher(buffer, getRowWidth(), order);
+  }
+  
+  
+  
+  /**
+   * Override to customize the {@linkplain Searcher} implementation. Called by
+   * {@linkplain #newSearcher(int)}.
+   */
+  protected Searcher newSearcher(ByteBuffer buffer, int rowWidth, RowOrder order) {
+    return new Searcher(buffer, rowWidth, order);
   }
   
   
