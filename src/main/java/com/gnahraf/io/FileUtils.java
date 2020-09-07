@@ -7,6 +7,7 @@ package com.gnahraf.io;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
@@ -152,6 +153,16 @@ public class FileUtils {
       out.flip();
     }
     return out;
+  }
+  
+  
+  public static void writeNewFile(File file, ByteBuffer contents) throws IOException {
+    if (file.exists())
+      throw new IllegalArgumentException(file + " already exists");
+    
+    try (@SuppressWarnings("resource") FileChannel channel = new FileOutputStream(file).getChannel()) {
+      ChannelUtils.writeRemaining(channel, contents);
+    }
   }
   
   

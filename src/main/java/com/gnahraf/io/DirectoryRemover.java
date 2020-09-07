@@ -52,6 +52,9 @@ public class DirectoryRemover {
   public static int removeTree(File root) {
     if (!root.exists())
       return 0;
+    else if (root.isFile())
+      return root.delete() ? 1 : -1;
+    
     try {
       root = root.getCanonicalFile();
     } catch (IOException iox) {
@@ -89,9 +92,9 @@ public class DirectoryRemover {
     @Override
     public void postorder(File node) {
       boolean deleted = node.delete();
+      ++count;
       if (!deleted)
         throw new FailedToDelete(node);
-      ++count;
     }
 
     @Override
