@@ -115,7 +115,18 @@ public class SortedTable extends Table implements Sorted {
     return order;
   }
   
-  
+  /**
+   * Returns the row with the specified key if found. Use this only if you're not interested
+   * in adjacent rows, row number, etc.
+   * 
+   * @param key semantics are defined by {@linkplain #order()}
+   * 
+   * @return the row if found; <tt>null</tt> o.w.
+   */
+  public ByteBuffer search(ByteBuffer key) throws IOException {
+    Searcher searcher = newSearcher(Searcher.MIN_BUFFER_ROWS);
+    return searcher.search(key) ? searcher.getHitRow() : null;
+  }
   
   
   public Searcher newSearcher(int rowsInBuffer) throws IOException {
