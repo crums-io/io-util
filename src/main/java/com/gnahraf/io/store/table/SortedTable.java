@@ -104,6 +104,12 @@ public class SortedTable extends Table implements Sorted {
     this.order = copy.order;
   }
   
+
+  
+  @Override
+  public SortedTable clone() {
+    return new SortedTable(this);
+  }
   
   public final RowOrder order() {
     return order;

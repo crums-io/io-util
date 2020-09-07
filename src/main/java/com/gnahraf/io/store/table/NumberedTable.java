@@ -44,10 +44,19 @@ public class NumberedTable extends SortedTable {
    * Reference-counted copy constructor.
    * 
    * @see SortedTable#SortedTable(SortedTable)
+   * @see #clone()
    */
   public NumberedTable(NumberedTable copy) {
     super(copy);
     this.id = copy.id;
+  }
+  
+  
+  
+  
+  @Override
+  public NumberedTable clone() {
+    return new NumberedTable(this);
   }
   
   

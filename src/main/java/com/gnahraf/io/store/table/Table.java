@@ -114,8 +114,14 @@ public class Table implements Channel {
   
   
   
-  
-  
+  /**
+   * Returns a new reference counted view of this instance. The caller agrees to close it
+   * immediately when done.
+   */
+  @Override
+  public Table clone() {
+    return new Table(this);
+  }
   
 
 
