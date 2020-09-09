@@ -22,8 +22,7 @@ public class SharedChannel implements Channel {
    * Creates a <em>first</em> instance.
    */
   public SharedChannel(AutoCloseable resource) {
-    sharedCounter = new int[1];
-    sharedCounter[0] = 1;
+    sharedCounter = new int[] { 1 };
     this.resource = Objects.requireNonNull(resource);
   }
   
@@ -35,7 +34,6 @@ public class SharedChannel implements Channel {
     this.resource = copy.resource;
     
     synchronized (sharedCounter) {
-      assert sharedCounter[0] >= 0;
       if (sharedCounter[0] < 1)
         throw new IllegalStateException("resource is already closed");
       ++sharedCounter[0];
@@ -61,6 +59,7 @@ public class SharedChannel implements Channel {
           handleClosingException(x);
         }
     }
+    closed = true;
   }
 
   protected void handleClosingException(Exception x) {
