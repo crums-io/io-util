@@ -18,6 +18,7 @@ import java.nio.CharBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.StandardCopyOption;
 import java.util.Objects;
+import java.util.logging.Logger;
 
 import io.crums.io.channels.ChannelUtils;
 
@@ -78,6 +79,38 @@ public class FileUtils {
       message += file.getAbsolutePath();
       throw new FileNotFoundException(message);
     }
+  }
+  
+  
+  /**
+   * Performs the given file move; failing that (after checking the target already exists),
+   * it deletes the file that failed to move.
+   * 
+   * @param src an existing file
+   * @param target the target file (the parent directory must exist).
+   * @return <tt>true</tt> iff the move succeeded; <tt>false</tt>, if the <tt>target</tt> file already
+   *  exists; failing that an <tt>IllegalStateException</tt> is raised
+   */
+  public static boolean moveOrDelete(File src, File target) {
+    if (!src.isFile())
+      throw new IllegalArgumentException("src must be an existing file: " + src);
+    
+    if (src.renameTo(target))
+      return true;
+    
+    if (src.equals(target))
+      throw new IllegalArgumentException("src and target are the same: " + src);
+    
+    if (!target.exists()) {
+      if (!target.getParentFile().isDirectory())
+        throw new IllegalArgumentException("target's parent directory does not exist. target: " + target);
+      else
+        throw new IllegalStateException("mv " + src + " " + target + " both failed and does not exist -- maybe a race");
+    }
+    if (!src.delete())
+      Logger.getGlobal().warning("failed to delete src " + src + " following failed mv to " + target);
+    
+    return false;
   }
   
   
@@ -156,12 +189,14 @@ public class FileUtils {
   }
   
   
-  public static void writeNewFile(File file, ByteBuffer contents) throws IOException {
+  public static void writeNewFile(File file, ByteBuffer contents) throws UncheckedIOException {
     if (file.exists())
       throw new IllegalArgumentException(file + " already exists");
     
     try (@SuppressWarnings("resource") FileChannel channel = new FileOutputStream(file).getChannel()) {
       ChannelUtils.writeRemaining(channel, contents);
+    } catch (IOException iox) {
+      throw new UncheckedIOException("on attempt to write to file " + file, iox);
     }
   }
   
