@@ -11,7 +11,7 @@ import java.util.function.Function;
 
 /**
  * Utility methods for lists. These are assume lists are <em>always</em> {@linkplain RandomAccess random access}.
- * To my mind, linked lists (despite have "list" in their name) don't belong to the interface.
+ * To my mind, linked lists (despite having "list" in their name) don't belong to the interface.
  */
 public class Lists {
 
@@ -40,6 +40,14 @@ public class Lists {
   }
   
   
+  /**
+   * Returns a reversed, read-only view of the given source list.
+   */
+  public static <T> List<T> reverse(List<T> source) {
+    return new ReverseView<>(source);
+  }
+  
+  
   
   
   
@@ -49,6 +57,28 @@ public class Lists {
    */
   public static abstract class RandomAccessList<T> extends AbstractList<T> implements RandomAccess {
     
+  }
+  
+  
+  protected static class ReverseView<T> extends RandomAccessList<T> {
+    
+    private final List<T> source;
+    
+    protected ReverseView(List<T> source) {
+      this.source = Objects.requireNonNull(source);
+    }
+
+    @Override
+    public T get(int index) {
+      int size = size();
+      Objects.checkIndex(index, size);
+      return source.get(size - 1 - index);
+    }
+
+    @Override
+    public int size() {
+      return source.size();
+    }
   }
   
   
