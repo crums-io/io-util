@@ -178,6 +178,24 @@ public class SetsTest {
   }
   
   
+  
+  @Test
+  public void testIntersectionIterator() {
+    Integer[] a = { 0,    4, 8, 13,     15, 34, 89, };
+    Integer[] b = { 1, 2, 4,    13, 14, 15, 23, 90, 93 };
+    Integer[] e = { 4, 13, 15,  };
+    
+    SortedSet<Integer> sa = new TreeSet<Integer>(Arrays.asList(a));
+    SortedSet<Integer> sb = new TreeSet<Integer>(Arrays.asList(b));
+    
+    Iterator<Integer> expected = Arrays.asList(e).iterator();
+    Iterator<Integer> actual = Sets.intersectionIterator(sa, sb);
+    while (expected.hasNext())
+      assertEquals(expected.next(), actual.next());
+    assertFalse(actual.hasNext());
+  }
+  
+  
 
 }
 

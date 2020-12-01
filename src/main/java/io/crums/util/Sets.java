@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
 import java.util.SortedSet;
@@ -82,6 +83,111 @@ public class Sets {
     return null;
   }
   
+  
+  
+  /**
+   * Returns an efficient iterator over the intersection of the given two sets.
+   */
+  public static <T> Iterator<T> intersectionIterator(SortedSet<T> a, SortedSet<T> b) {
+    return new IntersectionIterator<>(a, b);
+  }
+  
+  
+  /**
+   * Returns the exclusive tail set. This complements {@linkplain SortedSet#headSet(Object)}
+   * which also excludes the argument in the returned result.
+   * 
+   * @param <T> either implements {@linkplain Comparable Comparable&lt;T&gt;} or
+   *            the set has a comparator
+   * @param set 
+   * @param exclusiveFirst
+   * @return
+   */
+  public static <T> SortedSet<T> after(SortedSet<T> set, T exclusiveFirst) {
+    SortedSet<T> tail = set.tailSet(exclusiveFirst);
+    
+    return equal(tail.first(), exclusiveFirst, tail.comparator()) ?
+        trimFront(tail) :
+          tail;
+  }
+  
+  
+  private static <T> boolean equal(T a, T b, Comparator<? super T> comparator) {
+    return compare(a, b, comparator) == 0;
+  }
+  
+  
+  @SuppressWarnings("unchecked")
+  private static <T> int compare(T a, T b, Comparator<? super T> comparator) {
+    return comparator == null ? ((Comparable<? super T>) a).compareTo(b) : comparator.compare(a, b);
+  }
+  
+  
+  public static <T> SortedSet<T> trimFront(SortedSet<T> set) {
+    return trimFront(set, 1);
+  }
+  
+  
+  public static <T> SortedSet<T> trimFront(SortedSet<T> set, int elements) {
+    Objects.requireNonNull(set, "null set");
+    if (elements <= 0) {
+      if (elements == 0)
+        return set;
+      throw new IllegalArgumentException("elements: " + elements);
+    }
+    
+    if (set.size() <= elements)
+      return Collections.emptySortedSet();
+    
+    Iterator<T> iter = set.iterator();
+    for (int count = elements; count-- > 0; )
+      iter.next();
+    
+    T first = iter.next();
+    return set.tailSet(first);
+  }
+  
+  
+  private static class IntersectionIterator<T> implements Iterator<T> {
+    
+    private T next;
+    private SortedSet<T> a;
+    private SortedSet<T> b;
+    
+    IntersectionIterator(SortedSet<T> a, SortedSet<T> b) {
+      Objects.requireNonNull(a, "null a");
+      Objects.requireNonNull(b, "null b");
+      pump(a, b);
+    }
+    
+    
+    private void pump(SortedSet<T> a, SortedSet<T> b) {
+      next = firstIntersection(a, b);
+      if (next == null)
+        this.a = this.b = Collections.emptySortedSet();
+      else {
+        this.a = after(a, next);
+        this.b = after(b, next);
+      }
+    }
+
+    @Override
+    public boolean hasNext() {
+      return next != null;
+    }
+
+    @Override
+    public T next() {
+      if (next == null)
+        throw new NoSuchElementException();
+      
+      T out = next;
+      pump(a, b);
+      return out;
+    }
+    
+  }
+  
 
   /**
    * Returns a <tt>SortedSet</tt> view of the given ordered list. The returned object has undefined behavior
@@ -99,6 +205,11 @@ public class Sets {
    * Returns a <tt>SortedSet</tt> view of the given ordered list. The returned object has undefined behavior
    * if the given list contains out-of-order elements, or if the <tt>comparator</tt> is <tt>null</tt> and the
    * elements are not mutually comparable.
+   * 
+   * <h4>Note</h4>
+   * 
+   * <p>The generic parameter specification can be broadened with <tt>? super &lt;T&gt;</tt> types
+   * in arguments. Too many decisions: deferring for now.</p>
    * 
    * @param <T> the type (implements <tt>Comparable&lt;T&gt;</tt> if <tt>comparator</tt> is <tt>null</tt>)
    * 
