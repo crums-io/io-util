@@ -7,7 +7,8 @@ import java.nio.ByteBuffer;
 import java.util.Objects;
 
 /**
- * Read-write idiom using <tt>ByteBuffer</tt>s. Similar to that provided in Netty.
+ * Read-write idiom using <tt>ByteBuffer</tt>s. Similar to that provided in Netty, this
+ * partitions a <tt>ByteBuffer</tt> into readable and writable parts.
  */
 public class ReadWriteBuffer {
   
@@ -67,6 +68,28 @@ public class ReadWriteBuffer {
     writeBuffer.put(data);
     syncBuffers();
     return this;
+  }
+  
+  
+  /**
+   * Sets the position. Equivalently, this (re-)sets the number of bytes written.
+   * 
+   * @param position &ge; 0 and &le; {@linkplain #capacity()}
+   * @see #position(int)
+   */
+  public final ReadWriteBuffer position(int position) {
+    this.writeBuffer.position(position);
+    syncBuffers();
+    return this;
+  }
+  
+  
+  /**
+   * Returns the index where the next write would occur. Equivalently, this just a
+   * synonym for {@linkplain #readableBytes()}.
+   */
+  public final int position() {
+    return writeBuffer.position();
   }
   
   
