@@ -37,22 +37,58 @@ public abstract class MainTemplate extends UnanonymousType {
    * @see #mainImpl(String[])
    */
   protected void doMain(String[] args) {
-    if (help(args))
+    if (help(args)) {
       printHelpAndExit();
-    
+      return;
+    }
     try {
       
-      mainImpl(args);
-    
-    } catch (IllegalArgumentException iax) {
+      try {
+        
+        init(args);
+        
+      } catch (IllegalArgumentException iax) {
+        
+        exitInputError(makeErrorMessage(iax));
+        return;
+      }
       
-      exitInputError(makeErrorMessage(iax));
+      start();
+      
+    } catch (InterruptedException ix) {
+      
+      close();
+      StdExit.INTERRUPTED.exit();
     
     } catch (Exception e) {
       
+      close();
       exitOnProgramError(e, args);
     }
   }
+  
+  /**
+   * Initializes the instance. Program configuration occurs here. Note the exception semantics.
+   * 
+   * @param args                        arguments passed in from static main
+   * @throws IllegalArgumentException   indicates a user input error not detected early on
+   *                                    (as with {@linkplain #getRequiredParam(String[], String)} for e.g.)
+   * @throws Exception                  indicates a program failure; will exit after
+   *      invoking {@linkplain #close()}
+   */
+  protected abstract void init(String[] args) throws IllegalArgumentException, Exception;
+  
+  
+  /**
+   * Starts the program.
+   * 
+   * @throws InterruptedException if not handled before here, then the program exits with
+   *    {@linkplain StdExit#INTERRUPTED} code
+   * 
+   * @throws Exception signals abnormal program termination; the program will exit after
+   *      invoking {@linkplain #close()}
+   */
+  protected abstract void start() throws InterruptedException, Exception;
   
   /**
    * Exits the program on error (exit code 2).
@@ -64,7 +100,7 @@ public abstract class MainTemplate extends UnanonymousType {
     printError(makeErrorMessage(e));
     if (debugEnabled(args))
       e.printStackTrace(System.err);
-    System.exit(2);
+    StdExit.GENERAL_ERROR.exit();
   }
   
   private String makeErrorMessage(Exception e) {
@@ -75,16 +111,6 @@ public abstract class MainTemplate extends UnanonymousType {
   protected boolean debugEnabled(String[] args) {
     return contains(args, DEBUG_CMD);
   }
-  
-  /**
-   * The meat of the program, invoked by {@linkplain #doMain(String[])}.
-   * 
-   * @param args                        arguments passed in from static main
-   * @throws IllegalArgumentException   indicates a user input error not detected early on
-   *                                    (as with {@linkplain #getRequiredParam(String[], String)} for e.g.)
-   * @throws Exception                  indicates a program failure
-   */
-  protected abstract void mainImpl(String[] args) throws IllegalArgumentException, Exception;
   
   /**
    * Prints the given message on <tt>System.err</tt>, followed by an empty line.
@@ -104,7 +130,7 @@ public abstract class MainTemplate extends UnanonymousType {
     printUsage(System.err);
     System.err.println("Input '-help' for description details");
     System.err.println();
-    System.exit(1);
+    StdExit.ILLEGAL_ARG.exit();
   }
   
   /**
@@ -118,7 +144,7 @@ public abstract class MainTemplate extends UnanonymousType {
     printDescription();
     printUsage(System.out);
     printLegend(System.out);
-    System.exit(0);
+    StdExit.OK.exit();
   }
   
   /**
@@ -165,6 +191,15 @@ public abstract class MainTemplate extends UnanonymousType {
     if (value == null || value.isEmpty())
       exitInputError("Missing required " + param + "={value} parameter");
     return value;
+  }
+  
+  
+  /**
+   * Override to close all resources on program exit. By default this only invoked
+   * on exception handling.
+   */
+  protected void close() {
+    
   }
 
 }

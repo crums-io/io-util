@@ -7,12 +7,15 @@ package io.crums.io.store.table;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channel;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.FileChannel;
 import java.nio.channels.WritableByteChannel;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.logging.Logger;
 
 import io.crums.io.FileUtils;
@@ -22,6 +25,7 @@ import io.crums.io.store.ks.CachingKeystone;
 import io.crums.io.store.ks.Keystone;
 import io.crums.io.store.ks.RollingKeystone;
 import io.crums.io.store.ks.VolatileKeystone;
+import io.crums.util.Lists;
 
 
 /**
@@ -336,6 +340,70 @@ public class Table implements Channel {
     file.truncate(size);
     return size;
   }
+  
+
+  /**
+   * Returns a view of this table as a random access list. The table's current
+   * {@linkplain #getRowCount() row count} must be no greater than {@linkplain Integer#MAX_VALUE}.
+   * 
+   * @return a read-only snapshot of this table (the view's size is fixed)
+   * @throws IllegalStateException if {@linkplain #getRowCount()} &gt; {@linkplain Integer#MAX_VALUE}
+   */
+  public List<ByteBuffer> getListSnapshot() throws IOException, IllegalStateException {
+    
+    final int size;
+    {
+      long lsize = (int) getRowCount();
+      size = (int) lsize;
+      if (size != lsize)
+        throw new IllegalStateException(
+            "too many rows (" + lsize + "); cannot fit in 4-byte indexes");
+    }
+    
+    if (size == 0)
+      return Collections.emptyList(); // (be nice to the GC)
+    
+    List<ByteBuffer> view = new Lists.RandomAccessList<ByteBuffer>() {
+      
+      @Override
+      public int size() {
+        return size;
+      }
+      
+      @Override
+      public ByteBuffer get(int index) {
+        ByteBuffer row = ByteBuffer.allocate(getRowWidth());
+        try {
+          read(index, row);
+        } catch (IOException iox) {
+          throw new UncheckedIOException("on index " + index, iox);
+        }
+        return row.flip();
+      }
+    };
+    
+    return view;
+  }
+  
+  
+  protected final void checkOpen() throws ClosedChannelException {
+    if (!sharedFile.isOpen())
+      throw new ClosedChannelException();
+  }
+
+
+  @Override
+  public boolean isOpen() {
+    return sharedFile.isOpen();
+  }
+
+
+  @Override
+  public void close() throws IOException {
+    rowCount.commit();
+    sharedFile.close();
+  }
+  
 
 
   private long rowOffset(long row) {
@@ -492,25 +560,6 @@ public class Table implements Channel {
     if (rows < 0)
       throw new IOException("negative row count (" + rows + ") in keystone");
     return rows;
-  }
-  
-  
-  protected final void checkOpen() throws ClosedChannelException {
-    if (!sharedFile.isOpen())
-      throw new ClosedChannelException();
-  }
-
-
-  @Override
-  public boolean isOpen() {
-    return sharedFile.isOpen();
-  }
-
-
-  @Override
-  public void close() throws IOException {
-    rowCount.commit();
-    sharedFile.close();
   }
 
 }
