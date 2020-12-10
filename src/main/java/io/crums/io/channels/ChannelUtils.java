@@ -33,7 +33,7 @@ public class ChannelUtils {
   }
 
 
-  public static void readRemaining(ReadableByteChannel channel, ByteBuffer buffer) throws IOException {
+  public static ByteBuffer readRemaining(ReadableByteChannel channel, ByteBuffer buffer) throws IOException {
 
     int noopCountDown = MAX_NOOP_TRIALS;
 
@@ -45,10 +45,11 @@ public class ChannelUtils {
 
       noopCountDown = updateNoopCountDown(noopCountDown, amountRead);
     }
+    return buffer;
   }
 
 
-  public static void readRemaining(FileChannel file, long position, ByteBuffer buffer) throws IOException {
+  public static ByteBuffer readRemaining(FileChannel file, long position, ByteBuffer buffer) throws IOException {
 
     if (position + buffer.remaining() > file.size())
       throw new EofException("Attempt to read " + buffer.remaining() + " bytes starting from position " + position + "; file size is " + file.size() + " bytes");
@@ -65,6 +66,7 @@ public class ChannelUtils {
       noopCountDown = updateNoopCountDown(noopCountDown, amountRead);
     }
 
+    return buffer;
   }
 
 
