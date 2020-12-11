@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Babak Farhang 
+ * Copyright 2013 - 2020 Babak Farhang 
  */
 package io.crums.io;
 
@@ -23,8 +23,7 @@ import java.util.logging.Logger;
 import io.crums.io.channels.ChannelUtils;
 
 /**
- * 
- * @author Babak
+ * File utilities and convenience methods.
  */
 public class FileUtils {
   
@@ -50,15 +49,17 @@ public class FileUtils {
       throw new IllegalArgumentException("null path");
   }
   
-  public static void ensureDir(File dir) throws IllegalStateException {
+  public static File ensureDir(File dir) throws IllegalStateException {
     nonNullPath(dir);
     if (dir.isDirectory())
-      return;
+      return dir;
     if (dir.exists())
       throw new IllegalStateException("cannot overwrite ordinary file as dir: " + dir.getAbsolutePath());
     
     if (!dir.mkdirs() && !dir.isDirectory())
       throw new IllegalStateException("failed to create directory: " + dir.getAbsolutePath());
+    
+    return dir;
   }
   
   
