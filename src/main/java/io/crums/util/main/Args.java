@@ -4,6 +4,8 @@
 package io.crums.util.main;
 
 import java.util.ArrayList;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  *
@@ -46,6 +48,25 @@ public class Args {
   public static boolean getTrue(String[] args, String name) {
     return "true".equalsIgnoreCase(getValue(args, name, null));
   }
+  
+  
+  public static String orderCharOptions(String optValue, String chars) {
+    
+    SortedSet<Character> options = new TreeSet<>();
+    for (int index = 0; index < optValue.length(); ++index) {
+      char c = optValue.charAt(index);
+      if (chars.indexOf(c) == -1)
+        throw new IllegalArgumentException(
+            "illegal option '" + c + "': " + optValue);
+      if (!options.add(c))
+        throw new IllegalArgumentException(
+            "option '" + c + "' specified multiple times: " + optValue);
+    }
+    StringBuilder s = new StringBuilder(options.size());
+    for (char c : options)
+      s.append(c);
+    return s.toString();
+  }
 
 
 
@@ -54,7 +75,7 @@ public class Args {
     try {
       return value == null ? defaultValue : Integer.parseInt(value);
     } catch (NumberFormatException nfx) {
-      throw new IllegalArgumentException("while parsing " + name + "=" + value, nfx);
+      throw new IllegalArgumentException("on parsing " + name + "=" + value, nfx);
     }
   }
   

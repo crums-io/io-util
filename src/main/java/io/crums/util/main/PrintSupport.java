@@ -11,6 +11,40 @@ import java.io.PrintStream;
  */
 public class PrintSupport {
   
+  
+  public static String fenceCharsWithSpace(String string, int spaces) {
+    
+    if (spaces < 0 || spaces > 160) 
+      throw new IllegalArgumentException("spaces: " + spaces);
+    
+    StringBuilder fence = new StringBuilder(spaces);
+    for (int count = spaces; count-- > 0; )
+      fence.append(' ');
+    
+    return fenceChars(string, fence.toString());
+  }
+  
+  
+  
+  public static String fenceChars(String string, String fence) {
+    if (fence.isEmpty() || string.length() <= 1)
+      return string;
+    StringBuilder fenced =  new StringBuilder((string.length() - 1) * fence.length());
+    fenced.append(string.charAt(0));
+    for (int index = 1; index < string.length(); ++index)
+      fenced.append(fence).append(string.charAt(index));
+    return fenced.toString();
+  }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   protected final PrintStream out;
   
   private int indentation;
@@ -60,6 +94,29 @@ public class PrintSupport {
     printLineStart();
     out.println(restOfLine);
     lineEnded();
+  }
+  
+  /**
+   * 
+   * @param restOfLine
+   * @param center index of center on the console, typically near 40
+   */
+  public void printCentered(String restOfLine, int center) {
+    int len = restOfLine.length();
+    int spacePadding = center - getCharsWrittenToLine() - (len / 2);
+    printSpaces(spacePadding);
+    print(restOfLine);
+  }
+  
+  /**
+   * 
+   * @param restOfLine
+   * @param center index of center on the console, typically near 40
+   * @param spread number of spaces between adjacent characters
+   */
+  public void printCenteredSpread(String restOfLine, int center, int spread) {
+    restOfLine = fenceCharsWithSpace(restOfLine, spread);
+    printCentered(restOfLine, center);
   }
   
   

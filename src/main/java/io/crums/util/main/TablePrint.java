@@ -105,5 +105,28 @@ public class TablePrint extends PrintSupport {
       width += columnWidths[index];
     return width;
   }
+  
+  
+  public int getCenter() {
+    return getRowWidth() / 2;
+  }
+  
+  
+  
+  public void printlnCentered(String restOfLine) {
+    printCentered(restOfLine, getCenter());
+    println();
+  }
+  
+  
+  public void printlnCenteredSpread(String restOfLine) {
+    printlnCenteredSpread(restOfLine, 1);
+  }
+  
+  
+  public void printlnCenteredSpread(String restOfLine, int spread) {
+    printCenteredSpread(restOfLine, getCenter(), spread);
+    println();
+  }
 
 }

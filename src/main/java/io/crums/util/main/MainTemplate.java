@@ -48,8 +48,8 @@ public abstract class MainTemplate extends UnanonymousType {
         init(args);
         
       } catch (IllegalArgumentException iax) {
-        
-        exitInputError(makeErrorMessage(iax));
+        String msg = iax.getMessage();
+        exitInputError(msg == null ? makeErrorMessage(iax) : msg);
         return;
       }
       
@@ -126,6 +126,7 @@ public abstract class MainTemplate extends UnanonymousType {
    * code 1.
    */
   protected void exitInputError(String message) {
+    System.err.println();
     printError(message);
     printUsage(System.err);
     System.err.println("Input '-help' for description details");
