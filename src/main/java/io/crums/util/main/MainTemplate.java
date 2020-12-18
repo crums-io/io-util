@@ -71,7 +71,7 @@ public abstract class MainTemplate extends UnanonymousType {
    * Initializes the instance. Program configuration occurs here. Note the exception semantics.
    * 
    * @param args                        arguments passed in from static main
-   * @throws IllegalArgumentException   indicates a user input error not detected early on
+   * @throws IllegalArgumentException   indicates a user input error detected early on
    *                                    (as with {@linkplain #getRequiredParam(String[], String)} for e.g.)
    * @throws Exception                  indicates a program failure; will exit after
    *      invoking {@linkplain #close()}
