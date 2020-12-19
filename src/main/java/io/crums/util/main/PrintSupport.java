@@ -5,6 +5,7 @@ package io.crums.util.main;
 
 
 import java.io.PrintStream;
+import java.util.StringTokenizer;
 
 /**
  *
@@ -94,6 +95,62 @@ public class PrintSupport {
     printLineStart();
     out.println(restOfLine);
     lineEnded();
+  }
+  
+  
+  /**
+   * Prints a justified paragraph. Convenience for
+   * <pre>
+        printJustified(words, rightMargin);
+        println();
+   * </pre>
+   * 
+   * @see #printJustified(String, int)
+   */
+  public void printParagraph(String words, int rightMargin) {
+    printJustified(words, rightMargin);
+    println();
+  }
+  
+  /**
+   * Prints a snippet within the margins, adding new lines as necessary. The <em>left</em> margin
+   * is to be understood as the {@linkplain #getIndentation() indentation}; the
+   * <em>right</em> margin is specified as a parameter. This method neither
+   * prepends nor appends a new line to the input, unless it has to in order
+   * to maintain the right margin.
+   * 
+   * @param words paragraph content, words are whitespace delitimited
+   * @param rightMargin the right-side margin
+   *        (absolute, not relative to {@linkplain #getIndentation() indentation})
+   */
+  public void printJustified(String words, int rightMargin) {
+    
+    final int maxCharsPerLine = rightMargin - getIndentation(); // (best effort)
+    
+    if (maxCharsPerLine < 1)
+      throw new IllegalArgumentException(
+          "rightMargin " + rightMargin + "; indentation " + getIndentation());
+    
+    for (
+        StringTokenizer tokenizer = new StringTokenizer(words);
+        tokenizer.hasMoreTokens(); ) {
+      
+      String word = tokenizer.nextToken();
+      int len = word.length();
+      
+      if (getCharsWrittenToLine() >= maxCharsPerLine)
+        println();
+      
+      if (getCharsWrittenToLine() == 0)
+        print(word);
+      else if (len  + 1 + getCharsWrittenToLine() > maxCharsPerLine) {
+        println();
+        print(word);
+      } else {
+        print(" " + word);
+      }
+    }
+    
   }
   
   /**
