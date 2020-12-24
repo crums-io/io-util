@@ -3,6 +3,7 @@
  */
 package io.crums.io.store.karoon.merge;
 
+
 import static org.junit.Assert.*;
 
 import java.io.File;
@@ -15,8 +16,6 @@ import org.junit.Test;
 
 import io.crums.io.Releaseable;
 import io.crums.io.store.karoon.CommitRecord;
-import io.crums.io.store.karoon.merge.TableLifecycleListener;
-import io.crums.io.store.karoon.merge.TableRegistry;
 import io.crums.test.TestMethodHarness;
 import io.crums.util.CollectionUtils;
 

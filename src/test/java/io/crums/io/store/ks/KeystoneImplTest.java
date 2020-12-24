@@ -15,8 +15,6 @@ import java.util.logging.Logger;
 
 import org.junit.Test;
 
-import io.crums.io.store.ks.Keystone;
-import io.crums.io.store.ks.KeystoneImpl;
 import io.crums.test.TestDirs;
 
 

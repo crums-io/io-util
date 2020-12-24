@@ -3,6 +3,7 @@
  */
 package io.crums.io.store.table.merge;
 
+
 import static org.junit.Assert.*;
 
 import java.io.IOException;
@@ -17,7 +18,6 @@ import org.junit.Test;
 import io.crums.io.store.table.SortedTable;
 import io.crums.io.store.table.TableTestHarness;
 import io.crums.io.store.table.SortedTable.Searcher;
-import io.crums.io.store.table.merge.SetMergeSort;
 
 /**
  * 

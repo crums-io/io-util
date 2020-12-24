@@ -3,6 +3,7 @@
  */
 package io.crums.io.store.karoon;
 
+
 import static org.junit.Assert.*;
 
 import java.io.File;
@@ -15,8 +16,6 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import io.crums.io.store.karoon.TStore;
-import io.crums.io.store.karoon.TStoreConfig;
 import io.crums.io.store.karoon.TStoreConfig.Builder;
 import io.crums.io.store.karoon.merge.MergePolicy;
 import io.crums.io.store.karoon.merge.MergePolicyBuilder;

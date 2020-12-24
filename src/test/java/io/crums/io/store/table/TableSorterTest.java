@@ -14,8 +14,6 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import io.crums.io.store.table.Table;
-import io.crums.io.store.table.TableSorter;
 import io.crums.io.store.table.order.RowOrder;
 import io.crums.io.store.table.order.RowOrders;
 

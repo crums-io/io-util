@@ -13,8 +13,6 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import io.crums.io.DirectoryOrdering;
-import io.crums.io.FileSystemTraverser;
 import io.crums.test.TestMethodHarness;
 import io.crums.util.tree.TraverseListener;
 

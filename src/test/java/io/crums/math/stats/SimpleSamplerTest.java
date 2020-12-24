@@ -3,11 +3,10 @@
  */
 package io.crums.math.stats;
 
+
 import static org.junit.Assert.*;
 
 import org.junit.Test;
-
-import io.crums.math.stats.SimpleSampler;
 
 
 public class SimpleSamplerTest {

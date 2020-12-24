@@ -3,6 +3,7 @@
  */
 package io.crums.io.store.table;
 
+
 import static io.crums.test.TestHelper.method;
 import static org.junit.Assert.*;
 
@@ -18,7 +19,6 @@ import java.util.logging.Logger;
 import org.junit.After;
 import org.junit.Test;
 
-import io.crums.io.store.table.SortedTable;
 import io.crums.io.store.table.SortedTable.Searcher;
 import io.crums.io.store.table.order.RowOrder;
 import io.crums.io.store.table.order.RowOrders;

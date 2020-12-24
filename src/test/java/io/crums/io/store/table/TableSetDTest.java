@@ -14,9 +14,6 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import io.crums.io.store.table.SortedTable;
-import io.crums.io.store.table.TableSetD;
-
 /**
  * 
  * @author Babak

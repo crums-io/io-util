@@ -10,10 +10,6 @@ import java.util.logging.Logger;
 import org.junit.Test;
 
 import io.crums.test.TestHelper;
-import io.crums.util.cc.throt.FuzzySpeed;
-import io.crums.util.cc.throt.FuzzySpeedBean;
-import io.crums.util.cc.throt.FuzzyThrottler;
-import io.crums.util.cc.throt.ThrottledTicker;
 
 
 /**

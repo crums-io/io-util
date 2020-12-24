@@ -22,7 +22,6 @@ import io.crums.io.store.ks.Keystone;
 import io.crums.io.store.ks.KeystoneImpl;
 import io.crums.io.store.ks.RollingKeystone;
 import io.crums.io.store.ks.VolatileKeystone;
-import io.crums.io.store.table.Table;
 import io.crums.test.TestDirs;
 
 

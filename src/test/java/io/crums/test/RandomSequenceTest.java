@@ -1,4 +1,9 @@
+/*
+ * Copyright 2013 Babak Farhang 
+ */
 package io.crums.test;
+
+
 import static org.junit.Assert.*;
 
 import java.util.ArrayList;
@@ -7,11 +12,6 @@ import java.util.logging.Logger;
 
 import org.junit.Test;
 
-import io.crums.test.RandomSequence;
-
-/*
- * Copyright 2013 Babak Farhang 
- */
 
 /**
  * 

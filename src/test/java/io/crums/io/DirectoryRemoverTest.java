@@ -11,7 +11,6 @@ import java.io.IOException;
 
 import org.junit.Test;
 
-import io.crums.io.DirectoryRemover;
 import io.crums.test.TestMethodHarness;
 
 /**

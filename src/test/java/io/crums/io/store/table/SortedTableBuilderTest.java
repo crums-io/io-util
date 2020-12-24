@@ -3,8 +3,8 @@
  */
 package io.crums.io.store.table;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+
+import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,8 +14,6 @@ import java.nio.channels.FileChannel;
 import java.util.TreeSet;
 
 import io.crums.io.buffer.Covenant;
-import io.crums.io.store.table.SortedTable;
-import io.crums.io.store.table.SortedTableBuilder;
 import io.crums.io.store.table.SortedTable.Searcher;
 import io.crums.util.MinMaxObserver;
 

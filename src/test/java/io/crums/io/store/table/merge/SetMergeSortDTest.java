@@ -24,7 +24,6 @@ import io.crums.io.store.table.TableTestDHarness;
 import io.crums.io.store.table.SortedTable.Searcher;
 import io.crums.io.store.table.del.DeleteCodec;
 import io.crums.io.store.table.del.MagicNumDeleteCodec;
-import io.crums.io.store.table.merge.SetMergeSortD;
 import io.crums.io.store.table.order.RowOrder;
 import io.crums.io.store.table.order.RowOrders;
 

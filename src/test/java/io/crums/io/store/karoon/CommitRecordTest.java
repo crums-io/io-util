@@ -3,6 +3,7 @@
  */
 package io.crums.io.store.karoon;
 
+
 import static org.junit.Assert.*;
 
 import java.io.File;
@@ -13,7 +14,6 @@ import java.util.List;
 
 import org.junit.Test;
 
-import io.crums.io.store.karoon.CommitRecord;
 import io.crums.test.TestHelper;
 import io.crums.test.TestMethodHarness;
 import io.crums.util.CollectionUtils;

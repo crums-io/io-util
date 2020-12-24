@@ -19,7 +19,6 @@ import java.util.logging.Logger;
 import org.junit.Test;
 
 import io.crums.io.store.table.SortedTable;
-import io.crums.io.store.table.merge.ListMergeSort;
 import io.crums.io.store.table.order.RowOrder;
 import io.crums.io.store.table.order.RowOrders;
 import io.crums.test.TestDirs;

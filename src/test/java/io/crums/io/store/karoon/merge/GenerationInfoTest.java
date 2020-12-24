@@ -3,7 +3,9 @@
  */
 package io.crums.io.store.karoon.merge;
 
-import static org.junit.Assert.*;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -12,11 +14,6 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import org.junit.Test;
-
-import io.crums.io.store.karoon.merge.GenerationInfo;
-import io.crums.io.store.karoon.merge.MergePolicy;
-import io.crums.io.store.karoon.merge.MergePolicyBuilder;
-import io.crums.io.store.karoon.merge.TableInfo;
 
 /**
  * 

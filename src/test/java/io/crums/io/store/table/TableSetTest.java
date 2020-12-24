@@ -4,9 +4,7 @@
 package io.crums.io.store.table;
 
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -18,8 +16,6 @@ import java.util.Set;
 
 import org.junit.Test;
 
-import io.crums.io.store.table.SortedTable;
-import io.crums.io.store.table.TableSet;
 import io.crums.io.store.table.order.RowOrder;
 import io.crums.io.store.table.order.RowOrders;
 

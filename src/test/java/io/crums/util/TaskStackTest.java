@@ -5,14 +5,13 @@ package io.crums.util;
 
 import static org.junit.Assert.*;
 
+
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 
 import org.junit.Test;
-
-import io.crums.util.TaskStack;
 
 /**
  * 

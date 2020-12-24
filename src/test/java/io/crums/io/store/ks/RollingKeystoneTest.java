@@ -7,8 +7,6 @@ package io.crums.io.store.ks;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 
-import io.crums.io.store.ks.Keystone;
-import io.crums.io.store.ks.RollingKeystone;
 
 /**
  * 

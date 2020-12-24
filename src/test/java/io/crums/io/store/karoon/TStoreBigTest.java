@@ -4,10 +4,7 @@
 package io.crums.io.store.karoon;
 
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.io.File;
 import java.nio.ByteBuffer;
@@ -16,9 +13,6 @@ import java.text.DecimalFormat;
 import org.junit.Test;
 
 import io.crums.io.buffer.Covenant;
-import io.crums.io.store.karoon.CommitRecord;
-import io.crums.io.store.karoon.TStore;
-import io.crums.io.store.karoon.TStoreConfig;
 import io.crums.io.store.karoon.TStoreConfig.Builder;
 import io.crums.io.store.karoon.merge.MergePolicy;
 import io.crums.io.store.karoon.merge.MergePolicyBuilder;
