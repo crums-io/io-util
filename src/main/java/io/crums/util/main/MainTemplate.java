@@ -17,7 +17,7 @@ import io.crums.util.UnanonymousType;
  * do dangerous things--like exit the program. 
  * </p>
  * 
- * @see Args
+ * @see ArgList
  */
 public abstract class MainTemplate extends UnanonymousType {
   
@@ -30,11 +30,24 @@ public abstract class MainTemplate extends UnanonymousType {
   
   
   /**
-   * Launch point handling help and errors.
+   * Launch point handling help and errors. The model is as follows:
+   * <ol>
+   * <li>If there's a <tt>-help</tt> command in the argument list, then
+   *     {@linkplain #printHelpAndExit()} is invoked and the program exits.
+   * </li><li>
+   *     Next, {@linkplain #init(String[])} is invoked. {@linkplain IllegalArgumentException}s
+   *     thrown by this method are treated as user-input error and invoked
+   *     {@linkplain #exitInputError(String)} which terminates the program.
+   * </li><li>
+   *     Finally, {@linkplain #start()} gets invoked. Here, <tt>Exception</tt>s raised are generally
+   *     treated as <em>program</em> error. {@linkplain InterruptedException}s however are
+   *     special and are used as interrupt handling.
+   * </li>
+   * </ol>
    * 
    * @param args  the arguments passed in from static main
    * 
-   * @see #mainImpl(String[])
+   * @see ArgList
    */
   protected void doMain(String[] args) {
     if (help(args)) {
@@ -123,7 +136,9 @@ public abstract class MainTemplate extends UnanonymousType {
   /**
    * Exits the program after printing the given error <tt>message</tt>,
    * followed by the {@linkplain #printUsage(PrintStream)}. Exit status
-   * code 1.
+   * code 126.
+   * 
+   * @see StdExit#ILLEGAL_ARG
    */
   protected void exitInputError(String message) {
     System.err.println();

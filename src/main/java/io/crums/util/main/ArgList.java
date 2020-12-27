@@ -4,6 +4,7 @@
 package io.crums.util.main;
 
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -26,18 +27,45 @@ public class ArgList {
   private final String[] args;
   private final ArrayList<String> argsRemaining;
 
+  
   /**
+   * Constructor makes its own copy of argument.
    * 
+   * @param args command line arguments
    */
   public ArgList(String[] args) {
-    this.args = new String[args.length];
-    this.argsRemaining = new ArrayList<>(args.length);
+    this(Lists.asReadOnlyList(args));
+  }
+  
+  
+  
+  
+  /**
+   * Constructor makes its own copy of argument.
+   * 
+   * @param args command line arguments
+   */
+  public ArgList(List<String> args) {
+    this.args = new String[args.size()];
+    this.argsRemaining = new ArrayList<>(this.args.length);
     
-    for (int index = 0; index < args.length; ++index) {
-      String arg = args[index];
+    for (int index = 0; index < this.args.length; ++index) {
+      String arg = args.get(index);
       this.args[index] = arg;
       this.argsRemaining.add(arg);
     }
+  }
+  
+  
+  /**
+   * Copy constructor. The state of the new instance is initialized
+   * to the state of the <tt>copy</tt> but is henceforth independent.
+   * 
+   * @param copy
+   */
+  public ArgList(ArgList copy) {
+    this.args = copy.args;
+    this.argsRemaining = new ArrayList<>(copy.argsRemaining);
   }
   
 
@@ -100,21 +128,21 @@ public class ArgList {
   }
   
   
-  public String popRequiredValue(String name) {
-    String value = popValue(name);
+  public String removeRequiredValue(String name) {
+    String value = removeValue(name);
     if (value == null)
       throw new IllegalArgumentException("missing required value '" + name);
     return value;
   }
   
   
-  public boolean popBoolean(String name) {
-    return popBoolean(name, false);
+  public boolean removeBoolean(String name) {
+    return removeBoolean(name, false);
   }
   
   
-  public boolean popBoolean(String name, boolean defaultValue) {
-    String value = popValue(name);
+  public boolean removeBoolean(String name, boolean defaultValue) {
+    String value = removeValue(name);
     if (value == null)
       return defaultValue;
     if ("false".equals(value))
@@ -127,8 +155,8 @@ public class ArgList {
   
   
   
-  public long popLong(String name, long defaultValue) {
-    String value = popValue(name);
+  public long removeLong(String name, long defaultValue) {
+    String value = removeValue(name);
     if (value == null)
       return defaultValue;
     try {
@@ -139,9 +167,36 @@ public class ArgList {
   }
   
   
-  public List<Long> popNumbers() {
+  public List<Long> removeNumbers() {
     List<String> values = removeMatched(this::isNumber);
     return Lists.map(values, Long::parseLong);
+  }
+  
+  
+  
+  public List<File> removeExistingPaths() {
+    return removeExistingPaths(s -> new File(s).exists());
+  }
+  
+  
+  
+  public List<File> removeExistingFiles() {
+    return removeExistingPaths(s -> new File(s).isFile());
+  }
+  
+  
+  
+  public List<File> removeExistingDirectories() {
+    return removeExistingPaths(s -> new File(s).isDirectory());
+  }
+  
+  
+  
+  
+  
+  private List<File> removeExistingPaths(Function<String, Boolean> condition) {
+    List<String> paths = removeMatched(condition);
+    return Lists.map(paths, p -> new File(p));
   }
   
   
@@ -155,7 +210,14 @@ public class ArgList {
   }
   
   
-  public String popValue(String name) {
+  /**
+   * Removes and returns the value in the next <tt>name=<em>value</em></tt> pair,
+   * or <tt>null</tt> if the pattern does not occur. There may be multiple of these
+   * for the same name. This method consumes the first one.
+   * 
+   * @param name the name in the <tt>name=<em>value</em></tt> pair
+   */
+  public String removeValue(String name) {
     String arg = popOrGetNextMatch(s -> s.startsWith(name + EQ), true);
     return substring(arg, name.length() + 1);
   }
@@ -167,14 +229,14 @@ public class ArgList {
   
   
   
-  public String popValue(String name, String defaultValue) {
-    String value = popValue(name);
+  public String removeValue(String name, String defaultValue) {
+    String value = removeValue(name);
     return value == null ? defaultValue : value;
   }
   
   
   
-  public List<String> removedContained(String... args) {
+  public List<String> removeContained(String... args) {
     Set<String> argset;
     int len = args.length;
     switch (len) {
@@ -200,7 +262,7 @@ public class ArgList {
   
   
   
-  
+  // 'pop' here means remove, not really a stack
   private String popOrGetNextMatch(Function<String, Boolean> condition, boolean pop) {
     List<String> m = popOrGetMatches(condition, pop, 1);
     return m.isEmpty() ? null : m.get(0);

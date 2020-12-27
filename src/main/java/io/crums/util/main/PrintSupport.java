@@ -13,6 +13,9 @@ import java.util.StringTokenizer;
 public class PrintSupport {
   
   
+  public final static int DEFAULT_RIGHT_MARGIN = 80;
+  
+  
   public static String fenceCharsWithSpace(String string, int spaces) {
     
     if (spaces < 0 || spaces > 160) 
@@ -48,15 +51,23 @@ public class PrintSupport {
   
   protected final PrintStream out;
   
-  private int indentation;
+  private int indentation;  // same as leftMargin
+  private int rightMargin = DEFAULT_RIGHT_MARGIN;
 
   private boolean lineBegun;
   private int charsWrittenToLine;
   
+  
+  /**
+   * Creates a new instance with 0/80 left/right margins using {@linkplain System#out std out}. 
+   */
   public PrintSupport() {
     out = System.out;
   }
-  
+
+  /**
+   * Creates a new instance with 0/80 left/right margins using the given <tt>PrintStream</tt>. 
+   */
   public PrintSupport(PrintStream out) {
     this.out = out;
     if (out == null)
@@ -65,13 +76,26 @@ public class PrintSupport {
   
   
   
+  /**
+   * Returns the indententation. Synonym for {@linkplain #getLeftMargin() left margin}.
+   * @return &ge; 0
+   */
   public int getIndentation() {
     return indentation;
   }
   
+  
+  /**
+   * Sets the right margin. If the current {@linkplain #getLeftMargin() left margin} is
+   * less than or equal to the given margin, then it is bumped to 1 beyond.
+   * 
+   * @param spaces &ge; 0
+   */
   public void setIndentation(int spaces) {
     if (spaces < 0)
       throw new IllegalArgumentException("spaces " + spaces);
+    if (spaces >= rightMargin)
+      rightMargin = spaces + 1;
     indentation = spaces;
   }
   
@@ -99,6 +123,44 @@ public class PrintSupport {
   
   
   /**
+   * Sets the left and right margins for {@linkplain #printJustified(String)}.
+   * 
+   * @param left synonym for indentation
+   * @param right distance from zero column (&gt; <tt>left</tt>)
+   */
+  public void setMargins(int left, int right) {
+    if (right <= left)
+      throw new IllegalArgumentException("left (" + left + ") >= right (" + right + ")");
+    setIndentation(left);
+    this.rightMargin = right;
+  }
+  
+  
+  /**
+   * Synonym for {@linkplain #getIndentation()}.
+   */
+  public int getLeftMargin() {
+    return getIndentation();
+  }
+  
+  
+  /**
+   * Returns the right margin (counted from the left, since there is no notion of page size).
+   */
+  public int getRightMargin() {
+    return rightMargin;
+  }
+  
+  /**
+   * Prints a justified paragraph within the margins.
+   * 
+   * @see #setMargins(int, int)
+   */
+  public void printParagraph(String words) {
+    printParagraph(words, getRightMargin());
+  }
+  
+  /**
    * Prints a justified paragraph. Convenience for
    * <pre>
         printJustified(words, rightMargin);
@@ -110,6 +172,20 @@ public class PrintSupport {
   public void printParagraph(String words, int rightMargin) {
     printJustified(words, rightMargin);
     println();
+  }
+  
+  
+  /**
+   * Prints a snippet within the margins, adding new lines as necessary. This method neither
+   * prepends nor appends a new line to the input, unless it has to in order
+   * to maintain the right margin.
+   * 
+   * @param words paragraph content, words are whitespace delitimited
+   * 
+   * @see #setMargins(int, int)
+   */
+  public void printJustified(String words) {
+    printJustified(words, getRightMargin());
   }
   
   /**

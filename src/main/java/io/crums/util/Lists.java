@@ -4,6 +4,7 @@
 package io.crums.util;
 
 import java.util.AbstractList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.RandomAccess;
@@ -22,7 +23,9 @@ public class Lists {
    * Returns a read-only view.
    */
   public static <U, V> List<V> map(List<U> source, Function<U, V> mapper) {
-    return new ReadOnlyView<U, V>(source, mapper);
+    return source.isEmpty() ?
+        Collections.emptyList() :
+          new ReadOnlyView<U, V>(source, mapper);
   }
   
   
@@ -30,7 +33,9 @@ public class Lists {
    * Returns a read-write view.
    */
   public static <U, V> List<V> map(List<U> source, Isomorphism<U, V> iso) {
-    return new IsomorphicView<>(source, iso);
+    return source.isEmpty() ?
+        Collections.emptyList() :
+          new IsomorphicView<>(source, iso);
   }
   
   
@@ -44,7 +49,9 @@ public class Lists {
    * Returns a reversed, read-only view of the given source list.
    */
   public static <T> List<T> reverse(List<T> source) {
-    return new ReverseView<>(source);
+    return source.isEmpty() ?
+        Collections.emptyList() :
+          new ReverseView<>(source);
   }
   
   

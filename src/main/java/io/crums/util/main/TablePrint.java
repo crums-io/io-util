@@ -10,12 +10,14 @@ import java.text.NumberFormat;
 import java.util.Arrays;
 
 /**
- *
+ * Utility for printing columnar stuff to the console.
  */
 public class TablePrint extends PrintSupport {
   
   
   private final int[] columnWidths;
+  
+  private boolean formatNumber;
   
   @SuppressWarnings("serial")
   private NumberFormat numberFormat =
@@ -44,6 +46,7 @@ public class TablePrint extends PrintSupport {
   }
 
   /**
+   * 
    * @param out
    */
   public TablePrint(PrintStream out, int... columnWidths) {
@@ -60,6 +63,18 @@ public class TablePrint extends PrintSupport {
     if (numberFormat == null)
       throw new IllegalArgumentException("null");
     this.numberFormat = numberFormat;
+    formatNumber = true;
+  }
+  
+  
+  
+  public void setFormatNumber(boolean on) {
+    this.formatNumber = on;
+  }
+  
+  
+  public boolean isNumberFormatted() {
+    return formatNumber;
   }
   
   
@@ -73,7 +88,7 @@ public class TablePrint extends PrintSupport {
     for (int index = 0, cursor = 0; index < cells.length; ++index) {
       Object cell = cells[index];
       String string;
-      if (cell instanceof Number)
+      if (formatNumber && cell instanceof Number)
         string = numberFormat.format(cell);
       else if (cell == null)
         string = "";
