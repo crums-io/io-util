@@ -295,10 +295,18 @@ public class Sets {
     public boolean add(Object e) throws UnsupportedOperationException {
       throw new UnsupportedOperationException();
     }
+    
 
+    @SuppressWarnings("unchecked")
     @Override
-    public boolean containsAll(Collection<?> c) {
-      return elements.containsAll(c);
+    public boolean contains(Object o) {
+      if (o == null)
+        return false;
+      try {
+        return binarySearch((T) o) >= 0;
+      } catch (ClassCastException ccx) {
+        return false;
+      }
     }
 
     @Override
