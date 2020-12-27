@@ -131,7 +131,7 @@ public class ArgList {
   public String removeRequiredValue(String name) {
     String value = removeValue(name);
     if (value == null)
-      throw new IllegalArgumentException("missing required value '" + name);
+      throw new IllegalArgumentException("missing required value '" + name + "'");
     return value;
   }
   
