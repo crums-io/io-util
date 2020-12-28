@@ -93,6 +93,17 @@ public class Sets {
   }
   
   
+  
+  /**
+   * Returns an efficient iterator over the intersection of the given two ordered lists.
+   */
+  public static <T extends Comparable<T>> Iterator<T> intersectionIterator(List<T> a, List<T> b) {
+    SortedSet<T> sA = sortedSetView(a);
+    SortedSet<T> sB = sortedSetView(b);
+    return new IntersectionIterator<>(sA, sB);
+  }
+  
+  
   /**
    * Returns the exclusive tail set. This complements {@linkplain SortedSet#headSet(Object)}
    * which also excludes the argument in the returned result.
