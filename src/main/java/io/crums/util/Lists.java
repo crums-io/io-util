@@ -55,6 +55,16 @@ public class Lists {
   }
   
   
+  public static <T> List<T> concat(List<T> head, List<T> tail) {
+    if (head.isEmpty())
+      return tail;
+    else if (tail.isEmpty())
+      return head;
+    else
+      return new ConcatList<>(head, tail);
+  }
+  
+  
   
   
   
@@ -65,6 +75,68 @@ public class Lists {
   public static abstract class RandomAccessList<T> extends AbstractList<T> implements RandomAccess {
     
   }
+  
+  
+  /**
+   * A concatenated view of 2 lists.
+   */
+  public static class ConcatList<T> extends RandomAccessList<T> {
+    
+    private final List<T> head;
+    private final List<T> tail;
+    
+    /**
+     * Creates a new instance with the given <tt>first</tt> and <tt>second</tt>
+     * sublists.
+     * 
+     * @param head
+     * @param tail
+     * 
+     * @see #firstSubList()
+     * @see #secondSubList()
+     */
+    public ConcatList(List<T> head, List<T> tail) {
+      this.head = Objects.requireNonNull(head, "null head");
+      this.tail = Objects.requireNonNull(tail, "null tail");
+    }
+
+    @Override
+    public T get(int index) {
+      if (index < 0)
+        throw new IndexOutOfBoundsException(index);
+      
+      int firstSize = head.size();
+      
+      if (index < firstSize)
+        return head.get(index);
+      
+      if (index < firstSize + tail.size())
+        return tail.get(index - firstSize);
+      
+      throw new IndexOutOfBoundsException(index);
+    }
+
+    @Override
+    public int size() {
+      return head.size() + tail.size();
+    }
+    
+    /**
+     * Returns the head (lower index) sublist.
+     */
+    public List<T> headList() {
+      return head;
+    }
+    
+   /**
+    * Returns the tail (higher index) sublist.
+    */
+    public List<T> tailList() {
+      return tail;
+    }
+  }
+  
+  
   
   
   protected static class ReverseView<T> extends RandomAccessList<T> {

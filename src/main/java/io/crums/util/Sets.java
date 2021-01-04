@@ -84,6 +84,19 @@ public class Sets {
   }
   
   
+  /**
+   * Returns the first intersection of the given 2 naturally ordered lists or <tt>null</tt>
+   * if there isn't any.
+   * 
+   * @see #intersectionIterator(List, List)
+   */
+  public static <T extends Comparable<T>> T firstIntersection(List<T> a, List<T> b) {
+    SortedSet<T> sA = sortedSetView(a);
+    SortedSet<T> sB = sortedSetView(b);
+    return firstIntersection(sA, sB);
+  }
+  
+  
   
   /**
    * Returns an efficient iterator over the intersection of the given two sets.
@@ -95,7 +108,9 @@ public class Sets {
   
   
   /**
-   * Returns an efficient iterator over the intersection of the given two ordered lists.
+   * Returns an efficient iterator over the intersection of the given 2 naturally ordered lists.
+   * 
+   * @see #firstIntersection(List, List)
    */
   public static <T extends Comparable<T>> Iterator<T> intersectionIterator(List<T> a, List<T> b) {
     SortedSet<T> sA = sortedSetView(a);
