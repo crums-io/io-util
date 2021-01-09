@@ -41,5 +41,32 @@ public class Strings {
   
   
   
+  public static String nTh(int count) {
+    switch (count) {
+    case 1:
+      return "1st";
+    case 2:
+      return "2nd";
+    case 3:
+      return "3rd";
+    default:
+      return count + "th";
+    }
+  }
+  
+
+  
+  
+  public static String pluralize(String single, long count) {
+    if (count == 1)
+      return single;
+    if (single.endsWith("y"))
+      return single.substring(0, single.length() - 1) + "ies";
+    else
+      return single + "s";
+  }
+  
+  
+  
 
 }

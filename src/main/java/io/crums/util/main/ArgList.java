@@ -110,6 +110,13 @@ public class ArgList {
     return s.substring(0, s.length() - 1);
   }
   
+  
+  public void enforceNoRemaining() {
+    if (!isEmpty())
+      throw new IllegalArgumentException(
+          "illegal arguments / combination: " + getArgString());
+  }
+  
 
   /**
    * 
@@ -254,6 +261,11 @@ public class ArgList {
   }
   
   
+  /**
+   * Removes the arguments matching the <tt>condition</tt>, collects and returns them.
+   * If on evaluating a condition it throws an exception, the evaluation counts
+   * as <tt>false</tt>.
+   */
   public List<String> removeMatched(Function<String, Boolean> condition) {
     return popOrGetMatches(condition, true);
   }
@@ -278,7 +290,14 @@ public class ArgList {
     for (int index = 0; index < argsRemaining.size(); ) {
       String arg = argsRemaining.get(index);
       
-      if (condition.apply(arg)) {  // a hit
+      boolean hit;
+      try {
+        hit = condition.apply(arg);
+      } catch (Exception x) {
+        hit = false;
+      }
+      
+      if (hit) {  // a hit
         
         matches.add(arg);
         if (pop)
@@ -288,7 +307,7 @@ public class ArgList {
         if (--max == 0)
           break;
       
-      } else {                    // ! a hit
+      } else {    // ! a hit
         ++index;
       }
     }
