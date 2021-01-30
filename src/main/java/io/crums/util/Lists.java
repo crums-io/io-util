@@ -4,6 +4,7 @@
 package io.crums.util;
 
 import java.util.AbstractList;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -46,12 +47,31 @@ public class Lists {
   
   
   /**
+   * Returns a read-only copy of the argument. Used mostly with constructor
+   * arguments of immutable classes.
+   */
+  public static <T> List<T> readOnlyCopy(List<T> copy) {
+    
+    int size = Objects.requireNonNull(copy, "null copy").size();
+    switch (size) {
+    case 0:
+      return Collections.emptyList();
+    case 1:
+      return Collections.singletonList(copy.get(0));
+    }
+    ArrayList<T> out = new ArrayList<>(size);
+    out.addAll(copy);
+    return Collections.unmodifiableList(out);
+  }
+  
+  
+  /**
    * Returns a reversed, read-only view of the given source list.
+   * If the <tt>source</tt> is a singleton or empty, it is returned as-is.
    */
   public static <T> List<T> reverse(List<T> source) {
-    return source.isEmpty() ?
-        Collections.emptyList() :
-          new ReverseView<>(source);
+    
+    return source.size() <= 1 ? source : new ReverseView<>(source);
   }
   
   

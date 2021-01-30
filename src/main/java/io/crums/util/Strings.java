@@ -67,6 +67,18 @@ public class Strings {
   }
   
   
+  public static boolean isWhitespace(char c) {
+    switch (c) {
+    case '\t':
+    case '\n':
+    case '\f':
+    case '\r':
+    case ' ':
+      return true;
+    default:
+      return false;
+    }
+  }
   
 
 }

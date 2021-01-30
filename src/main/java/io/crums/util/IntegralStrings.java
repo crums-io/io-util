@@ -40,7 +40,7 @@ public class IntegralStrings {
   
   public static boolean isHex(String number) {
     int i = number.length();
-    if (i == 0)
+    if (i == 0 || (i & 1) != 0)
       return false;
     
     while (i-- > 0) {
@@ -59,6 +59,37 @@ public class IntegralStrings {
         break;
     }
     return i == -1;
+  }
+  
+  
+  
+  public static boolean isHexDigit(char c) {
+    switch (c) {
+    case '0':
+    case '1':
+    case '2':
+    case '3':
+    case '4':
+    case '5':
+    case '6':
+    case '7':
+    case '8':
+    case '9':
+    case 'A':
+    case 'B':
+    case 'C':
+    case 'D':
+    case 'E':
+    case 'F':
+    case 'a':
+    case 'b':
+    case 'c':
+    case 'd':
+    case 'e':
+    case 'f':
+      return true;
+    }
+    return false;
   }
   
   
