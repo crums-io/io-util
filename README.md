@@ -10,10 +10,7 @@ The objective is to provide reusable blocks of code for building efficient, cust
 
 ## What does it do?
 
-Early days.
-
-The highest level problem tackled so far (hot out of the oven and under development) concerns building, searching, and
-maintaining a large, externally stored,
+The highest level problem tackled so far  concerns building, searching, and maintaining a large, externally stored,
 fixed width, sorted table. The idea is that the library user specifies the row width (in bytes), a row comparison
 function (which implicitly defines any given row's key), and an optional delete codec, and they can spin up a
 fairly efficient, CRUD-like, durable, custom table in a few lines of code. The implementation models a sorted map
@@ -63,7 +60,10 @@ Here's an incomplete, but growing list of component features and attributes.
   row.
   
 
-## How to build
+## How to build (and install)
+
+This is a standard maven build. If you're gonna use the library in your own project (and want to include it as a dependency
+in your project's pom file), follow these steps.
 
 ### Prerequisites
 
@@ -71,24 +71,22 @@ Here's an incomplete, but growing list of component features and attributes.
 * Maven 3.x
 * Internet connection (possible dependency downloads by maven)
 
-### Building
+### Building & Installing
 
 Standard maven build. Change to the io-util project directory and invoke maven..
 
-<pre>
-$ cd io-util
-$ mvn clean package
-</pre>
+>`$ mvn clean install`
+
 
 The tests take a while (under a minute, at the time authored). When maven finishes
 you'll find a `target/test-artifacts` directory containing the side effects of the tests. If you want to also
 include the few performance tests (adds another 2 minutes, as of this date) add the `-Dperf_test=true` switch:
 
-`$ mvn clean package -Dperf_test=true`
+>`$ mvn clean package -Dperf_test=true`
 
 To generate javadocs
 
-`$ mvn javadoc:javadoc`
+>`$ mvn javadoc:javadoc`
 
 These get generated in the `target/site/apidocs` directory. Move that directory to a more
 permanent location, if you don't want it wiped out on the next build.
@@ -98,7 +96,7 @@ permanent location, if you don't want it wiped out on the next build.
 
 There's one write-heavy stress test for karoon. To run it
 
-`$ mvn clean test -Dtest=TStoreBigTest`
+>`$ mvn clean test -Dtest=TStoreBigTest`
 
 This inserts 1M randomly generated 64-byte rows. Typical insertion rates are around 7,000 rows
 per second. Note that the randomness actually works against the store: more real world, lumpy
@@ -112,6 +110,8 @@ drive] (https://en.wikipedia.org/wiki/Solid-state_drive#Hard_disk_drives).
 
 
 ## Milestones
+
+Feb. 11, 2021: Released under LGPL.
 
 Apr. 10, 2020: Version 0.0.2 - Bug fix for karoon w/o DeleteCodec (append-only/overwrite mode).
 
