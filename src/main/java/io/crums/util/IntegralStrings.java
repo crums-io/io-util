@@ -37,7 +37,9 @@ public class IntegralStrings {
   }
   
   
-  
+  /**
+   * @return {@code true} iff {@code number} is an even length string of hexadecimal digits.
+   */
   public static boolean isHex(String number) {
     int i = number.length();
     if (i == 0 || (i & 1) != 0)

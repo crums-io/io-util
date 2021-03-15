@@ -18,6 +18,12 @@ public class BufferUtils {
   private BufferUtils() {  }
   
   /**
+   * The null buffer. Tho it doesn't have to, it advertises itself as
+   * a read-only buffer. Stateless.
+   */
+  public final static ByteBuffer NULL_BUFFER = ByteBuffer.wrap(new byte[0]).asReadOnlyBuffer();
+  
+  /**
    * Positions the given <tt>buffer</tt> at the start of the specified cell. Arguments
    * are not checked.
    * <pre><tt>
@@ -39,6 +45,21 @@ public class BufferUtils {
     int limit = position + cellbytes;
     buffer.limit(limit).position(position);
     return buffer;
+  }
+  
+  
+  /**
+   * Returns a read-only slice of the given buffer with a few optimizations
+   * that are otherwise repetitive.
+   */
+  public static ByteBuffer readOnlySlice(ByteBuffer buffer) {
+    if (!buffer.hasRemaining())
+      return NULL_BUFFER;
+    
+    if (!buffer.isReadOnly())
+      buffer = buffer.asReadOnlyBuffer();
+    
+    return buffer.slice();
   }
   
   

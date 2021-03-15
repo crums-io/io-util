@@ -341,6 +341,21 @@ public class Table implements Channel {
     return size;
   }
   
+  
+  public void truncate(long newRowCount) throws IOException {
+    long rowCount = getRowCount();
+    if (newRowCount == rowCount)
+      return;
+    if (newRowCount < 0)
+      throw new IllegalArgumentException("newRowCount " + newRowCount);
+    if (newRowCount > rowCount)
+      throw new IllegalArgumentException("newRowCount " + newRowCount + " > rowCount " + rowCount);
+    
+    this.rowCount.set(newRowCount);
+    
+    trimToSize();
+  }
+  
 
   /**
    * Returns a view of this table as a random access list. The table's current
