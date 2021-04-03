@@ -4,6 +4,7 @@
 package io.crums.util;
 
 
+import java.nio.charset.Charset;
 import java.util.TreeSet;
 
 /**
@@ -13,6 +14,9 @@ public class Strings {
   
   // nobody calls
   private Strings() {  }
+  
+  
+  public final static Charset UTF_8 = Charset.forName("UTF-8");
   
   
   /**

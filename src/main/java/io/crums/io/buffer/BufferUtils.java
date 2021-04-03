@@ -49,8 +49,10 @@ public class BufferUtils {
   
   
   /**
-   * Returns a read-only slice of the given buffer with a few optimizations
-   * that are otherwise repetitive.
+   * Returns a new, read-only slice of the given buffer with a few optimizations
+   * that are otherwise repetitive. The one exception to <em>new</em> is when the
+   * buffer has no remain bytes: in that event the stateless singleton {@linkplain #NULL_BUFFER}
+   * is returned.
    */
   public static ByteBuffer readOnlySlice(ByteBuffer buffer) {
     if (!buffer.hasRemaining())
@@ -63,7 +65,31 @@ public class BufferUtils {
   }
   
   
-  
+  /**
+   * Slices out the given number of number of {@code bytes} from the {@code buffer}
+   * and returns it. On return, the buffer's position is advanced by as many bytes.
+   */
+  public static ByteBuffer slice(ByteBuffer buffer, int bytes) {
+    
+    //bounds check
+    if (bytes <= 0) {
+      if (bytes == 0)
+        return NULL_BUFFER;
+      
+      throw new IllegalArgumentException("negative bytes " + bytes);
+    
+    } else if (bytes > buffer.remaining()) {
+      throw new IllegalArgumentException(
+          "bytes " + bytes + " > remaining in buffer " + buffer);
+    }
+    
+    int limit = bytes + buffer.position();
+    int savedLimit = buffer.limit();
+    
+    ByteBuffer slice = buffer.limit(limit).slice();
+    buffer.position(limit).limit(savedLimit);
+    return slice;
+  }
   
 
   

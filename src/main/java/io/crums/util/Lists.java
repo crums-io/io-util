@@ -5,6 +5,7 @@ package io.crums.util;
 
 import java.util.AbstractList;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -40,9 +41,8 @@ public class Lists {
   }
   
   
-  
-  public static <T> List<T> asReadOnlyList(T[] array) {
-    return new ArrayView<>(array);
+  public static <T> List<T> asReadOnlyList(@SuppressWarnings("unchecked") T... element) {
+    return new ArrayView<>(element);
   }
   
   
@@ -50,17 +50,82 @@ public class Lists {
    * Returns a read-only copy of the argument. Used mostly with constructor
    * arguments of immutable classes.
    */
-  public static <T> List<T> readOnlyCopy(List<T> copy) {
+  public static <T> List<T> readOnlyCopy(Collection<? extends T> copy) {
     
-    int size = Objects.requireNonNull(copy, "null copy").size();
+    int size = Objects.requireNonNull(copy, "null list").size();
+    switch (size) {
+    case 0:
+      return Collections.emptyList();
+    case 1:
+      return Collections.singletonList(copy.iterator().next());
+    }
+    
+    ArrayList<T> out = new ArrayList<>(size);
+    out.addAll(copy);
+    return Collections.unmodifiableList(out);
+  }
+  
+  
+  
+  
+  /**
+   * Returns a read-only copy of the naturally ascending list containing no
+   * duplicate elements.
+   * 
+   * @param <T> naturally comparable type
+   * @param copy ordered list, monotonically ascending
+   * 
+   * @return a read-only copy
+   */
+  public static <T extends Comparable<T>> List<T> readOnlyOrderedCopy(List<T> copy) {
+    return readOnlyOrderedCopy(copy, true);
+  }
+  
+  
+  
+  /**
+   * Returns a read-only copy of the naturally ascending list.
+   * This doesn't sort the list: it validates that it is indeed sorted.
+   * 
+   * @param <T> naturally comparable type
+   * @param copy ordered list
+   * @param noDups if {@code true}, then {@code copy} must be monotonically ascending
+   * 
+   * @return a read-only copy
+   */
+  public static <T extends Comparable<T>> List<T> readOnlyOrderedCopy(List<T> copy, boolean noDups) {
+    
+    final int size = Objects.requireNonNull(copy, "null list").size();
     switch (size) {
     case 0:
       return Collections.emptyList();
     case 1:
       return Collections.singletonList(copy.get(0));
     }
+
     ArrayList<T> out = new ArrayList<>(size);
-    out.addAll(copy);
+    T prev = copy.get(0);
+    out.add(prev);
+    
+    for (int index = 1; index < size; ++index) {
+      T next = copy.get(index);
+      
+      int comp = next.compareTo(prev);
+      if (comp <= 0) {
+        if (comp == 0) {
+          if (noDups)
+            throw new IllegalArgumentException(
+                "duplicate (" + next + ") at index " + index + " in list " + copy);
+        } else {
+          throw new IllegalArgumentException(
+              "out-of-order elements at index " + index + "(" + prev + " and " + next +
+              ") in list " + copy);
+        }
+      }
+      prev = next;
+      
+      out.add(next);
+    }
     return Collections.unmodifiableList(out);
   }
   
