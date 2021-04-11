@@ -71,6 +71,18 @@ public class Strings {
   }
   
   
+  /**
+   * 
+   * @param thirdPpp 3rd person present tense of a verb (e.g. "divide")
+   * @param count &ge; 0
+   * 
+   * @return
+   */
+  public static String singularVerb(String thirdPpp, long count) {
+    return count == 1 ? thirdPpp + "s" : thirdPpp;
+  }
+  
+  
   public static boolean isWhitespace(char c) {
     switch (c) {
     case '\t':

@@ -21,9 +21,7 @@ import java.util.Objects;
  * </p>
  * <h3>Safe Under Concurrent Access</h3>
  * <p>
- * Concurrent read access is safe so long as the input filter list
- * at {@linkplain #FilteredIndex(List) construction} is not concurrently
- * modified behind the scenes.
+ * Concurrent read access is safe. Instances are immutable.
  * </p>
  */
 public class FilteredIndex {
@@ -32,19 +30,14 @@ public class FilteredIndex {
 
   /**
    * Constructs a new instance with the given <em>ordered</em> list
-   * of unique, non-negative, filtered index numbers. If the given list
-   * is immutable, then the new object will also be immutable.
-   * <p>
-   * Note for performance reasons, the base constructor does not validate.
-   * <em>The behavior of this class is undefined if the input list violates the above
-   * constraints.</em>
-   * 
-   * </p>
+   * of unique, non-negative, filtered index numbers.
    * 
    * @param filter non-null, non-negative, ordered list of numbers
    */
   public FilteredIndex(List<Long> filter) {
-    this.filter = Objects.requireNonNull(filter, "null filter list");
+    this.filter = Lists.readOnlyOrderedCopy(Objects.requireNonNull(filter, "null filter list"));
+    if (!filter.isEmpty() && filter.get(0) < 0)
+      throw new IllegalArgumentException("negative filter element at index [0]: " + filter.get(0));
   }
   
   
@@ -96,6 +89,8 @@ public class FilteredIndex {
    * Converts and returns the given <em>filtered</em> index as an
    * unfiltered index. The mapping is <em>one-to-one</em>.
    * 
+   * 
+   * 
    * @param filteredIndex &ge; 0
    * 
    * @return &ge; {@code filteredIndex}
@@ -108,40 +103,40 @@ public class FilteredIndex {
     if (filteredIndex < 0)
       throw new IllegalArgumentException("filteredIndex " + filteredIndex);
     
-    int filteredIndicesAhead = filteredIndicesAhead(filteredIndex);
+    final int maxAhead = this.filter.size();
     
-    if (filteredIndicesAhead == 0)
-      return filteredIndex;
+    int aheadCount = filteredIndicesAhead(filteredIndex);
     
-    long unFilteredIndex = filteredIndex + filteredIndicesAhead;
-
-    final int fsize = filter.size();
-
-    assert filteredIndicesAhead <= fsize;
-    
-    while (filteredIndicesAhead < fsize) {
-      int index = filteredIndicesAhead;
-      long nextFilter = filter.get(index);
-      if (nextFilter > unFilteredIndex)
-        break;
-      ++filteredIndicesAhead;
-      ++unFilteredIndex;
+    if (aheadCount != 0 && aheadCount != maxAhead) {
+      while (aheadCount < maxAhead ) {
+        int fAhead = filteredIndicesAhead(filteredIndex + aheadCount);
+        if (fAhead == aheadCount)
+          break;
+        else {
+          assert aheadCount < fAhead;
+          aheadCount = fAhead;
+        }
+      }
     }
     
-    return unFilteredIndex;
+    
+    return filteredIndex + aheadCount;
   }
+  
+  
+  
   
   
   /**
    * Returns the number of filtered indices ahead of (and including)
-   * the given index.
+   * the given <em>unfiltered</em> index. Here <em>including</em> means if the {@code index}
    * 
-   * @param index &ge; 0
+   * @param unfilteredIndex &ge; 0
    * 
    * @return a non-negative number
    */
-  public final int filteredIndicesAhead(long index) {
-    int fIndex = Collections.binarySearch(filter, index);
+  public final int filteredIndicesAhead(long unfilteredIndex) {
+    int fIndex = Collections.binarySearch(filter, unfilteredIndex);
     return fIndex < 0 ? -1 - fIndex : fIndex + 1;
   }
 
