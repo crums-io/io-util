@@ -7,6 +7,7 @@ package io.crums.util.main;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -17,6 +18,9 @@ import io.crums.util.Lists;
 
 /**
  * A consumable argument list.
+ * <p>
+ * Elements in returned list are ordered as they occur on the command line array.
+ * </p>
  */
 public class ArgList {
   
@@ -70,7 +74,9 @@ public class ArgList {
   
 
   
-  
+  /**
+   * Returns the number of remaining (unconsumed) arguments.
+   */
   public int size() {
     return argsRemaining.size();
   }
@@ -95,6 +101,9 @@ public class ArgList {
   }
   
   
+  /**
+   * Returns a <em>live</em>, read-only view of the remaining arguments.
+   */
   public List<String> argsRemaining() {
     return Collections.unmodifiableList(argsRemaining);
   }
@@ -140,6 +149,14 @@ public class ArgList {
     if (value == null)
       throw new IllegalArgumentException("missing required value '" + name + "'");
     return value;
+  }
+  
+  
+  /**
+   * Removes and returns the first remaining argument, if any; {@code null}, otherwise.
+   */
+  public String removeFirst() {
+    return argsRemaining.isEmpty() ? null : argsRemaining.remove(0);
   }
   
   
@@ -191,10 +208,49 @@ public class ArgList {
     return removeExistingPaths(s -> new File(s).isFile());
   }
   
+
+  /**
+   * Removes and returns the single, existing, remaining file specified on the
+   * command line.
+   * 
+   * @return an existing file, if one is found; {@code null} o.w.
+   * 
+   * @throws IllegalArgumentException if multiple arguments match existing files
+   */
+  public File removeExistingFile() {
+    List<File> file = removeExistingFiles();
+    switch (file.size()) {
+    case 0: return null;
+    case 1: return file.get(0);
+    default:
+      throw new IllegalArgumentException("ambiguous. Multiple existing files: " + file);
+    }
+    
+  }
+  
   
   
   public List<File> removeExistingDirectories() {
     return removeExistingPaths(s -> new File(s).isDirectory());
+  }
+  
+  
+  /**
+   * Removes and returns the single, existing, remaining directory specified on the
+   * command line.
+   * 
+   * @return an existing directory, if one is found; {@code null} o.w.
+   * 
+   * @throws IllegalArgumentException if multiple arguments match existing directories
+   */
+  public File removeExistingDirectory() throws IllegalArgumentException {
+    List<File> dir = removeExistingDirectories();
+    switch (dir.size()) {
+    case 0: return null;
+    case 1: return dir.get(0);
+    default:
+      throw new IllegalArgumentException("ambiguous. Multiple existing directories: " + dir);
+    }
   }
   
   
@@ -242,6 +298,24 @@ public class ArgList {
   }
   
   
+  /**
+   * Removes and returns a single required command from the given choice of many.
+   * 
+   * @param command var arg list of commands
+   * 
+   * @return the command
+   * 
+   * @throws IllegalArgumentException if no commands or multiple commands are parsed 
+   */
+  public String removeCommand(String... command) throws IllegalArgumentException {
+    List<String> cmd = removeContained(command);
+    if (cmd.isEmpty())
+      throw new IllegalArgumentException("no command specified");
+    if (cmd.size() != 1)
+      throw new IllegalArgumentException("only one command at a time may be given: " + cmd);
+    return cmd.get(0);
+  }
+  
   
   public List<String> removeContained(String... args) {
     Set<String> argset;
@@ -255,6 +329,12 @@ public class ArgList {
     }
     return removeContained(argset);
   }
+  
+  
+  public List<String> removeContained(Collection<String> args) {
+    return removeContained(new HashSet<String>(args));
+  }
+  
   
   public List<String> removeContained(Set<String> searchStrings) {
     return popOrGetMatches(searchStrings::contains, true);

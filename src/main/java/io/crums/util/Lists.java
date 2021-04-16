@@ -131,6 +131,43 @@ public class Lists {
   
   
   /**
+   * Determines whether the given {@code list} is sorted and contains no duplicates.
+   * 
+   * @param <T> naturally comparable type
+   * @param list
+   * 
+   * @return {@code isSorted(list, false)}
+   */
+  public static <T extends Comparable<T>> boolean isSortedNoDups(List<T> list) {
+    return isSorted(list, false);
+  }
+  
+  /**
+   * Determines whether the given {@code list} is sorted.
+   * 
+   * 
+   * @param <T> naturally comparable type
+   * @param dupsOk if {@code false}, then duplicate elements will fail (return false)
+   */
+  public static <T extends Comparable<T>> boolean isSorted(List<T> list, boolean dupsOk) {
+    final int size = list.size();
+    if (size < 2)
+      return true;
+    
+    T prev = list.get(0);
+    final int compMax = dupsOk ? 1 : 0; // exclusive
+    
+    for (int index = 1; index < size; ++index) {
+      T next = list.get(index);
+      if (next.compareTo(prev) < compMax)
+        return false;
+      prev = next;
+    }
+    return true;
+  }
+  
+  
+  /**
    * Returns a reversed, read-only view of the given source list.
    * If the <tt>source</tt> is a singleton or empty, it is returned as-is.
    */

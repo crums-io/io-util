@@ -33,7 +33,8 @@ public enum Opening {
    */
   CREATE,
   /**
-   * Read/write, create on demand. This is the default.
+   * Read/write, create on demand. This is the default and never fails.
+   * It's also the worst choice.
    */
   CREATE_ON_DEMAND;
   
@@ -85,10 +86,18 @@ public enum Opening {
   
   
   /**
-   * Determines whether the resouces is to be opened in read-only mode.
+   * Determines whether the resource is to be opened in read-only mode.
    */
   public boolean isReadOnly() {
     return this == READ_ONLY;
+  }
+  
+  
+  /**
+   * Determines whether the resource must already exist.
+   */
+  public boolean exists() {
+    return this == READ_WRITE_IF_EXISTS || this == READ_ONLY;
   }
   
   

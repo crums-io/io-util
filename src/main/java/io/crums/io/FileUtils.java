@@ -21,6 +21,7 @@ import java.util.Objects;
 import java.util.logging.Logger;
 
 import io.crums.io.channels.ChannelUtils;
+import io.crums.util.CloseableIterator;
 
 /**
  * File utilities and convenience methods.
@@ -126,6 +127,20 @@ public class FileUtils {
     return loadAsString(file, LOAD_AS_STRING_DEFAULT_MAX_FILE_SIZE);
   }
   
+  
+  /**
+   * Returns an iterator over the given text file's lines. Note the returned iterator
+   * must be eventually closed.
+   * 
+   * @param textFile a text file
+   * @return a {@code Iterator<String>} instance that must be eventually closed
+   * 
+   * @see CloseableIterator
+   */
+  public static FileLineIterator newLineIterator(File textFile) throws UncheckedIOException {
+    return new FileLineIterator(textFile);
+  }
+  
   public static String loadAsString(File file, long maxFileSize) throws IOException {
     assertFile(file);
 
@@ -229,7 +244,14 @@ public class FileUtils {
   }
 
   
-  
+  /**
+   * Recursively copies.
+   * 
+   * @param source       an existing path. If it's a directory, its files/subdirectories
+   *                     are recursively copied/created
+   * @param target       the target path
+   * @return             the number of <em>files</em> (not directories) copied
+   */
   public static int copyRecurse(File source, File target) throws IOException {
     return copyRecurse(source, target, false);
   }
@@ -246,7 +268,6 @@ public class FileUtils {
    *                     is raised. If <tt>target</tt> is a directory (and <tt>source</tt> is too),
    *                     then this argument doesn't matter
    * @return             the number of <em>files</em> (not directories) copied
-   * @throws IOException
    */
   public static int copyRecurse(File source, File target, boolean overwrite) throws IOException {
     Objects.requireNonNull(source, "source");
