@@ -86,7 +86,7 @@ public class PrintSupport {
   
   
   /**
-   * Sets the right margin. If the current {@linkplain #getLeftMargin() left margin} is
+   * Sets the left margin. If the current {@linkplain #getLeftMargin() left margin} is
    * less than or equal to the given margin, then it is bumped to 1 beyond.
    * 
    * @param spaces &ge; 0

@@ -91,6 +91,12 @@ public abstract class MainTemplate extends UnanonymousType {
    */
   protected abstract void init(String[] args) throws IllegalArgumentException, Exception;
   
+  protected ArgList newArgList(String[] args) {
+    ArgList argList = new ArgList(args);
+    argList.removeContained(DEBUG_CMD);
+    return argList;
+  }
+  
   
   /**
    * Starts the program.

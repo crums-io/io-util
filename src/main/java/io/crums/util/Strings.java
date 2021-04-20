@@ -4,6 +4,7 @@
 package io.crums.util;
 
 
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.TreeSet;
 
@@ -96,5 +97,40 @@ public class Strings {
     }
   }
   
+  
+  
+  
+  public static byte[] utf8Bytes(String string) {
+    return string.getBytes(UTF_8);
+  }
+  
+  
+  public static ByteBuffer utf8Buffer(String string) {
+    return ByteBuffer.wrap(utf8Bytes(string)).asReadOnlyBuffer();
+  }
+  
+  
+  public static String utf8String(byte[] bytes) {
+    return new String(bytes, UTF_8);
+  }
+  
+  
+  public static String utf8String(ByteBuffer bytes) {
+    byte[] b = new byte[bytes.remaining()];
+    bytes.get(b);
+    return new String(b, UTF_8);
+  }
+  
 
 }
+
+
+
+
+
+
+
+
+
+
+

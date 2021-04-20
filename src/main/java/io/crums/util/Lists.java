@@ -21,6 +21,50 @@ public class Lists {
   private Lists() { }
   
   
+  @SuppressWarnings("rawtypes")
+  private final static List SINK =
+      new RandomAccessList<>() {
+
+        @Override
+        public boolean add(Object e) {
+          return true;
+        }
+
+        @Override
+        public void add(int index, Object element) {   }
+
+        @Override
+        public boolean addAll(int index, Collection<? extends Object> c) {
+          return true;
+        }
+
+        @Override
+        public Object get(int index) {
+          throw new IndexOutOfBoundsException(index);
+        }
+    
+        @Override
+        public int size() {
+          return 0;
+        }
+      };
+  
+  
+  /**
+   * Returns a list whose <em>add</em> methods don't do anything. It breaks
+   * the interface, but if you have a method that takes a list as a collector,
+   * then this might sometimes be useful. Note, this is meant for use <em>inside</em>
+   * a class definition that knows how the list is used; it's not meant to be
+   * exposed to users.
+   * 
+   * @return an ever-empty list that silently drops whatever is added to it.
+   *         It's actually a singleton instance.
+   */
+  @SuppressWarnings("unchecked")
+  public static <T> List<T> sink() {
+    return (List<T>) SINK;
+  }
+  
   /**
    * Returns a read-only view.
    */
@@ -188,6 +232,40 @@ public class Lists {
   
   
   
+  /**
+   * Returns a read-only view of the given {@code array}.
+   */
+  public static List<Integer> intList(int[] array) {
+    Objects.requireNonNull(array, "null array");
+    return new RandomAccessList<Integer>() {
+      @Override
+      public Integer get(int index) {
+        return array[index];
+      }
+      @Override
+      public int size() {
+        return array.length;
+      }
+    };
+  }
+  
+
+  /**
+   * Returns a read-only view of the given {@code array}.
+   */
+  public static List<Long> longList(long[] array) {
+    Objects.requireNonNull(array, "null array");
+    return new RandomAccessList<Long>() {
+      @Override
+      public Long get(int index) {
+        return array[index];
+      }
+      @Override
+      public int size() {
+        return array.length;
+      }
+    };
+  }
   
   
   /**

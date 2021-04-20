@@ -12,7 +12,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Function;
+import java.util.function.Predicate;
 
 import io.crums.util.Lists;
 
@@ -165,6 +165,9 @@ public class ArgList {
   }
   
   
+  
+  
+  
   public boolean removeBoolean(String name, boolean defaultValue) {
     String value = removeValue(name);
     if (value == null)
@@ -190,10 +193,27 @@ public class ArgList {
     }
   }
   
-  
   public List<Long> removeNumbers() {
-    List<String> values = removeMatched(this::isNumber);
-    return Lists.map(values, Long::parseLong);
+    return removeNumbers(false);
+  }
+  
+  public List<Long> removeNumbers(boolean includeRanges) {
+    if (includeRanges) {
+      
+      List<String> ranges = removeMatched(NumbersArg.MATCHER);
+      if (ranges.isEmpty())
+        return Collections.emptyList();
+      
+      ArrayList<Long> out = new ArrayList<>();
+      for (String range : ranges)
+        NumbersArg.parse(range, out);
+      
+      return Collections.unmodifiableList(out);
+    
+    } else {
+      List<String> values = removeMatched(this::isNumber);
+      return Lists.map(values, Long::parseLong);
+    }
   }
   
   
@@ -257,7 +277,7 @@ public class ArgList {
   
   
   
-  private List<File> removeExistingPaths(Function<String, Boolean> condition) {
+  private List<File> removeExistingPaths(Predicate<String> condition) {
     List<String> paths = removeMatched(condition);
     return Lists.map(paths, p -> new File(p));
   }
@@ -270,6 +290,21 @@ public class ArgList {
     } catch (NumberFormatException nfx) {
       return false;
     }
+  }
+  
+  
+  /**
+   * Removes and returns the options gathered that match the given
+   * option characters.
+   * 
+   * @param chars the options (w/o the '-')
+   * 
+   * @return the gathered options sorted in alphabetical order, if any; {@code null} o.w.
+   */
+  public String removedDashedOptions(String chars) {
+    Options opts = new Options(chars);
+    List<String> matched = removeMatched(opts);
+    return opts.compose(matched);
   }
   
   
@@ -340,31 +375,44 @@ public class ArgList {
     return popOrGetMatches(searchStrings::contains, true);
   }
   
+  /**
+   * Removes and returns the single argument matching the {@code condition}, if found;
+   * {@code null} otherwise.
+   * 
+   * @throws IllegalArgumentException if multiple arguments match
+   */
+  public String removeSingle(Predicate<String> condition) throws IllegalArgumentException {
+    List<String> matched = removeMatched(condition);
+    switch (matched.size()) {
+    case 0: return null;
+    case 1: return matched.get(0);
+    default:
+      throw new IllegalArgumentException("ambiguous arguments: " + matched);
+    }
+  }
+  
   
   /**
    * Removes the arguments matching the <tt>condition</tt>, collects and returns them.
    * If on evaluating a condition it throws an exception, the evaluation counts
    * as <tt>false</tt>.
    */
-  public List<String> removeMatched(Function<String, Boolean> condition) {
-    return popOrGetMatches(condition, true);
+  public List<String> removeMatched(Predicate<String> condition) {
+    return popOrGetMatches(s -> condition.test(s), true);
   }
   
   
-  
-  
-  
   // 'pop' here means remove, not really a stack
-  private String popOrGetNextMatch(Function<String, Boolean> condition, boolean pop) {
+  private String popOrGetNextMatch(Predicate<String> condition, boolean pop) {
     List<String> m = popOrGetMatches(condition, pop, 1);
     return m.isEmpty() ? null : m.get(0);
   }
   
-  private List<String> popOrGetMatches(Function<String, Boolean> condition, boolean pop) {
+  private List<String> popOrGetMatches(Predicate<String> condition, boolean pop) {
     return popOrGetMatches(condition, pop, Integer.MAX_VALUE);
   }
   
-  private List<String> popOrGetMatches(Function<String, Boolean> condition, boolean pop, int max) {
+  private List<String> popOrGetMatches(Predicate<String> condition, boolean pop, int max) {
     ArrayList<String> matches = new ArrayList<>(Math.min(max, size()));
     
     for (int index = 0; index < argsRemaining.size(); ) {
@@ -372,7 +420,7 @@ public class ArgList {
       
       boolean hit;
       try {
-        hit = condition.apply(arg);
+        hit = condition.test(arg);
       } catch (Exception x) {
         hit = false;
       }

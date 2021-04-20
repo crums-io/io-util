@@ -8,6 +8,9 @@ import java.text.DecimalFormat;
 import java.text.FieldPosition;
 import java.text.NumberFormat;
 import java.util.Arrays;
+import java.util.List;
+
+import io.crums.util.Lists;
 
 /**
  * Utility for printing columnar stuff to the console.
@@ -113,12 +116,38 @@ public class TablePrint extends PrintSupport {
   }
   
   
-  
+  /**
+   * Returns the sum of the column widths.
+   */
   public int getRowWidth() {
     int width = 0;
     for (int index = columnWidths.length; index-- > 0; )
       width += columnWidths[index];
     return width;
+  }
+  
+  
+  /**
+   * Returns the column width at the given index.
+   */
+  public int getColWidth(int col) throws IndexOutOfBoundsException {
+    return columnWidths[col];
+  }
+  
+  
+  /**
+   * Returns the starting position of the given column.
+   */
+  public int getColStart(int col) throws IndexOutOfBoundsException {
+    int tally = 0;
+    for (int index = 0; index < col; ++index)
+      tally += columnWidths[index];
+    return tally;
+  }
+  
+  
+  public List<Integer> getColumnWidths() {
+    return Lists.intList(columnWidths);
   }
   
   

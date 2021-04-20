@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.StringTokenizer;
+import java.util.function.Predicate;
 
 import io.crums.util.Lists;
 
@@ -34,6 +35,8 @@ import io.crums.util.Lists;
  * </p>
  */
 public class NumbersArg {
+  
+  public final static Predicate<String> MATCHER = s -> parse(s, Lists.sink()) != null;
 
   // nobody calls
   private NumbersArg() {  }
@@ -77,7 +80,13 @@ public class NumbersArg {
    * @see #DEFAULT_MAX_RANGE
    */
   public static List<Long> parse(String arg) {
-    return parse(arg, DEFAULT_MAX_RANGE);
+    return parse(arg, DEFAULT_MAX_RANGE, null);
+  }
+  
+  
+
+  public static List<Long> parse(String arg, List<Long> out) {
+    return parse(arg, DEFAULT_MAX_RANGE, out);
   }
   
   
@@ -109,7 +118,7 @@ public class NumbersArg {
    * 
    * @return null or mutable list
    */
-  public static List<Long> parse(String arg, final int maxRange) {
+  public static List<Long> parse(String arg, final int maxRange, List<Long> out) {
     
     if (maxRange < MIN_RANGE)
       throw new IllegalArgumentException("maxRange " + maxRange + " < minimum " + MIN_RANGE);
@@ -125,7 +134,7 @@ public class NumbersArg {
         tokenizer.hasMoreTokens();
         cst.add(tokenizer.nextToken().trim()));
     
-    ArrayList<Long> nums = new ArrayList<>(Math.max(8, cst.size()));
+    List<Long> nums = out == null ? new ArrayList<>(Math.max(8, cst.size())) : out;
     
     try {
       for (String token : cst) {
@@ -138,13 +147,13 @@ public class NumbersArg {
         if (cindex < 1) {
           // (if zero, then interpret as a negative number)
           if (cindex == 0) {
-            // see if another comma follows (range definition starting from a negative value)
-            cindex = token.indexOf(COMMA, 1);
+            // see if another dash follows (range definition starting from a negative value)
+            cindex = token.indexOf(DASH, 1);
             if (cindex == -1) {
               // parse negative number
               nums.add(Long.parseLong(token));
               continue;
-            }     // else found a 2nd comma.. fall thru to range parsing
+            }     // else found a 2nd dash.. fall thru to range parsing
           
           } else {
             // cindex == -1 ..
