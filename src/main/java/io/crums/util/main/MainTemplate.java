@@ -116,6 +116,8 @@ public abstract class MainTemplate extends UnanonymousType {
    * @param args  the arguments passed in from static main
    */
   protected void exitOnProgramError(Exception e, String[] args) {
+    System.err.println();
+    System.err.println();
     printError(makeErrorMessage(e));
     if (debugEnabled(args))
       e.printStackTrace(System.err);

@@ -6,6 +6,7 @@ package io.crums.util;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.util.Objects;
 import java.util.TreeSet;
 
 /**
@@ -121,6 +122,147 @@ public class Strings {
     return new String(b, UTF_8);
   }
   
+  
+  
+  /**
+   * Un-escapes the given escaped sequence of characters. Escaping
+   * here just means c-style chars such as '\t', '\n', and so on.
+   * See {@linkplain CharEscape} for the list of escaped characters.
+   * 
+   * @param escaped a possibly escaped char sequence (null ok)
+   */
+  public static String unescape(String escaped) {
+    
+    return CharEscape.unescape(escaped);
+  }
+  
+  
+  
+  public enum CharEscape {
+    /**
+     * Tab '\t'.
+     */
+    TB('\t', "t"),
+    /**
+     * New line '\n'.
+     */
+    NL('\n', "n"),
+    /**
+     * Form feed '\f'.
+     */
+    FF('\f', "f"),
+    /**
+     * Carriage return '\r'.
+     */
+    CR('\r', "r"),
+    /**
+     * Back-slash '\\'.
+     */
+    BS('\\', "\\");
+    
+    
+    
+    public final static char BACK_SLASH = '\\';
+
+    private final static CharEscape[] vals = values();
+    
+    
+    
+    /**
+     * Escape character.
+     */
+    public final char eChar;
+    /**
+     * Escaped representation of eChar is of length 2.
+     */
+    public final String escaped;
+    
+    private CharEscape(char c, String esc) {
+      this.eChar = c;
+      this.escaped = '\\' + esc;
+    }
+    
+    
+    /**
+     * Returns the next escape position beyond {@code fromIndex}, or null
+     * if it doesn't occur.
+     * 
+     * @param escaped the string in escaped representation (null ok)
+     */
+    public static EscapePos nextEscapePos(String escaped, int fromIndex) {
+      if (escaped == null || escaped.length() - 2 < fromIndex)
+        return null;
+      
+      {
+        int bsIndex = escaped.indexOf(BACK_SLASH, fromIndex);
+        if (bsIndex == -1)
+          return null;
+        else
+          fromIndex = bsIndex;
+      }
+      
+      int min = escaped.length();
+      CharEscape c = null;
+      for (int ri = vals.length; ri-- > 0; ) {
+        var e = vals[ri];
+        int index = escaped.indexOf(e.escaped, fromIndex);
+        if (index >= 0 && index < min) {
+          min = index;
+          c = e;
+        }
+      }
+      
+      return c == null ? null : new EscapePos(min, c);
+    }
+    
+
+    /**
+     * Un-escapes the given escaped sequence of characters. Escaping
+     * here just means c-style chars such as '\t', '\n', and so on.
+     * See {@linkplain CharEscape} for the list of escaped characters.
+     * 
+     * @param escaped a possibly escaped char sequence (null ok)
+     */
+    public static String unescape(String escaped) {
+      EscapePos pos = nextEscapePos(escaped, 0);
+      if (pos == null)
+        return escaped;
+      
+      StringBuilder string = new StringBuilder(escaped.length());
+      string.append(escaped.substring(0, pos.index)).append(pos.echar());
+      
+      while (true) {
+        var nextPos = nextEscapePos(escaped, pos.index + 2);
+        if (nextPos == null)
+          break;
+        string.append(escaped.substring(pos.index + 2, nextPos.index)).append(nextPos.echar());
+        pos = nextPos;
+      }
+      
+      if (pos.index + 2 < escaped.length())
+        string.append(escaped.substring(pos.index + 2));
+      
+      return string.toString();
+    }
+  }
+  
+  
+  public static class EscapePos {
+    
+    public final int index;
+    public final CharEscape e;
+    
+    public EscapePos(int index, CharEscape e) {
+      this.index = index;
+      this.e = e;
+      if (index < 0) throw new IllegalArgumentException("index " + index);
+      Objects.requireNonNull(e, "null CharEscape");
+    }
+    
+    public char echar() {
+      return e.eChar;
+    }
+  }
 
 }
 

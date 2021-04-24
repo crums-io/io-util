@@ -222,10 +222,19 @@ public class ArgList {
     return removeExistingPaths(s -> new File(s).exists());
   }
   
-  
-  
+
   public List<File> removeExistingFiles() {
-    return removeExistingPaths(s -> new File(s).isFile());
+    return removeExistingFiles(false);
+  }
+  
+  public List<File> removeExistingFiles(boolean dupsOk) {
+    List<File> existingFiles = removeExistingPaths(s -> new File(s).isFile());
+    
+    if (!dupsOk && existingFiles.size() > 1 &&
+        new HashSet<>(existingFiles).size() != existingFiles.size())
+      throw new IllegalArgumentException("duplicate files: " + existingFiles);
+    
+    return existingFiles;
   }
   
 
@@ -251,7 +260,17 @@ public class ArgList {
   
   
   public List<File> removeExistingDirectories() {
-    return removeExistingPaths(s -> new File(s).isDirectory());
+    return removeExistingDirectories(false);
+  }
+  
+  public List<File> removeExistingDirectories(boolean dupsOk) {
+    List<File> existingDirs = removeExistingPaths(s -> new File(s).isDirectory());
+
+    if (!dupsOk && existingDirs.size() > 1 &&
+        new HashSet<>(existingDirs).size() != existingDirs.size())
+      throw new IllegalArgumentException("duplicate directories: " + existingDirs);
+    
+    return existingDirs;
   }
   
   
