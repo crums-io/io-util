@@ -6,6 +6,7 @@ package io.crums.util;
 
 import static org.junit.Assert.*;
 
+import java.nio.ByteBuffer;
 import java.util.Random;
 
 import org.junit.Test;
@@ -32,6 +33,69 @@ public class Base64_32Test extends SelfAwareTestCase {
     random.nextBytes(value);
     testImpl(value, label);
   }
+  
+  @Test
+  public void testEncodeNext32() {
+    byte[] value = new byte[64];
+    Random random = new Random(11);
+    random.nextBytes(value);
+    String[] encoded = new String[2];
+    ByteBuffer buffer = ByteBuffer.wrap(value);
+    encoded[0] = Base64_32.encodeNext32(buffer);
+    encoded[1] = Base64_32.encodeNext32(buffer);
+    assertFalse(buffer.hasRemaining());
+    ByteBuffer decoded = ByteBuffer.allocate(64);
+    for (var enc : encoded)
+      decoded.put(Base64_32.decode(enc));
+    
+    assertFalse(decoded.hasRemaining());
+    decoded.flip();
+    
+    assertEquals(buffer.clear(), decoded);
+  }
+  
+  @Test
+  public void testLoByte() {
+    System.out.println();
+    final Object label = new Object() {  };
+    
+    System.out.println(method(label) + ": testing all 256 combinations");
+    System.out.println();
+    
+    byte[] value = new byte[32];
+    for (int i = 0; i < 256; ++i) {
+      Object lb;
+      {
+        int edgeMod = i % 64;
+        lb = (edgeMod < 3 || edgeMod > 60) ? label : null;
+      }
+      value[31] = (byte) i;
+      testImpl(value, lb);
+    }
+  }
+  
+  @Test
+  public void testHiByte() {
+    System.out.println();
+    final Object label = new Object() {  };
+    
+    System.out.println(method(label) + ": testing all 256 combinations");
+    System.out.println();
+    
+    byte[] value = new byte[32];
+    for (int i = 0; i < 256; ++i) {
+      Object lb;
+      {
+        int edgeMod = i % 64;
+        lb = (edgeMod < 3 || edgeMod > 60) ? label : null;
+      }
+      value[0] = (byte) i;
+      testImpl(value, lb);
+    }
+  }
+  
+  
+  
   
   @Test
   public void testFew() {

@@ -4,6 +4,7 @@
 package io.crums.util;
 
 
+import java.nio.ByteBuffer;
 import java.util.Objects;
 
 /**
@@ -53,6 +54,7 @@ import java.util.Objects;
  * <li><em>Broken Doubleclick Selection</em>. Doubleclicking selects the whole number
  * as one word if it's all alphanumeric; the '-' character is not alphanumeric, so
  * it breaks the selection.</li>
+ * <li>Not widely known.</li>
  * </ul>
  * </p>
  * 
@@ -67,12 +69,21 @@ public class Base64_32 {
   public final static int ENC_LEN = 43; // ceiling(32 * 8 / 6)
 
   private final static char[] CHARS  = {
-    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
-    'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b',
-    'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p',
-    'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3',
-    '4', '5', '6', '7', '8', '9', '-', '_'
+    '0', '1', '2', '3','4', '5', '6', '7', '8', '9', 
+    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
+    'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
+    'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd',
+    'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
+    'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x',
+    'y', 'z', '-', '_'
   };
+  
+  
+  
+  /**
+   * The symbols used as digits, in ascending order.
+   */
+  public final static String SYMBOLS = new String(CHARS);
   
   
   
@@ -110,14 +121,80 @@ public class Base64_32 {
   }
   
   
+
+  /**
+   * Encodes and returns the next 32 bytes in the given data as a 43-character base64 string.
+   * On return, the position of the given buffer is advanced by 32 bytes.
+   */
+  public static String encodeNext32(ByteBuffer data) {
+    if (Objects.requireNonNull(data).remaining() < 32)
+      throw new IllegalArgumentException("expected at least 32 bytes; actual is " + data.remaining() + " bytes");
+    
+    StringBuilder out = new StringBuilder(43);
+    
+    final int pos = data.position();
+    
+    short twoBytes = (short) ((0xff & data.get(pos + 0)) << 6);
+    int winBitIndex = 10; // frontier index (from left)
+    int index = 0;
+    final int rightMask = 0b111111; // rightmost 6 bits
+    while (true) {
+      int cIndex = (twoBytes >> 10) & rightMask;
+      out.append(CHARS[cIndex]);
+      if (out.length() == ENC_LEN)
+        break;
+      twoBytes <<= 6;
+      winBitIndex -= 6;
+      if (winBitIndex < 6) {
+        ++index;
+        int b = ((0xff & data.get(pos + index)) << (8 - winBitIndex));
+        twoBytes |= b;
+        winBitIndex += 8;
+      }
+    }
+    
+    data.position(pos + 32);
+    
+    return out.toString();
+  }
+  
+  
+  
+
   /**
    * Decodes and returns the given 43-character base64 string as a 32-byte sequence.
    */
   public static byte[] decode(CharSequence base64) {
+    return decode(base64, new byte[32], 0);
+  }
+  
+  
+  /**
+   * Decodes and writes the given 43-character base64 string into the given
+   * {@code out} array as a 32-byte sequence starting from the given {@code offset}.
+   * 
+   * @param base64
+   * @param out an array big enough so that there are at least 32 bytes beyond {@code offset}
+   * @param offset &ge; 0
+   * 
+   * @return the {@code out} argument
+   */
+  public static byte[] decode(CharSequence base64, byte[] out, int offset) {
+    
+    // boilerplate arg checks
     if (Objects.requireNonNull(base64, "null base64").length() != ENC_LEN)
       throw new IllegalArgumentException(
           "expected " + ENC_LEN + " chars; actual given is " + base64.length() + ": " + base64);
-    byte[] out = new byte[32];
+    
+    if (Objects.requireNonNull(out, "null out").length - offset < 32)
+      throw new IllegalArgumentException(
+          "out.length " + out.length + " - offset " + offset + " < 32");
+    
+    if (offset < 0)
+      throw new IllegalArgumentException("offset " + offset);
+    
+    
+    
     short twoBytes;
     {
       char c = base64.charAt(0);
@@ -132,7 +209,7 @@ public class Base64_32 {
       twoBytes = (short) (sixBitVal << 12);
     }
     int winBitIndex = 4;
-    int outIndex = 0;
+    int outIndex = offset;
     for (int index = 1; index < ENC_LEN; ++index) {
       
       int sixBitVal = sixBitValue(base64.charAt(index)) << (10 - winBitIndex);
@@ -165,7 +242,7 @@ public class Base64_32 {
     case '7':
     case '8':
     case '9':
-      return 52 + c - '0';
+      return c - '0';
     
     case 'A':
     case 'B':
@@ -193,7 +270,7 @@ public class Base64_32 {
     case 'X':
     case 'Y':
     case 'Z':
-      return c - 'A';
+      return c - 'A' + 10;
     
     case '_':
       return 63;
@@ -224,7 +301,7 @@ public class Base64_32 {
     case 'x':
     case 'y':
     case 'z':
-      return 26 + c - 'a';
+      return c - 'a' + 36;
     default:
       throw new IllegalArgumentException("char '" + c + "' is not a Base64 digit");
     }
