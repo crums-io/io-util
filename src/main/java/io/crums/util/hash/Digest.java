@@ -32,6 +32,17 @@ public interface Digest {
   
   
   /**
+   * Convenience method for returning the digest array as a read-only buffer.
+   * 
+   * @return {@code ByteBuffer.wrap(digest.digest()).asReadOnlyBuffer()}
+   */
+  public static ByteBuffer bufferDigest(MessageDigest digest) {
+    Objects.requireNonNull(digest, "null digest");
+    return ByteBuffer.wrap(digest.digest()).asReadOnlyBuffer();
+  }
+  
+  
+  /**
    * Returns the number of bytes used to form a hash.
    * 
    * @see MessageDigest#getDigestLength()

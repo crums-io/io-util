@@ -3,6 +3,7 @@
  */
 package io.crums.util;
 
+
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -93,6 +94,8 @@ public class Lists {
   /**
    * Returns a read-only copy of the argument. Used mostly with constructor
    * arguments of immutable classes.
+   * 
+   * @param non-null, with non null values; empty OK
    */
   public static <T> List<T> readOnlyCopy(Collection<? extends T> copy) {
     
@@ -105,7 +108,13 @@ public class Lists {
     }
     
     ArrayList<T> out = new ArrayList<>(size);
-    out.addAll(copy);
+    for (var iter = copy.iterator(); iter.hasNext();) {
+      var next = iter.next();
+      // disallow null
+      if (next == null)
+        throw new IllegalArgumentException("argument has null elements: " + copy);
+      out.add(next);
+    }
     return Collections.unmodifiableList(out);
   }
   
