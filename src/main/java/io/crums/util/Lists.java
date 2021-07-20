@@ -258,6 +258,49 @@ public class Lists {
     };
   }
   
+  
+
+  /**
+   * Returns a contiguous list of {@code int}s in the range {@code [a, b]}.
+   * Consumes little (constant) memory no matter the size of the range.
+   * 
+   * @param a the highest or lowest number in the range (inclusive)
+   * @param b the highest or lowest number in the range (inclusive)
+   * 
+   * @return non-empty, read-only list
+   * @throws IllegalArgumentException if the size of the given range is greater
+   *         than {@linkplain Integer#MAX_VALUE}
+   */
+  public static List<Integer> intRange(int a, int b) {
+    final int lo;
+    int diff;
+    if (a < b) {
+      lo = a;
+      diff = b - a;
+    } else if (a == b) {
+      return Collections.singletonList(a);
+    } else {
+      lo = b;
+      diff = a - b;
+    }
+    if (diff < 0 || diff == Integer.MAX_VALUE)
+      throw new IllegalArgumentException("range overflow (" + a + "," + b + ")");
+    
+    final int size = diff + 1;
+    
+    return new RandomAccessList<Integer>() {
+      @Override
+      public Integer get(int index) {
+        Objects.checkIndex(index, size);
+        return lo + index;
+      }
+      @Override
+      public int size() {
+        return size;
+      }
+    };
+  }
+  
 
   /**
    * Returns a read-only view of the given {@code array}.
@@ -272,6 +315,49 @@ public class Lists {
       @Override
       public int size() {
         return array.length;
+      }
+    };
+  }
+  
+  
+  /**
+   * Returns a contiguous list of ascending {@code long}s in the range {@code [a, b]},
+   * inclusive. Consumes constant memory no matter the size of the range.
+   * 
+   * @param a the highest or lowest number in the range (inclusive)
+   * @param b the highest or lowest number in the range (inclusive)
+   * 
+   * @return non-empty, read-only list
+   * @throws IllegalArgumentException if the size of the given range is greater
+   *         than {@linkplain Integer#MAX_VALUE}
+   */
+  public static List<Long> longRange(long a, long b) {
+    final long lo;
+    long diff;
+    if (a < b) {
+      lo = a;
+      diff = b - a;
+    } else if (a == b) {
+      return Collections.singletonList(a);
+    } else {
+      lo = b;
+      diff = a - b;
+    }
+      
+    if (diff < 0 || diff >= Integer.MAX_VALUE)
+      throw new IllegalArgumentException("range overflow (" + a + "," + b + ")");
+    
+    final int isize = (int) diff + 1;
+    
+    return new RandomAccessList<Long>() {
+      @Override
+      public Long get(int index) {
+        Objects.checkIndex(index, isize);
+        return lo + index;
+      }
+      @Override
+      public int size() {
+        return isize;
       }
     };
   }
