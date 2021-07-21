@@ -174,7 +174,7 @@ public class FileUtils {
    * 
    * @return buffer positioned at zero with remaining bytes equal to the file length
    */
-  public static ByteBuffer loadFileToMemory(File file) throws IOException {
+  public static ByteBuffer loadFileToMemory(File file) throws UncheckedIOException {
     return loadFileToMemory(file, null);
   }
   
@@ -186,10 +186,12 @@ public class FileUtils {
    * 
    * @return buffer positioned at zero with remaining bytes equal to the file length
    */
-  public static ByteBuffer loadFileToMemory(File file, ByteBuffer out) throws IOException {
+  public static ByteBuffer loadFileToMemory(File file, ByteBuffer out) throws UncheckedIOException {
     final long bytes = file.length();
     if (bytes > LOAD_AS_STRING_DEFAULT_MAX_FILE_SIZE && (out == null || out.capacity() < bytes))
       throw new IllegalArgumentException("file size " +  bytes + " for " + file + " exceeds max capacity");
+    
+    
     if (out == null)
       out = ByteBuffer.allocate((int) bytes);
     else {
@@ -199,9 +201,10 @@ public class FileUtils {
     }
     try (@SuppressWarnings("resource") FileChannel ch = new FileInputStream(file).getChannel()) {
       ChannelUtils.readRemaining(ch, out);
-      out.flip();
+      return out.flip();
+    } catch (IOException iox) {
+      throw new UncheckedIOException("on loadFileToMemory( " + file + " ): " + iox, iox);
     }
-    return out;
   }
   
   

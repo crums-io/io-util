@@ -294,14 +294,7 @@ public class FilebasedLock implements InterProcLock {
   
   
   private ByteBuffer loadLock(long lockNumber) throws UncheckedIOException {
-    try {
-      File lockFile = lockPath(lockNumber);
-      return FileUtils.loadFileToMemory(lockFile);
-    } catch (FileNotFoundException fnfx) {
-      // normal
-      return null;
-    } catch (IOException iox) {
-      throw new UncheckedIOException("on loading lock " + lockNumber, iox);
-    }
+    File lockFile = lockPath(lockNumber);
+    return FileUtils.loadFileToMemory(lockFile);
   }
 }
