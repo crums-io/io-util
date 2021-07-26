@@ -47,17 +47,19 @@ public class Strings {
   
   
   
-  public static String nTh(int count) {
-    switch (count) {
+  public static String nTh(long count) {
+    final String suffix;
+    switch ((int) (count % 10)) {
     case 1:
-      return "1st";
+      suffix = "st";  break;
     case 2:
-      return "2nd";
+      suffix = "nd";  break;
     case 3:
-      return "3rd";
+      suffix = "rd";  break;
     default:
-      return count + "th";
+      suffix = "th";
     }
+    return count + suffix;
   }
   
 
