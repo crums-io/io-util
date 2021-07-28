@@ -9,6 +9,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
 import java.io.Reader;
@@ -219,6 +220,26 @@ public class FileUtils {
     }
   }
   
+  
+  public static long writeNewFile(File file, InputStream source) throws UncheckedIOException {
+    if (file.exists())
+      throw new IllegalArgumentException(file + " already exists");
+
+    byte[] buffer = new byte[16 * 1024];
+    try (FileOutputStream out = new FileOutputStream(file)) {
+      
+      while (true) {
+        int bytes = source.read(buffer);
+        if (bytes == -1)
+          break;
+        out.write(buffer, 0, bytes);
+      }
+      
+    } catch (IOException iox) {
+      throw new UncheckedIOException("on writeNewFile( " + file + ", " + source + " ): " + iox, iox);
+    }
+    return file.length();
+  }
   
   public static boolean trimFileLength(File file, long trimmedLength)
       throws IllegalArgumentException, UncheckedIOException{
