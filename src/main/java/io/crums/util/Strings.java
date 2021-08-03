@@ -49,15 +49,20 @@ public class Strings {
   
   public static String nTh(long count) {
     final String suffix;
-    switch ((int) (count % 10)) {
-    case 1:
-      suffix = "st";  break;
-    case 2:
-      suffix = "nd";  break;
-    case 3:
-      suffix = "rd";  break;
-    default:
+    int twoDigits = (int) (count % 100);
+    if (4 <= twoDigits && twoDigits <= 20)
       suffix = "th";
+    else {
+      switch ((int) (count % 10)) {
+      case 1:
+        suffix = "st";  break;
+      case 2:
+        suffix = "nd";  break;
+      case 3:
+        suffix = "rd";  break;
+      default:
+        suffix = "th";
+      }
     }
     return count + suffix;
   }
