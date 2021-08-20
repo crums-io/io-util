@@ -8,6 +8,7 @@ import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.RandomAccess;
@@ -95,9 +96,30 @@ public class Lists {
    * Returns a read-only copy of the argument. Used mostly with constructor
    * arguments of immutable classes.
    * 
-   * @param non-null, with non null values; empty OK
+   * @param copy non-null, with non null values; empty OK
    */
   public static <T> List<T> readOnlyCopy(Collection<? extends T> copy) {
+    return readOnlyCopy(copy, false);
+  }
+  
+
+  /**
+   * Returns a read-only copy of the argument. Used mostly with constructor
+   * arguments of immutable classes.
+   * 
+   * <h3>Duplicates semantics</h3>
+   * <p>
+   * These semantics are relevant only if invoked with {@code noDups} set to {@code true}.
+   * </p><p>
+   * We know nothing about type {@code <T>}, so equality (and hence duplicates)
+   * semantics is governed by {@code Object.equals(Object)} in the usual way.
+   * {@code <T>} must also implement {@code Object.hashCode()} per the general contract.
+   * </p>
+   * 
+   * @param copy non-null, with non null values; empty OK
+   * @param noDups if {@code true}, then the values are checked not to have duplicates
+   */
+  public static <T> List<T> readOnlyCopy(Collection<? extends T> copy, boolean noDups) {
     
     int size = Objects.requireNonNull(copy, "null list").size();
     switch (size) {
@@ -108,6 +130,13 @@ public class Lists {
     }
     
     ArrayList<T> out = new ArrayList<>(size);
+    
+    if (noDups) {
+      HashSet<T> set = new HashSet<>(size);
+      set.addAll(copy);
+      if (set.size() != size)
+        throw new IllegalArgumentException("argument contains duplicates: " + copy);
+    }
     for (var iter = copy.iterator(); iter.hasNext();) {
       var next = iter.next();
       // disallow null

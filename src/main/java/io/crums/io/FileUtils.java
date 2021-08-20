@@ -351,4 +351,17 @@ public class FileUtils {
       throw new IllegalArgumentException("source does not exist: " + source);
   }
 
+
+  /**
+   * Returns the parent directory of the given abstract pathname. If {@code path} is relative,
+   * and has no parent, then the path is resolved absolutely so that a parent directory can be
+   * found. In most use cases, the parent directory will actually exist; the JDK documentation
+   * is not very clear about how non-existent paths are resolved absolutely, so we must punt on
+   * describing that case.
+   */
+  public static File getParentDir(File path) {
+    File dir = path.getParentFile();
+    return dir == null ? path.getAbsoluteFile().getParentFile() : dir;
+  }
+
 }

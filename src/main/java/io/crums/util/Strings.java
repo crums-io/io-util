@@ -7,6 +7,7 @@ package io.crums.util;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Objects;
+import java.util.StringTokenizer;
 import java.util.TreeSet;
 
 /**
@@ -269,6 +270,83 @@ public class Strings {
     public char echar() {
       return e.eChar;
     }
+  }
+  
+  
+  /**
+   * Checks whether the given {@code name} qualifies as a syntactically valid
+   * Java class or package name. The name is expected to be qualified with dots (<b>.</b>)
+   * in the usual way, but it's not a requirement.
+   * 
+   * <h2>Examples</h2>
+   * <p>
+   * <table>
+   * <th><tr><td>Input</td><td></td><td>Output</td></tr></th>
+   * <tr><td>{@code abc.def.Xyz}</td><td></td><td>{@code true}</td></tr>
+   * <tr><td>{@code abc.def8.X_yz}</td><td></td><td>{@code true}</td></tr>
+   * <tr><td>{@code a.b}</td><td></td><td>{@code true}</td></tr>
+   * <tr><td>{@code a}</td><td></td><td>{@code true}</td></tr>
+   * <tr><td>{@code a.9}</td><td></td><td>{@code false}</td></tr>
+   * <tr><td>{@code _bc}</td><td></td><td>{@code false}</td></tr>
+   * <tr><td>{@code 9bc}</td><td></td><td>{@code false}</td></tr>
+   * <tr><td>{@code a9c}</td><td></td><td>{@code true}</td></tr>
+   * <tr><td>{@code abc.9ef.Xyz}</td><td></td><td>{@code false}</td></tr>
+   * <tr><td>{@code .def.Xyz}</td><td></td><td>{@code false}</td></tr>
+   * <tr><td>{@code abc..Xyz}</td><td></td><td>{@code false}</td></tr>
+   * </table>
+   * </p>
+   * 
+   */
+  public static boolean isPermissableJavaName(String name) {
+    if (name == null || name.isEmpty())
+      return false;
+    var tokenizer = new StringTokenizer(name, ".", true);
+    int count = 0;
+    while (tokenizer.hasMoreTokens()) {
+      String token = tokenizer.nextToken();
+      if ((count & 1) == 0) {
+        if (!validJavaNameToken(token))
+          return false;
+      } else if (!token.equals("."))
+        return false;
+      ++count;
+    }
+    return (count & 1) == 1;
+  }
+  
+  
+  private static boolean validJavaNameToken(String token) {
+    if (token.isEmpty())
+      return false;
+    if (!isAlphabet(token.charAt(0)))
+      return false;
+    for (int index = token.length(); index-- > 1; ) {
+      char c = token.charAt(index);
+      boolean ok =
+          isAlphabet(c) ||
+          isDigit(c) || c == '_';
+      if (!ok)
+        return false;
+    }
+    return true;
+  }
+  
+  
+  
+  /**
+   * @return {@code (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')}
+   */
+  public static boolean isAlphabet(char c) {
+    return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
+  }
+  
+  
+
+  /**
+   * @return {@code c >= '0' && c <= '9'}
+   */
+  public static boolean isDigit(char c) {
+    return c >= '0' && c <= '9';
   }
 
 }
