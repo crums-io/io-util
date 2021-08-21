@@ -7,8 +7,11 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 /**
@@ -39,7 +42,7 @@ import java.util.TreeSet;
  * I hope never to see a config file with that many values, so no bother.
  * </p>
  * @see #TidyProperties(List, boolean, Properties)
- * @see #keys()
+ * @see #entrySet()
  */
 @SuppressWarnings("serial")
 public class TidyProperties extends Properties {
@@ -98,7 +101,9 @@ public class TidyProperties extends Properties {
   }
   
   
+
   
+
   /**
    * <p>This override is the hook that controls the order name/value pairs are written.</p>
    * {@inheritDoc}
@@ -106,11 +111,15 @@ public class TidyProperties extends Properties {
    * @return an ordered enumeration of the existing keys
    */
   @Override
-  public Enumeration<Object> keys() {
-    TreeSet<Object> orderedKeys = new TreeSet<>(newComparator());
-    orderedKeys.addAll(super.keySet());
-    return Collections.enumeration(orderedKeys);
+  public Set<Map.Entry<Object, Object>> entrySet() {
+    var baseEntries = super.entrySet();
+    TreeMap<Object, Object> orderedMap = new TreeMap<>(newComparator());
+    for (var e : baseEntries) {
+      orderedMap.put(e.getKey(), e.getValue());
+    }
+    return orderedMap.entrySet();
   }
+  
 
   /**
    * Returns a comparator that orders keys (property names) in the order specified at construction.
