@@ -46,6 +46,7 @@ import java.util.Objects;
  * <p>
  * <ul>
  * <li><em>Compact</em>. Nearly 50% savings compared to hex.</li>
+ * <li><em>URL friendly</em>. Does not need URL encoding.</li>
  * </ul>
  * </p>
  * <h4>Cons</h4>

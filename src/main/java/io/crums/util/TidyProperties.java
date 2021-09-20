@@ -3,16 +3,13 @@
  */
 package io.crums.util;
 
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
 
 /**
  * Utility for organizing a properties file with some semblance of order.
@@ -46,6 +43,44 @@ import java.util.TreeSet;
  */
 @SuppressWarnings("serial")
 public class TidyProperties extends Properties {
+  
+  
+  
+  /**
+   * Returns a sub-{@linkplain Properties} containing only those names starting
+   * with the given {@code prefix}, and then with the prefix stripped from the
+   * name. This is a metaphor for nesting properties (in the same way a JSON
+   * or XML element doesn't care about its parent).
+   * 
+   * @param props non-null
+   * @param prefix non-null. Should be "dotted"; if a trailing dot is not present
+   *               (and if not empty), then a '.' is appended
+   * 
+   * @return usually a new sub-properties. However, if either argument is empty
+   *         then {@code props} is returned
+   */
+  public static Properties subProperties(Properties props, String prefix) {
+    Objects.requireNonNull(props, "null props");
+    Objects.requireNonNull(prefix, "null prefix");
+    if (prefix.isEmpty() || props.isEmpty())
+      return props;
+    Properties sub = new Properties();
+    if (!prefix.endsWith("."))
+      prefix += ".";
+    final int prefixLen = prefix.length();
+    for (var e : props.entrySet()) {
+      String key = e.getKey().toString();
+      if (key.startsWith(prefix)) {
+        String subkey = key.substring(prefixLen);
+        if (subkey.isEmpty())
+          throw new IllegalArgumentException("props contains illegal name: " + key);
+        sub.put(subkey, e.getValue());
+      }
+    }
+    return sub;
+  }
+  
+  
   
   private final List<String> orderedNames;
   

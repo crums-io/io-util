@@ -76,6 +76,8 @@ public class Strings {
       return single;
     if (single.endsWith("y"))
       return single.substring(0, single.length() - 1) + "ies";
+    else if (single.endsWith("sh") || single.endsWith("ch"))
+      return single + "es";
     else
       return single + "s";
   }
