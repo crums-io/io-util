@@ -206,7 +206,7 @@ public class JsonPrinter {
         out.append("\\t");
         break;
       case '/':
-        out.append("\\/");
+        out.append('/');
         break;
       default:
                 //Reference: http://www.unicode.org/versions/Unicode5.1.0/
