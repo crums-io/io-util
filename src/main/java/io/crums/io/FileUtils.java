@@ -363,5 +363,11 @@ public class FileUtils {
     File dir = path.getParentFile();
     return dir == null ? path.getAbsoluteFile().getParentFile() : dir;
   }
+  
+  
+  public static File getRelativeUnlessAbsolute(String path, File baseDir) {
+    File file = new File(path);
+    return file.isAbsolute() ? file : new File(baseDir, path);
+  }
 
 }

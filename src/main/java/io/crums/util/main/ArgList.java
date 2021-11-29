@@ -321,10 +321,13 @@ public class ArgList {
    * @return the gathered options sorted in alphabetical order, if any; {@code null} o.w.
    */
   public String removedDashedOptions(String chars) {
-    Options opts = new Options(chars);
+    ShortOptions opts = new ShortOptions(chars);
     List<String> matched = removeMatched(opts);
     return opts.compose(matched);
   }
+  
+  
+  
   
   
   /**

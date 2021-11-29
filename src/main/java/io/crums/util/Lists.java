@@ -76,19 +76,31 @@ public class Lists {
           new ReadOnlyView<U, V>(source, mapper);
   }
   
+  /**
+   * Returns a read-only view.
+   */
+  public static <U, V> List<V> map(U[] source, Function<U, V> mapper) {
+    return
+        source.length == 0 ?
+            Collections.emptyList() :
+              map(asReadOnlyList(source), mapper);
+  }
+  
   
   /**
    * Returns a read-write view.
    */
   public static <U, V> List<V> map(List<U> source, Isomorphism<U, V> iso) {
-    return source.isEmpty() ?
-        Collections.emptyList() :
-          new IsomorphicView<>(source, iso);
+    return new IsomorphicView<>(source, iso);
   }
   
   
   public static <T> List<T> asReadOnlyList(@SuppressWarnings("unchecked") T... element) {
-    return new ArrayView<>(element);
+    switch (element.length) {
+    case 0 :  return Collections.emptyList();
+    case 1 :  return Collections.singletonList(element[0]);
+    default:  return new ArrayView<>(element);
+    }
   }
   
   

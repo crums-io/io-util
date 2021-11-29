@@ -11,12 +11,14 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Predicate;
 
+import io.crums.util.Strings;
+
 /**
  * Support for groupable options on the command line. E.g. given declared
  * options <em>-a</em> and <em>-b</em>, support parsing these and also
  * <em>-ab</em> and <em>-ba</em>.
  */
-public class Options implements Predicate<String> {
+public class ShortOptions implements Predicate<String> {
   
   
   private final Set<Character> decl;
@@ -27,9 +29,12 @@ public class Options implements Predicate<String> {
    * 
    * @param chars (exclude the '-'), no whitespace obviously
    */
-  public Options(String chars) {
+  public ShortOptions(String chars) {
     if (Objects.requireNonNull(chars, "null chars").isEmpty())
       throw new IllegalArgumentException("empty chars");
+    
+    if (!Strings.isAlphabetOnly(chars))
+      throw new IllegalArgumentException("non-alphabetic chars: " + chars);
     
     this.decl = sort(chars);
     

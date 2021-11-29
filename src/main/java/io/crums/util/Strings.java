@@ -343,6 +343,14 @@ public class Strings {
   }
   
   
+  
+  public static boolean isAlphabetOnly(String string) {
+    int i = string.length();
+    while (i-- > 0 && isAlphabet(string.charAt(i)));
+    return i == -1;
+  }
+  
+  
 
   /**
    * @return {@code c >= '0' && c <= '9'}
