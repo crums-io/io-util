@@ -20,6 +20,16 @@ import io.crums.util.Lists;
  */
 public class OptionGroup implements Predicate<String> {
   
+  /**
+   * Removes and returns matching {@code options} in the {@code argList}.
+   * 
+   * @throws IllegalArgumentException if the {@code options} collide (at
+   *         the first character).
+   */
+  public static Set<Option> remove(ArgList args, Option... options) {
+    return new OptionGroup(options).removeOptions(args);
+  }
+  
   private final List<Option> options;
   
   private final ShortOptions shortOpts;

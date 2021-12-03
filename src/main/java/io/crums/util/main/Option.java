@@ -32,8 +32,15 @@ public class Option extends DelegateEquivalent implements Predicate<String> {
    */
   public Option(String name) {
     this.name = Objects.requireNonNull(name, "null name");
-    if (name.length() < 2 || !Strings.isAlphabetOnly(name))
+    if (name.length() < 2)
       throw new IllegalArgumentException("name (quoted): '" + name + "'");
+    for (int index = name.length(); index-- > 0; ) {
+      char c = name.charAt(index);
+      if (Strings.isAlphabet(c))
+        continue;
+      if (index == 0 || (c != '-' && c != '_'))
+        throw new IllegalArgumentException("name (quoted): '" + name + "'");
+    }
   }
   
   

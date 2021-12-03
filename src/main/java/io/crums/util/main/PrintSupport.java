@@ -265,12 +265,12 @@ public class PrintSupport {
   }
   
   
-  public boolean padToColumn(int column) {
-    return padToColumn(column, ' ');
+  public boolean padToCharColumn(int column) {
+    return padToCharColumn(column, ' ');
   }
   
   
-  public boolean padToColumn(int column, char c) {
+  public boolean padToCharColumn(int column, char c) {
     int count = column - getCharsWrittenToLine();
     printChar(c, count);
     return count > 0;

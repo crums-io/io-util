@@ -70,6 +70,10 @@ public class Strings {
   
 
   
+  public static String nOf(long count, String single) {
+    return count + " " + pluralize(single, count);
+  }
+  
   
   public static String pluralize(String single, long count) {
     if (count == 1)

@@ -138,7 +138,6 @@ public abstract class MainTemplate extends UnanonymousType {
    */
   protected void printError(String message) {
     System.err.println(ERROR_TAG + message);
-    System.err.println();
   }
   
   /**
@@ -151,8 +150,6 @@ public abstract class MainTemplate extends UnanonymousType {
   protected void exitInputError(String message) {
     System.err.println();
     printError(message);
-    printUsage(System.err);
-    System.err.println("Input '-help' for description details");
     System.err.println();
     StdExit.ILLEGAL_ARG.exit();
   }

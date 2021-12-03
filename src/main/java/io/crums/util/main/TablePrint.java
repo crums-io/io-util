@@ -22,6 +22,9 @@ public class TablePrint extends PrintSupport {
   
   private boolean formatNumber;
   
+  
+  private String colSep = "";
+  
   @SuppressWarnings("serial")
   private NumberFormat numberFormat =
       new DecimalFormat("#,###.###") {
@@ -46,6 +49,21 @@ public class TablePrint extends PrintSupport {
    */
   public TablePrint(int... columnWidths) {
     this(System.out, columnWidths);
+  }
+
+  
+  public TablePrint(List<Integer> columnWidths) {
+    this(System.out, columnWidths);
+  }
+  
+  
+  public TablePrint(PrintStream out, List<Integer> columnWidths) {
+    super(out);
+    this.columnWidths = new int[columnWidths.size()];
+    
+    for (int index = columnWidths.size(); index-- > 0; )
+      if ((this.columnWidths[index] = columnWidths.get(index)) < 0)
+        throw new IllegalArgumentException(columnWidths.toString());
   }
 
   /**
@@ -81,13 +99,22 @@ public class TablePrint extends PrintSupport {
   }
   
   
+  public String getColSeparator() {
+    return colSep;
+  }
+
+
+  public void setColSeparator(String colSep) {
+    this.colSep = colSep == null ? "" : colSep;
+  }
+
+
   /**
    * Prints a table row. To be invoked at beginning of new line.
    */
   public void printRow(Object... cells) {
-    if (cells.length > columnWidths.length)
-      throw new IllegalArgumentException("too many args: " + Arrays.asList(cells));
     
+    final int minSepLen = Math.max(1, colSep.length());
     for (int index = 0, cursor = 0; index < cells.length; ++index) {
       Object cell = cells[index];
       String string;
@@ -97,12 +124,17 @@ public class TablePrint extends PrintSupport {
         string = "";
       else
         string = cell.toString();
+      if (index > 0) {
+        print(colSep);
+      }
       print(string);
-      cursor += columnWidths[index];
-      boolean padded = padToColumn(cursor);
-      if (!padded)
-        printSpaces(1);
+      
+      cursor += index < columnWidths.length ?  columnWidths[index] :
+          string.length() + minSepLen;
+      
+      padToCharColumn(cursor);
     }
+    
     println();
   }
   
