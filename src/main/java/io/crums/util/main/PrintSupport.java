@@ -100,6 +100,17 @@ public class PrintSupport {
   }
   
   
+  public void incrIndentation(int spaces) {
+    setIndentation(spaces + indentation);
+  }
+  
+  
+  
+  public void decrIndentation(int spaces) {
+    setIndentation(indentation - spaces);
+  }
+  
+  
   /**
    * Returns the number of characters written to the line, ignoring
    * indentation.

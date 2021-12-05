@@ -141,12 +141,12 @@ public class JSONValue {
     }
     
     if(value instanceof Map){
-      JSONObject.writeJSONString((Map)value, out);
+      JSONObject.writeJSONString((Map<?,?>)value, out);
       return;
     }
     
     if(value instanceof List){
-      JSONArray.writeJSONString((List)value, out);
+      JSONArray.writeJSONString((List<?>)value, out);
             return;
     }
     
@@ -198,10 +198,10 @@ public class JSONValue {
       return ((JSONAware)value).toJSONString();
     
     if(value instanceof Map)
-      return JSONObject.toJSONString((Map)value);
+      return JSONObject.toJSONString((Map<?,?>)value);
     
     if(value instanceof List)
-      return JSONArray.toJSONString((List)value);
+      return JSONArray.toJSONString((List<?>)value);
     
     return value.toString();
   }
@@ -214,7 +214,7 @@ public class JSONValue {
   public static String escape(String s){
     if(s==null)
       return null;
-        StringBuffer sb = new StringBuffer();
+        var sb = new StringBuilder();
         escape(s, sb);
         return sb.toString();
     }
@@ -223,7 +223,7 @@ public class JSONValue {
      * @param s - Must not be null.
      * @param sb
      */
-    static void escape(String s, StringBuffer sb) {
+    static void escape(String s, StringBuilder sb) {
     for(int i=0;i<s.length();i++){
       char ch=s.charAt(i);
       switch(ch){

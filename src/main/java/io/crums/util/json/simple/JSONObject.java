@@ -6,31 +6,69 @@ package io.crums.util.json.simple;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
+
+import io.crums.util.Maps.DelegateMap;
 
 /**
  * A JSON object. Key value pairs are unordered. JSONObject supports java.util.Map interface.
  * 
+ * <h3>Babak's Changes</h3>
+ * <p>
+ * Key/value pairs are ordered in insertion order.
+ * This uses a swappable {@linkplain Map} implementation. The default is {@linkplain LinkedHashMap},
+ * which is <em>slower</em> than a regular {@linkplain HashMap}.
+ * </p>
+ * 
  * @author FangYidong<fangyidong@yahoo.com.cn>
+ * 
+ * @see #newFastInstance() for old-style implementation
  */
-public class JSONObject extends HashMap implements Map, JSONAware, JSONStreamAware{
-  
-  private static final long serialVersionUID = -503443796854799292L;
+public class JSONObject extends DelegateMap<Object, Object> implements JSONAware, JSONStreamAware{
   
   
+  /**
+   * Returns a regular, old-style instance. The order of the key/value pairs is
+   * [pseudo-] random.
+   * 
+   * @return an instance using a {@linkplain HashMap} underneath
+   */
+  public static JSONObject newFastInstance() {
+    return new JSONObject(new HashMap<>(), null);
+  }
+  
+  
+  /**
+   * Creates an insertion-ordered instance.
+   */
   public JSONObject() {
-    super();
+    this(new LinkedHashMap<>(), null);
   }
 
   /**
    * Allows creation of a JSONObject from a Map. After that, both the
    * generated JSONObject and the Map can be modified independently.
-   * 
-   * @param map
+   * <p>
+   * The instance is insertion-ordered.
+   * </p>
    */
-  public JSONObject(Map map) {
-    super(map);
+  public JSONObject(Map<Object,Object> map) {
+    this();
+    delegate.putAll(map);
+  }
+  
+  
+  /**
+   * Base constructor.
+   * 
+   * @param impl  non-null implementation map
+   * @param init  optional initial mappings (may be {@code null})
+   */
+  protected JSONObject(Map<Object, Object> impl, Map<Object,Object> init) {
+    super(impl);
+    if (init != null)
+      delegate.putAll(impl);
   }
 
 
@@ -43,14 +81,14 @@ public class JSONObject extends HashMap implements Map, JSONAware, JSONStreamAwa
      * @param map
      * @param out
      */
-  public static void writeJSONString(Map map, Writer out) throws IOException {
+  public static void writeJSONString(Map<?, ?> map, Writer out) throws IOException {
     if(map == null){
       out.write("null");
       return;
     }
     
     boolean first = true;
-    Iterator iter=map.entrySet().iterator();
+    var iter =map.entrySet().iterator();
     
         out.write('{');
     while(iter.hasNext()){
@@ -58,7 +96,7 @@ public class JSONObject extends HashMap implements Map, JSONAware, JSONStreamAwa
                 first = false;
             else
                 out.write(',');
-      Map.Entry entry=(Map.Entry)iter.next();
+      var entry = iter.next();
             out.write('\"');
             out.write(escape(String.valueOf(entry.getKey())));
             out.write('\"');
@@ -81,13 +119,13 @@ public class JSONObject extends HashMap implements Map, JSONAware, JSONStreamAwa
    * @param map
    * @return JSON text, or "null" if map is null.
    */
-  public static String toJSONString(Map map){
+  public static String toJSONString(Map<?, ?> map){
     if(map == null)
       return "null";
     
-        StringBuffer sb = new StringBuffer();
+        var sb = new StringBuilder();
         boolean first = true;
-    Iterator iter=map.entrySet().iterator();
+    var iter= map.entrySet().iterator();
     
         sb.append('{');
     while(iter.hasNext()){
@@ -96,7 +134,7 @@ public class JSONObject extends HashMap implements Map, JSONAware, JSONStreamAwa
             else
                 sb.append(',');
             
-      Map.Entry entry=(Map.Entry)iter.next();
+      var entry = iter.next();
       toJSONString(String.valueOf(entry.getKey()),entry.getValue(), sb);
     }
         sb.append('}');
@@ -107,7 +145,7 @@ public class JSONObject extends HashMap implements Map, JSONAware, JSONStreamAwa
     return toJSONString(this);
   }
   
-  private static String toJSONString(String key,Object value, StringBuffer sb){
+  private static String toJSONString(String key,Object value, StringBuilder sb){
     sb.append('\"');
         if(key == null)
             sb.append("null");
@@ -125,7 +163,7 @@ public class JSONObject extends HashMap implements Map, JSONAware, JSONStreamAwa
   }
 
   public static String toString(String key,Object value){
-        StringBuffer sb = new StringBuffer();
+        var sb = new StringBuilder();
     toJSONString(key, value, sb);
         return sb.toString();
   }

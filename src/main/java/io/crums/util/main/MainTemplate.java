@@ -151,6 +151,7 @@ public abstract class MainTemplate extends UnanonymousType {
     System.err.println();
     printError(message);
     System.err.println();
+    System.err.println("Use -h (-help) to see required arguments.");
     StdExit.ILLEGAL_ARG.exit();
   }
   

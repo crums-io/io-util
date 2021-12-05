@@ -243,7 +243,7 @@ class Yylex {
   private int zzEndRead;
 
   /** number of newlines encountered up to the start of the matched text */
-  private int yyline;
+//  private int yyline;
 
   /** the number of characters up to the start of the matched text */
   private int yychar;
@@ -252,18 +252,18 @@ class Yylex {
    * the number of characters from the last newline up to the start of the 
    * matched text
    */
-  private int yycolumn;
+//  private int yycolumn;
 
   /** 
    * zzAtBOL == true <=> the scanner is currently at the beginning of a line
    */
-  private boolean zzAtBOL = true;
+//  private boolean zzAtBOL = true;
 
   /** zzAtEOF == true <=> the scanner is at the EOF */
   private boolean zzAtEOF;
 
   /* user code: */
-private StringBuffer sb=new StringBuffer();
+private StringBuilder sb = new StringBuilder();
 
 int getPosition(){
   return yychar;
@@ -388,11 +388,10 @@ int getPosition(){
    */
   public final void yyreset(java.io.Reader reader) {
     zzReader = reader;
-    zzAtBOL  = true;
     zzAtEOF  = false;
     zzEndRead = zzStartRead = 0;
     zzCurrentPos = zzMarkedPos = 0;
-    yyline = yychar = yycolumn = 0;
+    yychar = 0;
     zzLexicalState = YYINITIAL;
   }
 
@@ -606,7 +605,7 @@ int getPosition(){
           }
         case 33: break;
         case 1: 
-          { throw new ParseException(yychar, ParseException.ERROR_UNEXPECTED_CHAR, new Character(yycharat(0)));
+          { throw new ParseException(yychar, ParseException.ERROR_UNEXPECTED_CHAR, yycharat(0));
           }
         case 34: break;
         case 8: 
