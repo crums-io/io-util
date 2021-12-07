@@ -80,6 +80,18 @@ public abstract class MainTemplate extends UnanonymousType {
     }
   }
   
+  
+  /**
+   * Returns the program name. The default implementation returns per the
+   * convention it's the simple classname, lowercased. This value is used in
+   * the default error messages.
+   * 
+   * @return {@code getClass().getSimpleName().toLowerCase()}
+   */
+  public String getProgname() {
+    return getClass().getSimpleName().toLowerCase();
+  }
+  
   /**
    * Initializes the instance. Program configuration occurs here. Note the exception semantics.
    * 
@@ -142,7 +154,7 @@ public abstract class MainTemplate extends UnanonymousType {
   
   /**
    * Exits the program after printing the given error <tt>message</tt>,
-   * followed by the {@linkplain #printUsage(PrintStream)}. Exit status
+   * followed by {@code See '}{@linkplain #getProgname()}{@code --help'}. Exit status
    * code 126.
    * 
    * @see StdExit#ILLEGAL_ARG
@@ -151,7 +163,7 @@ public abstract class MainTemplate extends UnanonymousType {
     System.err.println();
     printError(message);
     System.err.println();
-    System.err.println("Use -h (-help) to see required arguments.");
+    System.err.println("See '" + getProgname() + " --help'");
     StdExit.ILLEGAL_ARG.exit();
   }
   
