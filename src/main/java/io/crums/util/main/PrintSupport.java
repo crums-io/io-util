@@ -298,6 +298,7 @@ public class PrintSupport {
   
   protected void printIndentation() {
     printCharImpl(' ', getIndentation());
+    charsWrittenToLine += getIndentation();
   }
   
   

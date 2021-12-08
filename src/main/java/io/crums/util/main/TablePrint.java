@@ -111,11 +111,12 @@ public class TablePrint extends PrintSupport {
 
   /**
    * Prints a table row. To be invoked at beginning of new line.
+   * 
+   * @param cells 1 or more objects per cell. It's OK if there are more cells than declared columns.
    */
   public void printRow(Object... cells) {
     
-    final int minSepLen = Math.max(1, colSep.length());
-    for (int index = 0, cursor = 0; index < cells.length; ++index) {
+    for (int index = 0; index < cells.length; ++index) {
       Object cell = cells[index];
       String string;
       if (formatNumber && cell instanceof Number)
@@ -124,18 +125,67 @@ public class TablePrint extends PrintSupport {
         string = "";
       else
         string = cell.toString();
-      if (index > 0) {
+      
+      if (index > 0)
         print(colSep);
-      }
+      
       print(string);
+
+      final int charsWritten = getCharsWrittenToLine();
       
-      cursor += index < columnWidths.length ?  columnWidths[index] :
-          string.length() + minSepLen;
+      if (index < columnWidths.length) {
+        int happyPathIndex = getNetColumnEnd(index);
+        if (charsWritten < happyPathIndex) {
+          padToCharColumn(happyPathIndex);
+          continue;
+        }
+      }
       
-      padToCharColumn(cursor);
+      padToCharColumn(charsWritten + (colSep.isEmpty() ? 1 : 0));
     }
     
     println();
+  }
+  
+  
+  /**
+   * Returns the <em>net</em> declared column starting position. This includes
+   * the {@linkplain #getIndentation() indentation}.
+   * 
+   * @param colIndex &ge; 0 and &le; {@linkplain #getColumnCount()}
+   * 
+   * @see #printRow(Object...)
+   */
+  public int getNetColumnStart(int colIndex) throws IndexOutOfBoundsException {
+    int tally = getIndentation();
+    for (int index = colIndex; index-- > 0; )
+      tally += columnWidths[index];
+    return tally;
+  }
+  
+  
+  /**
+   * Returns the <em>net</em> declared column ending position. This includes
+   * the {@linkplain #getIndentation() indentation}.
+   * 
+   * @param colIndex &ge; 0 and &lt; {@linkplain #getColumnCount()}
+   * 
+   * @return {@code getNetColumnStart(colIndex + 1)}
+   * 
+   * @see #printRow(Object...)
+   */
+  public int getNetColumnEnd(int colIndex) throws IndexOutOfBoundsException {
+    return getNetColumnStart(colIndex + 1);
+  }
+  
+  
+  /**
+   * Returns the number of declared columns.
+   * 
+   * @see #printRow(Object...)
+   */
+  public int getColumnCount() {
+    return columnWidths.length;
   }
   
   
