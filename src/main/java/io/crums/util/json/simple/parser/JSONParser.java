@@ -274,11 +274,11 @@ public class JSONParser {
   
   private Map<Object,Object> createObjectContainer(ContainerFactory containerFactory){
     if(containerFactory == null)
-      return new JSONObject();
+      return JSONObject.newFastInstance();
     var m = containerFactory.createObjectContainer();
     
     if(m == null)
-      return new JSONObject();
+      return JSONObject.newFastInstance();
     return m;
   }
   

@@ -27,7 +27,8 @@
  * prints mappings in insertion order. This is usually not significantly slower
  * than the original unordered version. To create an old-style version, use the
  * {@linkplain io.crums.util.json.simple.JSONObject#newFastInstance() JSONObject.newFastInstance()}
- * pseudo-constructor.</li>
+ * pseudo-constructor. Indeed, on the read-path, {@linkplain io.crums.util.json.simple.parser.JSONParser JSONParser}
+ * uses this plain unordered version.</li>
  * <li>StringBuffer -> StringBuilder:<br/>
  * Since instances are not safe under concurrent access anyway, <code>StringBuffer</code>s
  * were converted to <code>StringBuilder</code>s. This involved one API change:

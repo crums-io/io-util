@@ -3,6 +3,8 @@
  */
 package io.crums.io;
 
+import java.io.FilterOutputStream;
+import java.io.Flushable;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Writer;
@@ -21,24 +23,60 @@ public class IoBridges {
   
   
   /**
-   * Returns a {@code PrintStream} as a {@code Writer}.
+   * Returns the given {@code PrintStream} as a {@code Writer}.
+   * 
+   * @return a view of {@code out} as a {@linkplain Writer}
    */
   public static Writer toWriter(PrintStream out) {
-    Objects.requireNonNull(out);
     // this shouldn't matter, but to be safe..
     boolean user = out != System.out && out != System.err;
-    return new PrintStreamWriter(out, user);
+    return new AppendableWriterAdaptor(out, user);
   }
   
   
-  private static class PrintStreamWriter extends Writer {
+
+  
+  /**
+   * Returns the given {@linkplain Appendable} as a writer. The returned
+   * writer's {@code close()} method does nothing.
+   * 
+   * @param out the appendable stream
+   * 
+   * @return a view of {@code out} as a {@linkplain Writer}
+   */
+  public static Writer toWriter(Appendable out) {
+    return new AppendableWriterAdaptor(out, false);
+  }
+  
+  
+  
+  /**
+   * Returns the given {@linkplain Appendable} as a closing writer.
+   * 
+   * <h4>FIXME: </h4>
+   * <p>For some reason, this &lt;T&gt; def doesn't work.. the compiler doesn't fuss if out is not Closeable.</p>
+   * 
+   * @param <T> type that is both {@linkplain Appendable} and {@linkplain AutoCloseable}
+   * @param out the appendable stream
+   * 
+   * @return a view of {@code out} as a {@linkplain Writer}
+   */
+  public static <T extends Appendable, Closeable> Writer toCloseableWriter(T out) {
+    return new AppendableWriterAdaptor(out, true);
+  }
+  
+  
+  private static class AppendableWriterAdaptor extends Writer {
     
-    private final PrintStream out;
+    private final Appendable out;
     private final boolean close;
     
-    PrintStreamWriter(PrintStream out, boolean close) {
+    AppendableWriterAdaptor(Appendable out, boolean close) {
+      Objects.requireNonNull(out);
       this.out = out;
       this.close = close;
+      if (close && !(out instanceof AutoCloseable))
+        throw new IllegalArgumentException(out + " is not an instance of AutoCloseable");
     }
 
     @Override
@@ -49,13 +87,25 @@ public class IoBridges {
 
     @Override
     public void flush() throws IOException {
-      out.flush();
+      if (out instanceof FilterOutputStream)
+        ((FilterOutputStream) out).flush();
+      else if (out instanceof Flushable) {
+        ((Flushable) out).flush();
+      }
     }
 
     @Override
     public void close() throws IOException {
-      if (close)
-        out.close();
+      if (close) {
+        try {
+          ((AutoCloseable) out).close();
+        } catch (IOException iox) {
+          // rethrow
+          throw iox;
+        } catch (Exception x) {
+          throw new IOException("on close: " + x.getMessage(), x);
+        }
+      }
     }
 
     @Override

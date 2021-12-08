@@ -9,7 +9,9 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import io.crums.io.IoBridges;
 import io.crums.util.Maps.DelegateMap;
+import io.crums.util.json.simple.parser.JSONParser;
 
 /**
  * A JSON object. Key value pairs are unordered. JSONObject supports java.util.Map interface.
@@ -18,12 +20,13 @@ import io.crums.util.Maps.DelegateMap;
  * <p>
  * Key/value pairs are ordered in insertion order.
  * This uses a swappable {@linkplain Map} implementation. The default is {@linkplain LinkedHashMap},
- * which is <em>slower</em> than a regular {@linkplain HashMap}.
+ * which is <em>slower</em> than a regular {@linkplain HashMap}. However, on the read-path
+ * (that is {@linkplain JSONParser}) the library uses the faster {@code HashMap} implementation. 
  * </p>
  * 
  * @author FangYidong<fangyidong@yahoo.com.cn>
  * 
- * @see #newFastInstance() for old-style implementation
+ * @see #newFastInstance() {@code JSONObject.newFastInstance()} &nbsp; for old-style implementation
  */
 public class JSONObject extends DelegateMap<Object, Object> implements JSONAware, JSONStreamAware{
   
@@ -108,6 +111,11 @@ public class JSONObject extends DelegateMap<Object, Object> implements JSONAware
 
   public void writeJSONString(Writer out) throws IOException{
     writeJSONString(this, out);
+  }
+  
+  
+  public void writeJSONString(Appendable out) throws IOException {
+    writeJSONString(IoBridges.toWriter(out));
   }
   
   /**

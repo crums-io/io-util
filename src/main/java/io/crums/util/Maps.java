@@ -9,13 +9,18 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * 
+ * Map classes and utilities.
  */
 public class Maps {
   
   
   
-  
+  /**
+   * A swappable {@linkplain Map} implementation base class.
+   * Designed to be subclassed. The use case is when a {@code Map}
+   * sub-type needs to be sometimes insertion-ordered, other times
+   * not.
+   */
   public static class DelegateMap<K, V> implements Map<K, V> {
     
     
@@ -95,6 +100,26 @@ public class Maps {
     @Override
     public Collection<V> values() {
       return delegate.values();
+    }
+
+
+    /**
+     * <p>A rare case where we can (and should) also delegate this method.</p>
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+      return delegate.hashCode();
+    }
+
+
+    /**
+     * <p>A rare case where we can (and should) also delegate this method.</p>
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(Object obj) {
+      return delegate.equals(obj);
     }
     
   }
