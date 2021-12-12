@@ -19,9 +19,15 @@ import io.crums.util.json.simple.parser.JSONParser;
 import io.crums.util.json.simple.parser.ParseException;
 
 /**
- * JSON read-interface for an entity.
+ * JSON read-interface for an entity. Its only non-default method is
+ * {@linkplain #toEntity(JSONObject)}.
  * 
  * @param <T> the entity type
+ * @see #toEntity(JSONObject)
+ * @see #toEntity(String)
+ * @see #toEntity(File)
+ * @see #toEntity(Reader)
+ * @see #toEntityList(JSONArray)
  */
 public interface JsonEntityReader<T> {
 

@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.RandomAccess;
+import java.util.TreeSet;
 import java.util.function.Function;
 
 /**
@@ -155,6 +156,29 @@ public class Lists {
       if (next == null)
         throw new IllegalArgumentException("argument has null elements: " + copy);
       out.add(next);
+    }
+    return Collections.unmodifiableList(out);
+  }
+  
+  
+  
+  public static <T extends Comparable<T>> List<T> sort(Collection<? extends T> copy, boolean noDups) {
+    int size = Objects.requireNonNull(copy, "null list").size();
+    switch (size) {
+    case 0:
+      return Collections.emptyList();
+    case 1:
+      return Collections.singletonList(copy.iterator().next());
+    }
+    List<T> out = new ArrayList<>(copy.size());
+    if (noDups) {
+      var set = new TreeSet<>(copy);
+      if (set.size() != copy.size())
+        throw new IllegalArgumentException("argument has duplicates");
+      out.addAll(set);
+    } else {
+      out.addAll(copy);
+      Collections.sort(out);
     }
     return Collections.unmodifiableList(out);
   }
@@ -496,10 +520,29 @@ public class Lists {
     }
   }
   
+  // Idea jotted down. Not sure, so I commented it out.
+  // Another approach is to wrap a sorted list in a view. (Prolly better)
+  // Later..
+  
+//  protected static class SortedArrayView<T extends Comparable<T>> extends ArrayView<T> {
+//    
+//    protected SortedArrayView(T[] array) {
+//      super(array);
+//    }
+//    
+//    @Override
+//    public boolean contains(Object element) {
+//      if (element == null)
+//        return false;
+//      int index = Arrays.binarySearch(array, element);
+//      return index >= 0 && index < array.length && array[index].equals(element);
+//    }
+//  }
+  
   
   protected static class ArrayView<T> extends RandomAccessList<T> {
     
-    private final T[] array;
+    protected final T[] array;
     
     protected ArrayView(T[] array) {
       this.array = Objects.requireNonNull(array);
@@ -550,6 +593,9 @@ public class Lists {
     }
     
   }
+  
+  
+  
   
   
   protected static class IsomorphicView<U, V> extends BaseView<U, V> {

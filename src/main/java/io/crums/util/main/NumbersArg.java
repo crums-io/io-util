@@ -92,7 +92,7 @@ public class NumbersArg {
   
 
   /**
-   * Parses a list of longs from the given argument string and returns it if successful;
+   * Parses a list of ints from the given argument string and returns it if successful;
    * returns null otherwise.
    * 
    * @param arg argument string

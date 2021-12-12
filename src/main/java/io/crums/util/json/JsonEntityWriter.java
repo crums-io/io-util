@@ -9,9 +9,14 @@ import io.crums.util.json.simple.JSONArray;
 import io.crums.util.json.simple.JSONObject;
 
 /**
- * The JSON entity output interface.
+ * The JSON entity output interface. Its only non-default method is
+ * {@linkplain #injectEntity(Object, JSONObject)}.
  * 
  * @param <T> the entity type
+ * 
+ * @see #injectEntity(Object, JSONObject)
+ * @see #toJsonObject(Object)
+ * @see #toJsonArray(List)
  */
 public interface JsonEntityWriter<T> {
   
