@@ -4,9 +4,12 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.crums</groupId>
 	<artifactId>io-util</artifactId>
-	<version>0.0.8-SNAPSHOT</version>
+	<version>0.0.8</version>
 	<name>I/O Primitives</name>
-	<description>Utilities for creating simple data structures for persistent storage.</description>
+	<description>
+	 Utilities for creating simple data structures for persistent storage.
+	 Includes other goodies I use often, and now a JSON library (json-simple sans some warts).
+	 </description>
 
 
 	<properties>
