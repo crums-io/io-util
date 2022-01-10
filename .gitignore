@@ -6,5 +6,7 @@ target/
 # So you can move generated javadocs here
 apidocs/
 
-# Don't know what exactly creates this in a maven build
-bin/
+sandbox/
+
+attic/
+

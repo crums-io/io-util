@@ -2,14 +2,13 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+
 	<groupId>io.crums</groupId>
-	<artifactId>io-util</artifactId>
-	<version>0.0.8</version>
-	<name>I/O Primitives</name>
-	<description>
-	 Utilities for creating simple data structures for persistent storage.
-	 Includes other goodies I use often, and now a JSON library (json-simple sans some warts).
-	 </description>
+	<artifactId>util</artifactId>
+	<version>1.0-SNAPSHOT</version>
+
+        <packaging>pom</packaging>
+
 
 
 	<properties>
@@ -19,6 +18,9 @@
 	</properties>
 
 
+  <modules>
+    <module>io-util</module>
+  </modules>
 
 	<build>
 
