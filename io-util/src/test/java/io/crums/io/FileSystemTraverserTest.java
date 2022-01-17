@@ -10,16 +10,18 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import org.junit.Test;
 
-import io.crums.test.TestMethodHarness;
+import com.gnahraf.test.IoTestCase;
+
 import io.crums.util.tree.TraverseListener;
 
 /**
  * 
  */
-public class FileSystemTraverserTest extends TestMethodHarness {
+public class FileSystemTraverserTest extends IoTestCase {
 
   private static abstract class CountingListener
   implements TraverseListener<File> {
@@ -72,6 +74,22 @@ public class FileSystemTraverserTest extends TestMethodHarness {
     public void postorder(File file) {
       assertOrder(root, file, 1);
     }
+  }
+  
+
+  
+  final Logger log = Logger.getLogger(getClass().getSimpleName());
+  
+  File testDir;
+  
+  
+  void initUnitTestDir(Object label) {
+    testDir = getMethodOutputFilepath(label);
+    assert testDir.mkdirs();
+  }
+  
+  File unitTestDir() {
+    return testDir;
   }
 
 

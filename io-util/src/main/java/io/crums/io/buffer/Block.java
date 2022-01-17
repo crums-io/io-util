@@ -9,16 +9,12 @@ import static io.crums.io.buffer.BufferUtils.*;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 
-import java.util.logging.Logger;
-
 /**
  * A contiguous block of cells.
  * 
  * @author Babak
  */
 public class Block {
-  
-  private final static Logger LOG = Logger.getLogger(Block.class.getName());
   
   /**
    * Array of equal capacity cells, windows into the block, in block-offset order.
@@ -66,7 +62,6 @@ public class Block {
     block.clear();
     
     if (block.capacity() % cellByteWidth != 0) {
-      LOG.fine("slicing off trailing cell fragment from end of buffer");
       block.limit(cellCount * cellByteWidth);
       block = block.slice();
     }

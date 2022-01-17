@@ -9,7 +9,6 @@ import java.io.FileFilter;
 import java.util.Comparator;
 import java.util.function.Consumer;
 
-import io.crums.util.Measure;
 import io.crums.util.tree.AbstractTraverser;
 import io.crums.util.tree.TraverseListener;
 
@@ -159,7 +158,7 @@ public class FileSystemTraverser extends AbstractTraverser<File> {
     setListener(listener);
     setFilter(filter);
     if (siblingOrder == null)
-      siblingOrder = Measure.naturalComparator();
+      siblingOrder = Comparator.naturalOrder();
     setSiblingOrder(siblingOrder);
   }
 

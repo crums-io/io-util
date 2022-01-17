@@ -5,21 +5,28 @@
 
 	<groupId>io.crums</groupId>
 	<artifactId>util</artifactId>
-	<version>1.0-SNAPSHOT</version>
+	<version>${revision}</version>
 
-        <packaging>pom</packaging>
+  <packaging>pom</packaging>
 
 
 
 	<properties>
+    <revision>1.0.0-SNAPSHOT</revision>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.11</maven.compiler.source>
 		<maven.compiler.target>1.11</maven.compiler.target>
+		<flatten.version>1.2.2</flatten.version>
+    <junit.version>[4.13.1,)</junit.version>
 	</properties>
 
 
   <modules>
     <module>io-util</module>
+    <module>table-io</module>
+    <module>karoon</module>
+    <module>jsonimple</module>
+    <module>io-xp</module>
   </modules>
 
 	<build>
@@ -104,6 +111,32 @@
 				</configuration>
 			</plugin>
 
+      <!-- w/o plugin below, sub module artifacts get polluted with this parent pom -->
+      <plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>flatten-maven-plugin</artifactId>
+				<version>${flatten.version}</version>
+				<configuration>
+				  <updatePomFile>true</updatePomFile>
+				  <flattenMode>resolveCiFriendliesOnly</flattenMode>
+				</configuration>
+				<executions>
+				  <execution>
+				    <id>flatten</id>
+				    <phase>process-resources</phase>
+				    <goals>
+				      <goal>flatten</goal>
+				    </goals>
+				  </execution>
+				  <execution>
+				    <id>flatten.clean</id>
+				    <phase>clean</phase>
+				    <goals>
+				      <goal>clean</goal>
+				    </goals>
+				  </execution>
+				</executions>
+      </plugin>
 
 		</plugins>
 
@@ -115,7 +148,7 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.13.1</version>
+			<version>${junit.version}</version>
 			<scope>test</scope>
 		</dependency>
 		

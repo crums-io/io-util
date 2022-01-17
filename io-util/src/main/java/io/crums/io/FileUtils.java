@@ -19,7 +19,6 @@ import java.nio.CharBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.StandardCopyOption;
 import java.util.Objects;
-import java.util.logging.Logger;
 
 import io.crums.io.channels.ChannelUtils;
 import io.crums.util.CloseableIterator;
@@ -111,7 +110,7 @@ public class FileUtils {
         throw new IllegalStateException("mv " + src + " " + target + " both failed and does not exist -- maybe a race");
     }
     if (!src.delete())
-      Logger.getGlobal().warning("failed to delete src " + src + " following failed mv to " + target);
+      System.err.println("[WARNING] Failed to delete src " + src + " following failed mv to " + target);
     
     return false;
   }

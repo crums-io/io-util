@@ -1,0 +1,31 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  
+  <parent>
+    <groupId>io.crums</groupId>
+    <artifactId>util</artifactId>
+    <version>${revision}</version>
+  </parent>
+  
+  
+  <artifactId>table-io</artifactId>
+  
+  <name>Table I/O</name>
+  <description>
+    A low level library for fixed width tables. Provides methods to sort tables using custom
+    row-order functions, both in memory, and for larger tables, via on disk multi-merge sort.
+    Optional keystone structures may be used to guarantee consistent table state on abnormal
+    shutdown.
+  </description>
+  
+  <dependencies>
+    <dependency>
+     <groupId>io.crums</groupId>
+     <artifactId>io-xp</artifactId>
+     <version>${revision}</version>
+    </dependency>
+  </dependencies>
+  
+</project>

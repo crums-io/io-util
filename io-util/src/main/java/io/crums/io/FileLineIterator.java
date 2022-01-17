@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.NoSuchElementException;
 import java.util.Objects;
-import java.util.logging.Logger;
 
 import io.crums.util.CloseableIterator;
 
@@ -83,7 +82,7 @@ public class FileLineIterator implements CloseableIterator<String> {
     try {
       reader.close();
     } catch (IOException iox) {
-      Logger.getGlobal().warning("I/O error encountered on closing " + this + ": " + iox);
+      throw new UncheckedIOException("I/O error encountered on closing " + this + ": " + iox, iox);
     }
   }
   

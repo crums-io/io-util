@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+    <groupId>io.crums</groupId>
+    <artifactId>util</artifactId>
+    <version>${revision}</version>
+  </parent>
+
+	<artifactId>karoon</artifactId>
+	
+	<packaging>jar</packaging>
+	<name>Karoon</name>
+	
+	<description>
+		Prototype durable, fail-safe sorted table engine. Fail-safe here means, for eg, if
+		the JVM crashes	for whatever reason in the midst of a write, then on a subsequent run
+		the logical table will still be in a consistent state with all the committed writes.
+		Supports high throughput concurrent reads, writes, and deletes (and effectively updates)
+		with well behaved atomicity, read consistency.
+	</description>
+	
+	<dependencies>
+	  <dependency>
+	   <groupId>io.crums</groupId>
+	   <artifactId>table-io</artifactId>
+	   <version>${revision}</version>
+	  </dependency>
+	</dependencies>
+</project>

@@ -8,16 +8,31 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.Logger;
 
 import org.junit.Test;
 
-import io.crums.test.TestMethodHarness;
+import com.gnahraf.test.IoTestCase;
 
 /**
  * 
  */
-public class DirectoryRemoverTest extends TestMethodHarness {
+public class DirectoryRemoverTest extends IoTestCase {
 
+  
+  final Logger log = Logger.getLogger(getClass().getSimpleName());
+  
+  File testDir;
+  
+  
+  void initUnitTestDir(Object label) {
+    testDir = getMethodOutputFilepath(label);
+    assert testDir.mkdirs();
+  }
+  
+  File unitTestDir() {
+    return testDir;
+  }
 
 
   @Test

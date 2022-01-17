@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
-import java.util.logging.Logger;
 
 /**
  * Utility for resource releasing.  Mostly, this has to do
@@ -66,27 +65,27 @@ import java.util.logging.Logger;
 public class TaskStack implements Channel {
   
   protected final List<AutoCloseable> opStack = Collections.synchronizedList(new ArrayList<AutoCloseable>());
-  protected final Logger log;
   
   
-  public TaskStack() {
-    this.log = Logger.getLogger(getClass().getName());
-  }
   
-  /**
-   * Creates an instance using the given <tt>user</tt> object's class to determine
-   * the logger.
-   * 
-   * @param user the user object, or <tt>null</tt>
-   */
-  public TaskStack(Object user) {
-    Class<?> logClass = user == null ? getClass() : user.getClass();
-    this.log = user instanceof Logger ? (Logger) user : Logger.getLogger(logClass.getName());
-  }
-  
-  public TaskStack(Logger log) {
-    this.log = log == null ? Logger.getLogger(getClass().getName()) : log;
-  }
+//  public TaskStack() {
+//    this.log = Logger.getLogger(getClass().getName());
+//  }
+//  
+//  /**
+//   * Creates an instance using the given <tt>user</tt> object's class to determine
+//   * the logger.
+//   * 
+//   * @param user the user object, or <tt>null</tt>
+//   */
+//  public TaskStack(Object user) {
+//    Class<?> logClass = user == null ? getClass() : user.getClass();
+//    this.log = user instanceof Logger ? (Logger) user : Logger.getLogger(logClass.getName());
+//  }
+//  
+//  public TaskStack(Logger log) {
+//    this.log = log == null ? Logger.getLogger(getClass().getName()) : log;
+//  }
   
   
   public TaskStack pushRun(final Runnable task) {
@@ -172,10 +171,23 @@ public class TaskStack implements Channel {
     try {
       resource.close();
     } catch (Exception x) {
-      log.severe(
-          "On closing resource[" + removedIndex + "] ("  + resource + "): "+ x.getMessage());
+      onCloseError(removedIndex, resource, x);
     }
     return removedIndex;
+  }
+  
+  
+  /**
+   * Writes an error message to std err. No longer logged (so as to remove dependency on
+   * logging and aid modularization.
+   * 
+   * @param removedIndex
+   * @param resource
+   * @param x
+   */
+  protected void onCloseError(int removedIndex, AutoCloseable resource, Exception x) {
+    System.err.println(
+        "[ERROR] On closing resource[" + removedIndex + "] ("  + resource + "): "+ x.getMessage());
   }
 
 

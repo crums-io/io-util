@@ -4,6 +4,7 @@
 package io.crums.io.channels;
 
 
+import java.io.EOFException;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -16,8 +17,6 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.GatheringByteChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
-
-import io.crums.io.EofException;
 
 
 /**
@@ -41,7 +40,7 @@ public class ChannelUtils {
       int amountRead = channel.read(buffer);
 
       if (amountRead == -1)
-        throw new EofException("While attempting to read " + buffer.remaining() + " more bytes");
+        throw new EOFException("While attempting to read " + buffer.remaining() + " more bytes");
 
       noopCountDown = updateNoopCountDown(noopCountDown, amountRead);
     }
@@ -52,7 +51,7 @@ public class ChannelUtils {
   public static ByteBuffer readRemaining(FileChannel file, long position, ByteBuffer buffer) throws IOException {
 
     if (position + buffer.remaining() > file.size())
-      throw new EofException("Attempt to read " + buffer.remaining() + " bytes starting from position " + position + "; file size is " + file.size() + " bytes");
+      throw new EOFException("Attempt to read " + buffer.remaining() + " bytes starting from position " + position + "; file size is " + file.size() + " bytes");
 
     int noopCountDown = MAX_NOOP_TRIALS;
 
@@ -61,7 +60,7 @@ public class ChannelUtils {
       position += amountRead;
 
       if (amountRead == -1)
-        throw new EofException("While attempting to read " + buffer.remaining() + " more bytes at position " + (position + 1));
+        throw new EOFException("While attempting to read " + buffer.remaining() + " more bytes at position " + (position + 1));
 
       noopCountDown = updateNoopCountDown(noopCountDown, amountRead);
     }

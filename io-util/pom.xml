@@ -6,18 +6,17 @@
 	<parent>
 	  <groupId>io.crums</groupId>
 	  <artifactId>util</artifactId>
-	  <version>1.0-SNAPSHOT</version>
+	  <version>${revision}</version>
 	</parent>
 	
 	
 	
 	<artifactId>io-util</artifactId>
 	
-	<name>I/O Primitives</name>
+	<name>I/O Utils</name>
 	<description>
-	 Utilities for creating simple data structures for persistent storage.
-	 Includes other goodies I use often, and now a JSON library (json-simple sans some warts).
-	 </description>
+	  I/O and other utilites. The most common constructs are gathered here.
+	</description>
 
 
 	
