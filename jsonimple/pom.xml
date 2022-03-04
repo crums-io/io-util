@@ -10,7 +10,6 @@
   </parent>
   
   <artifactId>jsonimple</artifactId>
-  <version>${revision}</version>
   
   <name>Jsonimple</name>
   

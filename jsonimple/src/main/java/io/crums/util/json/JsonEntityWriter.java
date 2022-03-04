@@ -50,9 +50,8 @@ public interface JsonEntityWriter<T> {
    * @return
    */
   default JSONArray toJsonArray(List<T> list) {
-    JSONArray jArray = new JSONArray();
-    for (T entity : list)
-      jArray.add( toJsonObject(entity) );
+    JSONArray jArray = new JSONArray(list.size());
+    list.forEach(t -> jArray.add(toJsonObject(t)));
     return jArray;
   }
 

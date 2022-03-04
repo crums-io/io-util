@@ -41,17 +41,30 @@ public interface Serial {
    * Returns a serial (binary) representation of this instance's state.
    * 
    * @see #writeTo(ByteBuffer)
+   * @return {@code writeTo(ByteBuffer.allocate(estimateSize()).flip()}
    */
   default ByteBuffer serialize() {
-    ByteBuffer out = ByteBuffer.allocate(serialSize());
+    ByteBuffer out = ByteBuffer.allocate(estimateSize());
     
     writeTo(out);
-
-    assert !out.hasRemaining();
     
     return out.flip();
   }
   
   
+  /**
+   * Returns the {@linkplain #serialSize()} or if it's too expensive, a conservative
+   * estimate. By default, this returns {@code serialSize()}. Override, if an estimate
+   * is significantly cheaper than an exact answer.
+   * 
+   * @return &ge; {@code serialSize()}
+   */
+  default int estimateSize() {
+    return serialSize();
+  }
 
 }
+
+
+
+

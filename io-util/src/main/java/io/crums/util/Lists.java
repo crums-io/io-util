@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.RandomAccess;
 import java.util.TreeSet;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
@@ -74,7 +75,7 @@ public class Lists {
   public static <U, V> List<V> map(List<U> source, Function<U, V> mapper) {
     return source.isEmpty() ?
         Collections.emptyList() :
-          new ReadOnlyView<U, V>(source, mapper);
+          new MappedView<U, V>(source, mapper);
   }
   
   /**
@@ -88,6 +89,13 @@ public class Lists {
   }
   
   
+  public static <U, V> List<V> mapByIndex(List<U> source, BiFunction<Integer, U, V> mapper) {
+    return source.isEmpty() ?
+        Collections.emptyList() :
+          new MappedIndexView<>(source, mapper);
+  }
+  
+  
   /**
    * Returns a read-write view.
    */
@@ -96,6 +104,15 @@ public class Lists {
   }
   
   
+  /**
+   * Returns a read-only view of the given elements. The intended usage is an
+   * <em>unmodified</em> array: it is used as is and does not check for null elements.
+   * As such, for large arrays, it is significantly faster than the now standard
+   * {@linkplain List#of(Object...)} implementation.
+   * 
+   * @param element non-null array of non-null elements
+   * @return
+   */
   public static <T> List<T> asReadOnlyList(@SuppressWarnings("unchecked") T... element) {
     switch (element.length) {
     case 0 :  return Collections.emptyList();
@@ -428,6 +445,31 @@ public class Lists {
   }
   
   
+  
+  public static <T> List<T> repeatedList(T repeated, int size) {
+    Objects.requireNonNull(repeated);
+    if (size < 2) {
+      switch (size) {
+      case 0: return Collections.emptyList();
+      case 1: return Collections.singletonList(repeated);
+      default:
+        throw new IllegalArgumentException("size: " + size);
+      }
+    }
+    return new RandomAccessList<T>() {
+      @Override
+      public T get(int index) {
+        Objects.checkIndex(index, size);
+        return repeated;
+      }
+      @Override
+      public int size() {
+        return size;
+      }
+    };
+  }
+  
+  
   /**
    * Extend <em>this</em> class instead of {@linkplain AbstractList}. (Really, a list that's not random access is
    * not a list should just be called a collection.)
@@ -499,7 +541,7 @@ public class Lists {
   
   
   
-  protected static class ReverseView<T> extends RandomAccessList<T> {
+  static class ReverseView<T> extends RandomAccessList<T> {
     
     private final List<T> source;
     
@@ -520,27 +562,8 @@ public class Lists {
     }
   }
   
-  // Idea jotted down. Not sure, so I commented it out.
-  // Another approach is to wrap a sorted list in a view. (Prolly better)
-  // Later..
   
-//  protected static class SortedArrayView<T extends Comparable<T>> extends ArrayView<T> {
-//    
-//    protected SortedArrayView(T[] array) {
-//      super(array);
-//    }
-//    
-//    @Override
-//    public boolean contains(Object element) {
-//      if (element == null)
-//        return false;
-//      int index = Arrays.binarySearch(array, element);
-//      return index >= 0 && index < array.length && array[index].equals(element);
-//    }
-//  }
-  
-  
-  protected static class ArrayView<T> extends RandomAccessList<T> {
+  static class ArrayView<T> extends RandomAccessList<T> {
     
     protected final T[] array;
     
@@ -578,11 +601,30 @@ public class Lists {
   
   
   
-  protected static class ReadOnlyView<U, V> extends BaseView<U, V> {
+  static class MappedIndexView<U, V> extends BaseView<U, V> {
+    
+    private final BiFunction<Integer, U, V> mapper;
+    
+    
+    public MappedIndexView(List<U> source, BiFunction<Integer, U, V> mapper) {
+      super(source);
+      this.mapper = Objects.requireNonNull(mapper, "mapper");
+    }
+
+    @Override
+    public V get(int index) {
+      return mapper.apply(index, source.get(index));
+    }
+    
+  }
+  
+  
+  
+  static class MappedView<U, V> extends BaseView<U, V> {
     
     private final Function<U, V> mapper;
     
-    protected ReadOnlyView(List<U> source, Function<U, V> mapper) {
+    protected MappedView(List<U> source, Function<U, V> mapper) {
       super(source);
       this.mapper = Objects.requireNonNull(mapper, "mapper");
     }
@@ -598,7 +640,7 @@ public class Lists {
   
   
   
-  protected static class IsomorphicView<U, V> extends BaseView<U, V> {
+  static class IsomorphicView<U, V> extends BaseView<U, V> {
     
     private final Isomorphism<U, V> iso;
     

@@ -7,6 +7,8 @@ package io.crums.util.json;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
@@ -83,6 +85,15 @@ public interface JsonEntityReader<T> {
   }
   
   
+  default T toEntity(InputStream in) throws JsonParsingException, UncheckedIOException {
+    try (var reader = new InputStreamReader(in)) {
+      return toEntity(reader);
+    } catch (IOException iox) {
+      throw new UncheckedIOException("on toEntity(in=" + in + "): " + iox , iox);
+    }
+  }
+  
+  
   default T toEntity(File file) throws JsonParsingException, UncheckedIOException {
     try (var reader = new FileReader(file)) {
       return toEntity(reader);
@@ -104,8 +115,12 @@ public interface JsonEntityReader<T> {
       return Collections.emptyList();
     
     ArrayList<T> list = new ArrayList<>(size);
-    for (int index = 0; index < size; ++index)
+    for (int index = 0; index < size; ++index) {
+      Object jObj = jArray.get(index);
+      if (!(jObj instanceof JSONObject))
+        throw new JsonParsingException("element at [" + index + "] is not a JSON object: " + jObj);
       list.add( toEntity((JSONObject) jArray.get(index)));
+    }
     return Collections.unmodifiableList(list);
   }
   

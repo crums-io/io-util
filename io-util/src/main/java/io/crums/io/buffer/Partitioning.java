@@ -58,8 +58,9 @@ public class Partitioning implements Serial {
     if (partCount == 0)
       return NULL;
     
-    if (partCount < 0 || partCount*4 > serialForm.remaining())
-      throw new IllegalArgumentException("part-count " + partCount + " in " + serialForm);
+    if (partCount < 0)
+      throw new IllegalArgumentException(
+          "read negative part count: " + partCount + " from " + serialForm);
     
     ArrayList<Integer> sizes = new ArrayList<>(partCount);
     int totalSize = 0;
@@ -75,10 +76,7 @@ public class Partitioning implements Serial {
     }
     // end header
     
-    
-    int pos = serialForm.position();
-    ByteBuffer block = serialForm.duplicate().limit(pos + totalSize).slice();
-    serialForm.position(pos + totalSize);
+    var block = BufferUtils.slice(serialForm, totalSize);
     
     if (readOnly && !block.isReadOnly())
       block = block.asReadOnlyBuffer();
@@ -116,7 +114,8 @@ public class Partitioning implements Serial {
    * given block. If it's read-only, then this instance is also read-only.
    * 
    * @param block with capacity &ge; 1 (you're mine now: position and limit don't matter)
-   * @param sizes list of non-negative sizes defining the boundaries between adjacent partitions
+   * @param sizes list of non-negative sizes defining the boundaries between adjacent partitions.
+   *              Must sum to the {@code block.capacity()}.
    * 
    * @see #NULL
    */
@@ -144,7 +143,7 @@ public class Partitioning implements Serial {
       throw new IllegalArgumentException(
           "sizes added up to " + off[off.length - 1] + " != block capacity " + block.capacity());
     
-    this.offsets = Lists.asReadOnlyList(off);
+    this.offsets = List.of(off);
   }
   
   
@@ -166,6 +165,16 @@ public class Partitioning implements Serial {
    */
   public final ByteBuffer getBlock() {
     return block.duplicate();
+  }
+  
+  
+  /**
+   * Returns the size of the block in bytes.
+   * 
+   * @return {@code getBlock().capacity()}
+   */
+  public final int getBlockSize() {
+    return block.capacity();
   }
   
   
@@ -261,7 +270,7 @@ public class Partitioning implements Serial {
 
   
   @Override
-  public final int serialSize() {
+  public int serialSize() {
     return serialHeaderSize() + block.capacity();
   }
   
@@ -270,15 +279,6 @@ public class Partitioning implements Serial {
    */
   public int serialHeaderSize() {
     return 4 * offsets.size();
-  }
-  
-  
-  /**
-   * Returns the header part of the instance's serial form.
-   */
-  public ByteBuffer serialHeader() {
-    ByteBuffer header = ByteBuffer.allocate(serialHeaderSize());
-    return writeHeaderTo(header).flip();
   }
   
   
@@ -309,7 +309,7 @@ public class Partitioning implements Serial {
    * 
    */
   @Override
-  public final ByteBuffer writeTo(ByteBuffer out) {
+  public ByteBuffer writeTo(ByteBuffer out) {
     writeHeaderTo(out);
     out.put(getBlock());
     return out;

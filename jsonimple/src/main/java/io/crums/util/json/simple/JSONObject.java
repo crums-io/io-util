@@ -16,7 +16,7 @@ import java.util.Objects;
 import io.crums.util.json.simple.parser.JSONParser;
 
 /**
- * A JSON object. Key value pairs are unordered. JSONObject supports java.util.Map interface.
+ * A JSON object. <strike>Key value pairs are unordered.</strike> JSONObject supports java.util.Map interface.
  * 
  * <h3>Babak's Changes</h3>
  * <p>
@@ -46,6 +46,8 @@ public class JSONObject extends DelegateMap<Object, Object> implements JSONAware
   
   /**
    * Creates an insertion-ordered instance.
+   * 
+   * @see #newFastInstance()
    */
   public JSONObject() {
     this(new LinkedHashMap<>(), null);
