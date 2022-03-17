@@ -1,7 +1,7 @@
 /*
  * Copyright 2013 Babak Farhang 
  */
-package io.crums.io.buffer;
+package io.crums.io.block;
 
 /**
  * Indicates what a caller agrees <em>not</em> to do to an accompanying

@@ -5,9 +5,9 @@ package io.crums.io.store.table.order;
 
 
 import static io.crums.io.store.table.order.RowOrders.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * 

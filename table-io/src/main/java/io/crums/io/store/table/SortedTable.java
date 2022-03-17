@@ -10,7 +10,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.logging.Logger;
 
-import io.crums.io.buffer.SortedBlock;
+import io.crums.io.block.SortedBlock;
 import io.crums.io.store.Sorted;
 import io.crums.io.store.ks.Keystone;
 import io.crums.io.store.ks.VolatileKeystone;

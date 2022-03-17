@@ -4,7 +4,7 @@
 package io.crums.io.store.table;
 
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
 import java.io.IOException;

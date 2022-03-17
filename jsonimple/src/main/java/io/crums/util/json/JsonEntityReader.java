@@ -29,6 +29,7 @@ import io.crums.util.json.simple.parser.ParseException;
  * @see #toEntity(String)
  * @see #toEntity(File)
  * @see #toEntity(Reader)
+ * @see #toEntity(InputStream)
  * @see #toEntityList(JSONArray)
  */
 public interface JsonEntityReader<T> {

@@ -5,10 +5,11 @@ package io.crums.util.json;
 
 
 /**
- * Emergent pattern for implementing parsing and generating JSON,
- * abstracted into an interface.
+ * Pattern for both parsing and generating JSON.
  * 
  * @param <T> the entity type
+ * @see JsonEntityWriter
+ * @see JsonEntityReader
  */
 public interface JsonEntityParser<T> extends JsonEntityWriter<T>, JsonEntityReader<T> {
   

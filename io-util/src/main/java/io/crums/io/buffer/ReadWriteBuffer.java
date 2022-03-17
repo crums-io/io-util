@@ -3,6 +3,7 @@
  */
 package io.crums.io.buffer;
 
+
 import java.nio.ByteBuffer;
 import java.util.Objects;
 
@@ -14,7 +15,6 @@ public class ReadWriteBuffer {
   
   
   private final ByteBuffer writeBuffer;
-  private final ByteBuffer readBuffer;
 
   
   /**
@@ -54,8 +54,6 @@ public class ReadWriteBuffer {
     this.writeBuffer = Objects.requireNonNull(writeBuffer);
     if (writeBuffer.isReadOnly())
       throw new IllegalArgumentException("writeBuffer " + writeBuffer + " is read-only");
-    this.readBuffer = writeBuffer.asReadOnlyBuffer().clear();
-    syncBuffers();
   }
   
   
@@ -66,7 +64,6 @@ public class ReadWriteBuffer {
    */
   public final ReadWriteBuffer put(ByteBuffer data) {
     writeBuffer.put(data);
-    syncBuffers();
     return this;
   }
   
@@ -78,8 +75,7 @@ public class ReadWriteBuffer {
    * @see #position(int)
    */
   public final ReadWriteBuffer position(int position) {
-    this.writeBuffer.position(position);
-    syncBuffers();
+    writeBuffer.position(position);
     return this;
   }
   
@@ -99,7 +95,23 @@ public class ReadWriteBuffer {
    * @return read-only sliced view
    */
   public final ByteBuffer readBuffer() {
-    return readBuffer.slice();
+    return writeBuffer.asReadOnlyBuffer().flip().slice();
+  }
+  
+  public ByteBuffer copyReadBuffer() {
+    int size = writeBuffer.position();
+    return
+        size == 0 ?
+            BufferUtils.NULL_BUFFER :
+              copyReadBufferInto(ByteBuffer.allocate(size)).flip();
+    
+  }
+  
+  public final ByteBuffer copyReadBufferInto(ByteBuffer out) {
+    if (out.remaining() < readableBytes())
+      throw new IllegalArgumentException("required " + readableBytes() + " remaining: " + out);
+    
+    return out.put(writeBuffer.duplicate().flip());
   }
   
   
@@ -108,7 +120,7 @@ public class ReadWriteBuffer {
    * of bytes thus far written.)
    */
   public final int readableBytes() {
-    return readBuffer.limit();
+    return writeBuffer.position();
   }
   
   
@@ -137,13 +149,13 @@ public class ReadWriteBuffer {
    */
   public final ReadWriteBuffer clear() {
     writeBuffer.clear();
-    readBuffer.limit(0);
     return this;
-  }
-  
-  
-  private void syncBuffers() {
-    readBuffer.limit(writeBuffer.position());
   }
 
 }
+
+
+
+
+
+

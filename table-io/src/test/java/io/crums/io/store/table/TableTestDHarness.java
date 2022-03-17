@@ -3,8 +3,7 @@
  */
 package io.crums.io.store.table;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;

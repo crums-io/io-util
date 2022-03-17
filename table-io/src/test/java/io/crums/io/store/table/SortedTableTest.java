@@ -4,7 +4,7 @@
 package io.crums.io.store.table;
 
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,8 +15,8 @@ import java.text.DecimalFormat;
 import java.util.Random;
 import java.util.logging.Logger;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.AfterEach;
 
 import com.gnahraf.test.IoTestCase;
 
@@ -49,7 +49,7 @@ public class SortedTableTest extends IoTestCase {
 
 
 
-  @After
+  @AfterEach
   public void tearDown() throws Exception {
     if (file != null)
       file.close();
@@ -403,14 +403,14 @@ public class SortedTableTest extends IoTestCase {
       
       boolean hit = searcher.search(key);
       assertEquals(
+          hit, searcher.isHit(),
           "assertion failure at searchKey[" + i + "]: searcher.search() is " +
-          hit + " but searcher.isHit() is " + searcher.isHit(),
-          hit, searcher.isHit());
+          hit + " but searcher.isHit() is " + searcher.isHit());
       int expectedResult = expectedSearchResults[i];
       assertEquals(
+          hit, expectedResult >= 0,
           "assertion failure at searchKey[" + i + "]: expectedResult is " +
-          expectedResult + " but hit is " + hit,
-          hit, expectedResult >= 0);
+          expectedResult + " but hit is " + hit);
       
       assertEquals(expectedResult, searcher.getHitRowNumber());
       if (hit) {

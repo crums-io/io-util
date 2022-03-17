@@ -14,24 +14,30 @@
 	<properties>
     <revision>1.0.0-SNAPSHOT</revision>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.source>1.11</maven.compiler.source>
-		<maven.compiler.target>1.11</maven.compiler.target>
+    <maven.compiler.release>17</maven.compiler.release>
 		<flatten.version>1.2.2</flatten.version>
-    <junit.version>[4.13.1,)</junit.version>
+    <junit.version>4.13.2</junit.version>
 	</properties>
 
 
   <modules>
     <module>io-util</module>
-    <module>table-io</module>
-    <module>karoon</module>
-    <module>jsonimple</module>
     <module>io-xp</module>
+    <module>table-io</module>
+    <module>jsonimple</module>
   </modules>
 
 	<build>
 
 		<plugins>
+
+      
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.8.1</version>
+      </plugin>
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -47,97 +53,45 @@
 				</executions>
 			</plugin>
 
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>versions-maven-plugin</artifactId>
-				<version>2.5</version>
-				<configuration>
-					<generateBackupPoms>false</generateBackupPoms>
-				</configuration>
-			</plugin>
 
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-enforcer-plugin</artifactId>
-				<version>3.0.0-M3</version>
-				<executions>
-					<execution>
-						<id>enforce-maven</id>
-						<goals>
-							<goal>enforce</goal>
-						</goals>
-						<configuration>
-							<rules>
-								<requireMavenVersion>
-									<version>[3.0,)</version>
-								</requireMavenVersion>
-							</rules>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.8.0</version>
-				<configuration>
-          <!--compilerArgs>
-              <arg>-Xlint:unchecked</arg>
-          </compilerArgs-->
-					<release>11</release>
-				</configuration>
-			</plugin>
+			
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.22.0</version>
-				<configuration>
-					<argLine>
-						--illegal-access=permit
-					</argLine>
-				</configuration>
-			</plugin>
-			
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-failsafe-plugin</artifactId>
-				<version>2.22.0</version>
-				<configuration>
-					<argLine>
-						--illegal-access=permit
-					</argLine>
-				</configuration>
+				<version>3.0.0-M5</version>
 			</plugin>
 
-      <!-- w/o plugin below, sub module artifacts get polluted with this parent pom -->
+
+
+      <!-- w/o plugin below, ${revision} is not resolved  -->
       <plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>flatten-maven-plugin</artifactId>
-				<version>${flatten.version}</version>
-				<configuration>
-				  <updatePomFile>true</updatePomFile>
-				  <flattenMode>resolveCiFriendliesOnly</flattenMode>
-				</configuration>
-				<executions>
-				  <execution>
-				    <id>flatten</id>
-				    <phase>process-resources</phase>
-				    <goals>
-				      <goal>flatten</goal>
-				    </goals>
-				  </execution>
-				  <execution>
-				    <id>flatten.clean</id>
-				    <phase>clean</phase>
-				    <goals>
-				      <goal>clean</goal>
-				    </goals>
-				  </execution>
-				</executions>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>flatten-maven-plugin</artifactId>
+        <version>${flatten.version}</version>
+        <configuration>
+          <updatePomFile>true</updatePomFile>
+          <flattenMode>resolveCiFriendliesOnly</flattenMode>
+        </configuration>
+        <executions>
+          <execution>
+            <id>flatten</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>flatten</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>flatten.clean</id>
+            <phase>clean</phase>
+            <goals>
+              <goal>clean</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
 
+      
 		</plugins>
 
 	</build>
@@ -145,12 +99,13 @@
 
 	<dependencies>
 
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>${junit.version}</version>
-			<scope>test</scope>
-		</dependency>
+
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>5.8.2</version>
+      <scope>test</scope>
+    </dependency>
 		
     <dependency>
       <groupId>com.gnahraf</groupId>

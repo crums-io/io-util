@@ -4,9 +4,9 @@
 package io.crums.io.channels;
 
 
+import java.lang.System.Logger.Level;
 import java.nio.channels.Channel;
 import java.util.Objects;
-import java.util.logging.Logger;
 
 /**
  * Reference-counted resource closer.
@@ -63,7 +63,9 @@ public class SharedChannel implements Channel {
   }
 
   protected void handleClosingException(Exception x) {
-    Logger.getLogger(SharedChannel.class.getName()).warning("exception on closing " + resource + ": " + x);
+    System.getLogger(SharedChannel.class.getName()).log(
+        Level.WARNING,
+        "Error ignored on closing " + resource + ": " + x);
   }
 
 }

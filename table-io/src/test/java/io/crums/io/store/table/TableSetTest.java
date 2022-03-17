@@ -4,7 +4,7 @@
 package io.crums.io.store.table;
 
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import io.crums.io.store.table.order.RowOrder;
 import io.crums.io.store.table.order.RowOrders;

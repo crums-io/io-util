@@ -4,7 +4,7 @@
 package io.crums.io.store.table;
 
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,8 +13,8 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.logging.Logger;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import com.gnahraf.test.IoTestCase;
 
@@ -58,7 +58,7 @@ public class TableTest extends IoTestCase {
   
 
 
-  @After
+  @AfterEach
   public void tearDown() throws Exception {
     if (file != null)
       file.close();

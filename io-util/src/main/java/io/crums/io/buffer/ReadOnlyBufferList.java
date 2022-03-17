@@ -19,7 +19,7 @@ import java.util.RandomAccess;
  * <em>Instances are safe under concurrent access.</em>
  * </p>
  */
-public class BufferList extends AbstractList<ByteBuffer> implements RandomAccess {
+public class ReadOnlyBufferList extends AbstractList<ByteBuffer> implements RandomAccess {
   
   /**
    * Invariants: the positional state of is never changed.
@@ -40,7 +40,7 @@ public class BufferList extends AbstractList<ByteBuffer> implements RandomAccess
    *                      <tt>block</tt> is not read-only).
    * @param elementWidth  the number of bytes for each element in the block
    */
-  public BufferList(ByteBuffer block, int elementWidth) {
+  public ReadOnlyBufferList(ByteBuffer block, int elementWidth) {
     this(block, elementWidth, true);
   }
 
@@ -60,7 +60,7 @@ public class BufferList extends AbstractList<ByteBuffer> implements RandomAccess
    *                      positional fields in <tt>block</tt> and that the entire block (ignoring
    *                      position and limit) belongs to this list
    */
-  public BufferList(ByteBuffer block, int elementWidth, boolean slice) {
+  public ReadOnlyBufferList(ByteBuffer block, int elementWidth, boolean slice) {
     Objects.requireNonNull(block, "null block");
     this.block = slice ? block.slice() : block.clear();
     this.elementWidth = elementWidth;

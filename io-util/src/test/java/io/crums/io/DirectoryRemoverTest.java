@@ -4,13 +4,12 @@
 package io.crums.io;
 
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.logging.Logger;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.gnahraf.test.IoTestCase;
 
@@ -20,7 +19,6 @@ import com.gnahraf.test.IoTestCase;
 public class DirectoryRemoverTest extends IoTestCase {
 
   
-  final Logger log = Logger.getLogger(getClass().getSimpleName());
   
   File testDir;
   

@@ -4,7 +4,7 @@
 package io.crums.io.store.ks;
 
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,7 +12,7 @@ import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 import java.util.logging.Logger;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.gnahraf.test.IoTestCase;
 

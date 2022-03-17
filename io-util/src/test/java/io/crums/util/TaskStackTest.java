@@ -1,9 +1,9 @@
 /*
- * Copyright 2013 Babak Farhang 
+ * Copyright 2013-2022 Babak Farhang
  */
 package io.crums.util;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 import java.util.ArrayList;
@@ -11,11 +11,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * 
- * @author Babak
  */
 public class TaskStackTest {
   

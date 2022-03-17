@@ -11,7 +11,7 @@ import java.nio.channels.FileChannel;
 import java.util.logging.Logger;
 
 import io.crums.io.FileUtils;
-import io.crums.io.buffer.SortedViewBlock;
+import io.crums.io.block.SortedViewBlock;
 import io.crums.io.store.table.order.RowOrder;
 
 /**

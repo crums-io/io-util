@@ -5,11 +5,11 @@ package io.crums.util;
 
 
 import static io.crums.util.IntegralStrings.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Random;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * 
@@ -21,9 +21,9 @@ public class IntegralStringsTest {
     String[] hex = { "fE", "00", "10", "0123456789abcdefABCDEF" };
     String[] notHex = { "0x5", "5G", "0g" };
     for (String n : hex)
-      assertTrue(n, isHex(n));
+      assertTrue(isHex(n), n);
     for (String g : notHex)
-      assertFalse(g, isHex(g));
+      assertFalse(isHex(g), g);
   }
   
   

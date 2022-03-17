@@ -14,8 +14,8 @@ import java.util.NavigableSet;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import io.crums.io.block.Covenant;
 import io.crums.io.buffer.BufferOp;
-import io.crums.io.buffer.Covenant;
 import io.crums.io.channels.ChannelUtils;
 import io.crums.io.store.table.iter.Direction;
 import io.crums.io.store.table.iter.RowIterator;

@@ -3,7 +3,7 @@
  */
 package io.crums.io.store.table;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,14 +12,13 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Random;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import io.crums.io.store.table.order.RowOrder;
 import io.crums.io.store.table.order.RowOrders;
 
 /**
  * 
- * @author Babak
  */
 public class TableSorterTest extends TableTestHarness {
   

@@ -1,7 +1,7 @@
 /*
  * Copyright 2013 Babak Farhang 
  */
-package io.crums.io.buffer;
+package io.crums.io.block;
 
 
 import static io.crums.io.buffer.BufferUtils.binaryFirst;
@@ -11,6 +11,8 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Comparator;
 
+import io.crums.io.buffer.Block;
+import io.crums.io.buffer.BufferUtils;
 import io.crums.io.store.Sorted;
 
 /**

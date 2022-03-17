@@ -4,15 +4,14 @@
 package io.crums.io;
 
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.gnahraf.test.IoTestCase;
 
@@ -76,9 +75,6 @@ public class FileSystemTraverserTest extends IoTestCase {
     }
   }
   
-
-  
-  final Logger log = Logger.getLogger(getClass().getSimpleName());
   
   File testDir;
   

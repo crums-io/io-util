@@ -1,7 +1,7 @@
 /*
  * Copyright 2013 Babak Farhang 
  */
-package io.crums.io.buffer;
+package io.crums.io.block;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -9,6 +9,7 @@ import java.nio.channels.GatheringByteChannel;
 import java.util.Arrays;
 import java.util.Comparator;
 
+import io.crums.io.buffer.BufferUtils;
 import io.crums.io.channels.ChannelUtils;
 
 /**

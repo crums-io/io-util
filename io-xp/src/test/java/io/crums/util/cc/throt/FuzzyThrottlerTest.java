@@ -4,10 +4,10 @@
 package io.crums.util.cc.throt;
 
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.logging.Logger;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.gnahraf.test.SelfAwareTestCase;
 
