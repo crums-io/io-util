@@ -7,6 +7,7 @@ import java.nio.Buffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 import java.util.AbstractList;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.RandomAccess;
 
@@ -70,6 +71,15 @@ public abstract class NumberList<N extends Number> extends AbstractList<N> imple
   @Override
   public final int size() {
     return blocks.length * entriesPerBlock + frontier().position();
+  }
+  
+  
+  
+  public final N last() {
+    int size = size();
+    if (size == 0)
+      throw new NoSuchElementException();
+    return get(size - 1);
   }
   
   
@@ -172,7 +182,8 @@ public abstract class NumberList<N extends Number> extends AbstractList<N> imple
     }
     
     public void addInt(int value) {
-      ((IntBuffer) ensureFrontier()).put(value);
+      ensureFrontier();
+      frontier.put(value);
     }
 
 
@@ -242,7 +253,8 @@ public abstract class NumberList<N extends Number> extends AbstractList<N> imple
     
     
     public void addLong(long value) {
-      ((LongBuffer) ensureFrontier()).put(value);
+      ensureFrontier();
+      frontier.put(value);
     }
     
     

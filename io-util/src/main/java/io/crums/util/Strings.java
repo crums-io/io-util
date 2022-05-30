@@ -69,18 +69,58 @@ public class Strings {
   }
   
 
-  
+  /**
+   * Returns a string of the form "n-of-something". For example:
+   * <pre>
+   *    System.out.println(nOf(0, "cow"));
+   *    System.out.println(nOf(1, "cow"));
+   *    System.out.println(nOf(2, "cow"));
+   * </pre>
+   * prints
+   * <pre>
+   *    0 cows
+   *    1 cow
+   *    2 cows
+   * </pre>
+   * 
+   * @param count &ge; 0
+   * @param single  the singular form of the word
+   * 
+   * @see #pluralize(String, long)
+   */
   public static String nOf(long count, String single) {
     return count + " " + pluralize(single, count);
   }
   
   
+  /**
+   * Returns the given singular English word in plural form (using heuristics
+   * based on ending) <em>if and only if</em> the given {@code count} is not
+   * {@code 1}. (In English, zero of something is plural.)
+   * 
+   * <h3>Ending Patterns</h3>
+   * <p>The default pluralizaton behavior is to simply append 's' to the end of the
+   * input argument {@code single}. However the following endings are specially treated
+   * (as per English rules-of-thumb):
+   * <ol>
+   * <li>{@code ch}</li>
+   * <li>{@code sh}</li>
+   * <li>{@code s}</li>
+   * <li>{@code y}</li>
+   * <ol>
+   * </p>
+   * 
+   * @param single  the word in singular form
+   * @param count   &ge; 0. If {@code 1}, then {@code single} is returned
+   * 
+   * @return possibly pluralized version of {@code single}
+   */
   public static String pluralize(String single, long count) {
     if (count == 1)
       return single;
     if (single.endsWith("y"))
       return single.substring(0, single.length() - 1) + "ies";
-    else if (single.endsWith("sh") || single.endsWith("ch"))
+    else if (single.endsWith("sh") || single.endsWith("ch") || single.endsWith("s"))
       return single + "es";
     else
       return single + "s";

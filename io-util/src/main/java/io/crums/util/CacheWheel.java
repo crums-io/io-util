@@ -200,7 +200,7 @@ public class CacheWheel<T> {
     if (from >= maxSize)
       throw new IllegalArgumentException("from (" + from + ") >= max size (" + maxSize + ")");
     if (to > maxSize)
-      throw new IllegalArgumentException("to (" + from + ") > max size (" + maxSize + ")");
+      throw new IllegalArgumentException("to (" + to + ") > max size (" + maxSize + ")");
   }
   
 

@@ -180,7 +180,7 @@ public class Lists {
   
   
   public static <T extends Comparable<T>> List<T> sort(Collection<? extends T> copy, boolean noDups) {
-    int size = Objects.requireNonNull(copy, "null list").size();
+    int size = Objects.requireNonNull(copy).size();
     switch (size) {
     case 0:
       return Collections.emptyList();
@@ -198,6 +198,20 @@ public class Lists {
       Collections.sort(out);
     }
     return Collections.unmodifiableList(out);
+  }
+
+  
+  
+  
+  public static <T extends Comparable<T>> List<T> sortRemoveDups(Collection<? extends T> copy) {
+    int size = Objects.requireNonNull(copy).size();
+    switch (size) {
+    case 0:
+      return Collections.emptyList();
+    case 1:
+      return Collections.singletonList(copy.iterator().next());
+    }
+    return readOnlyCopy(new TreeSet<T>(copy));
   }
   
   
@@ -471,10 +485,54 @@ public class Lists {
   
   
   /**
+   * Returns a list view of the given access function. Note successive invocations
+   * of {@linkplain List#get(int) get(index)} on the same index return different
+   * objects.
+   * 
+   * @param size the fixed size of the list
+   * @param accessor
+   * @return a lazy, lightweight, read-only list of {@code accesssor}
+   */
+  public static <T> List<T> functorList(int size, Function<Integer, T> accessor) {
+    return new FunctorList<>(size, accessor);
+  }
+  
+  
+  /**
    * Extend <em>this</em> class instead of {@linkplain AbstractList}. (Really, a list that's not random access is
    * not a list should just be called a collection.)
    */
   public static abstract class RandomAccessList<T> extends AbstractList<T> implements RandomAccess {
+    
+  }
+  
+  
+  /**
+   * An index-to-object function wrapped as a read-only list.
+   */
+  public static class FunctorList<T> extends RandomAccessList<T> {
+    
+    private final Function<Integer, T> accessor;
+    private final int size;
+    
+    
+    public FunctorList(int size, Function<Integer, T> accessor) {
+      this.size = size;
+      this.accessor = Objects.requireNonNull(accessor, "null accessor function");
+      if (size < 0)
+        throw new IllegalArgumentException("negative size: " + size);
+    }
+
+    @Override
+    public T get(int index) {
+      Objects.checkIndex(index, size);
+      return accessor.apply(index);
+    }
+
+    @Override
+    public int size() {
+      return size;
+    }
     
   }
   

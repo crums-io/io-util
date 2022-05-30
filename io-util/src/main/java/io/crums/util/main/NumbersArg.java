@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.StringTokenizer;
+import java.util.TreeSet;
 import java.util.function.Predicate;
 
 import io.crums.util.Lists;
@@ -178,6 +179,20 @@ public class NumbersArg {
       // eat it
       return null;
     }
+  }
+  
+  
+  /**
+   * Parses a list of {@code long}s from the given argument string and returns
+   * them as a list of unique, ascending {@code long}s if successful;
+   * returns null otherwise.
+   * 
+   * @param arg
+   * @return null or immutable list.
+   */
+  public static List<Long> parseSorted(String arg) {
+    var unsorted = parse(arg);
+    return unsorted == null ? null : Lists.sortRemoveDups(unsorted);
   }
 
 }
