@@ -319,10 +319,15 @@ public class Lists {
   /**
    * Returns a reversed, read-only view of the given source list.
    * If the <tt>source</tt> is a singleton or empty, it is returned as-is.
+   * <p>
+   * Note, reversing an already reversed list <em>unwraps</em> the view.
+   * (You needn't worry about needless double-wrappings.)
+   * </p>
    */
   public static <T> List<T> reverse(List<T> source) {
-    
-    return source.size() <= 1 ? source : new ReverseView<>(source);
+    if (source.size() < 2)
+      return source;
+    return source instanceof ReverseView<T> rev ? rev.source() : new ReverseView<>(source);
   }
   
   
@@ -498,6 +503,50 @@ public class Lists {
   }
   
   
+  
+  /**
+   * Returns a <em>downcast</em> view of the given list. This is an efficient workaround
+   * for the inability to do casts of the following type in Java: {@code (List<CharSequence>) List<String>}.
+   * The objects in the list themselves are not transformed.
+   * <p>
+   * <em>Note the transformed view never throws {@linkplain ClassCastException}s.</em>
+   * </p>
+   * 
+   * @param <D> the downcast type
+   * @param <U> the original type (a subtype of {@code <D>}
+   * 
+   * @return {@code map(list, u -> (D) u)}
+   */
+  public static <D, U extends D> List<D> downcast(List<U> list) {
+    return map(list, u -> (D) u);
+  }
+  
+  
+
+  /**
+   * Returns a <em>upcast</em> view of the given list. This is an efficient workaround
+   * for the inability to do casts of the following type in Java: {@code (List<String>) List<CharSequence>}.
+   * The objects in the list themselves are not transformed.
+   * <p>
+   * Note this method does not inspect the elements of the given list: <em>a {@linkplain ClassCastException}
+   * may later be thrown on accessing an element that is not castable.</em>
+   * </p>
+   * 
+   * @param <D> the original type
+   * @param <U> the type cast to (a subtype of {@code <D>}
+   * 
+   * @return {@code map(list, u -> (D) u)}
+   */
+  @SuppressWarnings("unchecked")
+  public static <D, U extends D> List<U> upcast(List<D> list) {
+    return map(list, d -> (U) d);
+  }
+  
+  
+  
+  
+  
+  
   /**
    * Extend <em>this</em> class instead of {@linkplain AbstractList}. (Really, a list that's not random access is
    * not a list should just be called a collection.)
@@ -617,6 +666,11 @@ public class Lists {
     @Override
     public int size() {
       return source.size();
+    }
+    
+    
+    public List<T> source() {
+      return source;
     }
   }
   
