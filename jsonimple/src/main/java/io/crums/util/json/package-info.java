@@ -4,7 +4,7 @@
 /**
  * Utilities and abstractions for using the JSON model.
  * <p>
- * Jsoniple is a derivative of <a href="https://github.com/fangyidong/json-simple">simple-json</a>.
+ * Jsonimple is a derivative of <a href="https://github.com/fangyidong/json-simple">simple-json</a>.
  * Like its parent, it aims to be simple and lightweight (no external dependencies). Another aim is
  * to simplify migraton from the parent to this one: other than adjusting imported packages, most
  * code should compile fine.
