@@ -10,7 +10,11 @@ import io.crums.util.json.simple.JSONArray;
 import io.crums.util.json.simple.JSONObject;
 
 /**
- * 
+ * JSON parsing utilities -- mostly on the read-path.
+ * <p>
+ * For the most part, this deals with the tedium of validating a JSON field's <em>value</em>
+ * is the expected type, validating a <em>required</em> JSON field is in fact there, and so on.
+ * </p>
  */
 public class JsonUtils {
 
@@ -88,7 +92,14 @@ public class JsonUtils {
   }
   
   
-  
+  /**
+   * Returns the named {@code JSONArray}, if found.
+   * 
+   * @param require   if {@code true}, then "not-found" is a parsing error
+   * @return possibly {@code null}; unless {@code require} is {@code true}
+   * 
+   * @throws JsonParsingException if {@code require} is {@code true} and no such object is found, or if the named object is not a JSON map
+   */
   public static JSONArray getJsonArray(JSONObject jObj, String name, boolean require) throws JsonParsingException {
     Object value = jObj.get(name);
     if (value == null) {
@@ -103,7 +114,14 @@ public class JsonUtils {
     }
   }
   
-  
+  /**
+   * Returns the named {@code JSONObject}, if found.
+   * 
+   * @param require   if {@code true}, then "not-found" is a parsing error
+   * @return possibly {@code null}; unless {@code require} is {@code true}
+   * 
+   * @throws JsonParsingException if {@code require} is {@code true} and no such object is found, or if the named object is not a JSON map
+   */
   public static JSONObject getJsonObject(JSONObject jObj, String name, boolean require) throws JsonParsingException {
     Object value = jObj.get(name);
     if (value == null) {
