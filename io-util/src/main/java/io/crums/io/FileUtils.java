@@ -199,13 +199,17 @@ public class FileUtils {
         throw new IllegalArgumentException("file size " +  bytes + " for " + file + " exceeds buffer capacity " + out.capacity());
       out.clear().limit((int) bytes);
     }
-    try (@SuppressWarnings("resource") FileChannel ch = new FileInputStream(file).getChannel()) {
+    try (FileChannel ch = new FileInputStream(file).getChannel()) {
       ChannelUtils.readRemaining(ch, out);
       return out.flip();
     } catch (IOException iox) {
       throw new UncheckedIOException("on loadFileToMemory( " + file + " ): " + iox, iox);
     }
   }
+  
+  
+  
+  
   
   
   public static void writeNewFile(File file, ByteBuffer contents) throws UncheckedIOException {

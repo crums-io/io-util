@@ -3,6 +3,10 @@
  */
 package io.crums.io.buffer;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -91,6 +95,24 @@ public class BufferUtils {
     return slice;
   }
   
+  
+  
+  /**
+   * Reads the given input stream fully and returns the bytes read as a
+   * {@code ByteBuffer}.
+   */
+  public static ByteBuffer readFully(InputStream in) throws UncheckedIOException {
+    try {
+      ByteArrayOutputStream out = new ByteArrayOutputStream();
+      byte[] bytes = new byte[4096];
+      int amount;
+      while ((amount = in.read(bytes)) != -1)
+        out.write(bytes, 0, amount);
+      return ByteBuffer.wrap(out.toByteArray());
+    } catch (IOException iox) {
+      throw new UncheckedIOException(iox);
+    }
+  }
 
   
   
