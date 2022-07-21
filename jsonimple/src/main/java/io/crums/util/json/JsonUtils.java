@@ -34,6 +34,18 @@ public class JsonUtils {
   }
   
   
+  public static String getString(
+      JSONObject jObj, String name, String defaultVal) throws JsonParsingException {
+    Object value = jObj.get(name);
+    if (value == null)
+      return defaultVal;
+    
+    if (!(value instanceof String))
+      throw new JsonParsingException("'" + name + "' expects a simple string: " + value);
+    return value.toString();
+  }
+  
+  
   public static Number getNumber(JSONObject jObj, String name, boolean require) throws JsonParsingException {
     Object value = jObj.get(name);
     if (value == null) {
@@ -109,6 +121,20 @@ public class JsonUtils {
     }
     try {
       return (JSONArray) value;
+    } catch (ClassCastException ccx) {
+      throw new JsonParsingException("'" + name + "' expects a JSON array: " + value, ccx);
+    }
+  }
+  
+  public static List<?> getList(JSONObject jObj, String name, boolean require) throws JsonParsingException {
+    Object value = jObj.get(name);
+    if (value == null) {
+      if (require)
+        throw new JsonParsingException("expected JSON array '" + name + "' missing");
+      return null;
+    }
+    try {
+      return (List<?>) value;
     } catch (ClassCastException ccx) {
       throw new JsonParsingException("'" + name + "' expects a JSON array: " + value, ccx);
     }

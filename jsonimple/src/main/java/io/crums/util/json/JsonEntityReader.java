@@ -125,4 +125,15 @@ public interface JsonEntityReader<T> {
     return Collections.unmodifiableList(list);
   }
   
+  
+  /**
+   * Returns a named instance, if present; {@code null} otherwise.
+   * 
+   * @return may be null (!)
+   */
+  default T parseIfPresent(JSONObject jObj, String name) throws JsonParsingException {
+    var jSub = JsonUtils.getJsonObject(jObj, name, false);
+    return jSub == null ? null : toEntity(jSub);
+  }
+  
 }

@@ -5,6 +5,7 @@ package io.crums.util.json;
 
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.io.UncheckedIOException;
 import java.util.List;
 import java.util.Map;
@@ -44,7 +45,14 @@ public class JsonPrinter {
   }
   
   
+  public static void println(Map<?,?> map) {
+    println(map, System.out);
+  }
   
+  public static void println(Map<?,?> map, PrintStream out) {
+    new JsonPrinter(out).print(map);
+    out.println();
+  }
   
   
   

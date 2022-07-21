@@ -26,7 +26,7 @@ public class JsonParsingException extends RuntimeException {
    * @param cause
    */
   public JsonParsingException(Throwable cause) {
-    super(cause);
+    super(cause.getMessage(), cause);
   }
 
   /**
