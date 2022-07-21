@@ -26,6 +26,8 @@ import java.util.Objects;
  * encapsulating adhoc predicates (e.g. are these 2 numbers equal?) then you'll need to use
  * some previously agreed, hopefully reasonable conversion rules. Hence this class.
  * </p>
+ * 
+ * @deprecated Ditching this: finding ways not to use it.
  */
 @SuppressWarnings("serial")
 public abstract class PrimitiveNumber extends Number implements Comparable<PrimitiveNumber> {
@@ -221,6 +223,11 @@ public abstract class PrimitiveNumber extends Number implements Comparable<Primi
   public static class Settable extends PrimitiveNumber {
     
     private Number value;
+    
+    
+    public Settable() {
+      this(0L);
+    }
     
     public Settable(Long value) {
       this(value, true);
