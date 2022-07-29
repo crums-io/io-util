@@ -115,8 +115,10 @@ public class Lists {
    */
   public static <T> List<T> asReadOnlyList(@SuppressWarnings("unchecked") T... element) {
     switch (element.length) {
-    case 0 :  return Collections.emptyList();
-    case 1 :  return Collections.singletonList(element[0]);
+    case 0 :  return List.of();
+    case 1 :  return List.of(element[0]);
+    case 2 :  return List.of(element[0], element[1]);
+    case 3 :  return List.of(element[0], element[1], element[2]);
     default:  return new ArrayView<>(element);
     }
   }
@@ -160,18 +162,16 @@ public class Lists {
     }
     
     ArrayList<T> out = new ArrayList<>(size);
+    HashSet<T> set = noDups ? new HashSet<>(size) : null;
     
-    if (noDups) {
-      HashSet<T> set = new HashSet<>(size);
-      set.addAll(copy);
-      if (set.size() != size)
-        throw new IllegalArgumentException("argument contains duplicates: " + copy);
-    }
     for (var iter = copy.iterator(); iter.hasNext();) {
       var next = iter.next();
       // disallow null
       if (next == null)
         throw new IllegalArgumentException("argument has null elements: " + copy);
+      if (noDups && !set.add(next))
+        throw new IllegalArgumentException(
+            "argument contains duplicate (" + next + "): " + copy);
       out.add(next);
     }
     return Collections.unmodifiableList(out);
