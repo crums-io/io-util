@@ -4,7 +4,7 @@ Overview
 A small set of Java utility modules for some general / specific tasks:
 
 1. [io-util](./io-util/README.md) - I/O, buffer, and some common utilities. The `Lists` utility methods find a lot of use in other crums.io projects. *(No external dependencies.)*
-2. [jsonimple](./jsonimple/READE.md) - json-simple knock off with some bug fixes, and a few added features. *(No external dependencies.)*
+2. [jsonimple](https://github.com/crums-io/io-util/tree/master/jsonimple) - json-simple knock off with some bug fixes, and a few added features. *(No external dependencies.)*
 3. [io-xp](./io-xp/README.md) - Less used stuff. Includes a fuzzy controller.
 4. [table-io](./table-io/README.md) - Simple, fast, fail-safe, fixed-width, external tables (on disk).
 
