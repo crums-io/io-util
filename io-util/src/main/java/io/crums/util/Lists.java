@@ -153,23 +153,59 @@ public class Lists {
    */
   public static <T> List<T> readOnlyCopy(Collection<? extends T> copy, boolean noDups) {
     
-    int size = Objects.requireNonNull(copy, "null list").size();
+    final int size = Objects.requireNonNull(copy, "null list").size();
     switch (size) {
     case 0:
-      return Collections.emptyList();
+      return List.of();
     case 1:
-      return Collections.singletonList(copy.iterator().next());
+      return List.of(copy.iterator().next());
+    case 2:
+      if (noDups)
+        break;
+      T a, b;
+      {
+        var iter = copy.iterator();
+        a = iter.next();
+        b = iter.next();
+      }
+      return List.of(a, b);
+    case 3:
+      if (noDups)
+        break;
+      T c;
+      {
+        var iter = copy.iterator();
+        a = iter.next();
+        b = iter.next();
+        c = iter.next();
+      }
+      return List.of(a, b, c);
+    case 4:
+      if (noDups)
+        break;
+      T d;
+      {
+        var iter = copy.iterator();
+        a = iter.next();
+        b = iter.next();
+        c = iter.next();
+        d = iter.next();
+      }
+      return List.of(a, b, c, d);
     }
     
+    if (!noDups)
+      return List.copyOf(copy);
+    
     ArrayList<T> out = new ArrayList<>(size);
-    HashSet<T> set = noDups ? new HashSet<>(size) : null;
+    HashSet<T> set = new HashSet<>(size);
     
     for (var iter = copy.iterator(); iter.hasNext();) {
       var next = iter.next();
       // disallow null
       if (next == null)
         throw new IllegalArgumentException("argument has null elements: " + copy);
-      if (noDups && !set.add(next))
+      if (!set.add(next))
         throw new IllegalArgumentException(
             "argument contains duplicate (" + next + "): " + copy);
       out.add(next);
