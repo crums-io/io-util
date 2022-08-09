@@ -6,6 +6,7 @@ package io.crums.util;
 
 import java.util.AbstractList;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -15,6 +16,7 @@ import java.util.RandomAccess;
 import java.util.TreeSet;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * Utility methods for lists. These are assume lists are <em>always</em> {@linkplain RandomAccess random access}.
@@ -125,6 +127,32 @@ public class Lists {
   
   
   /**
+   * Returns a read-only version of the given list. If the size of the given
+   * list is less than 4, returns an immutable copy; if 4 or more, it's only
+   * a read-only view.
+   * <p>
+   * Motivation for this method is an opportunity to centralize how this can
+   * be done most efficiently (should {@code List.of(..) be mixed in with
+   * {{@code Collections.unmodifiableList}, for eg?}). TODO: gather/find data
+   * for this.
+   * </p>
+   * 
+   * @param copy
+   * @return
+   */
+  public static <T> List<T> asReadOnlyList(List<T> copy) {
+    switch (copy.size()) {
+    case 0:   return List.of();
+    case 1:   return List.of(copy.get(0));
+    case 2:   return List.of(copy.get(0), copy.get(1));
+    case 3:   return List.of(copy.get(0), copy.get(1), copy.get(2));
+    default:  return Collections.unmodifiableList(copy);
+    }
+  }
+  
+  
+  
+  /**
    * Returns a read-only copy of the argument. Used mostly with constructor
    * arguments of immutable classes.
    * 
@@ -214,7 +242,16 @@ public class Lists {
   }
   
   
-  
+  /**
+   * Returns a sorted, read-only list from the given collection, optionally <em>checking</em>
+   * that it hss no duplicates.
+   * 
+   * @param <T> naturally comparable type
+   * @param noDups no duplicates allowed if {@code true} (more expensive)
+   * 
+   * @see #sortRemoveDups(Collection)
+   * @throws IllegalArgumentException if {@code noDups} is {@code true} and {@code copy} contains duplicates
+   */
   public static <T extends Comparable<T>> List<T> sort(Collection<? extends T> copy, boolean noDups) {
     int size = Objects.requireNonNull(copy).size();
     switch (size) {
@@ -238,7 +275,15 @@ public class Lists {
 
   
   
-  
+  /**
+   * Returns the contents of the given collection as a sorted, read-only list with
+   * no duplicates.
+   * 
+   * @param <T> naturally comparable type
+   * @param copy  may be empty or with duplicates
+   * 
+   * @see #sort(Collection, boolean)
+   */
   public static <T extends Comparable<T>> List<T> sortRemoveDups(Collection<? extends T> copy) {
     int size = Objects.requireNonNull(copy).size();
     switch (size) {
@@ -374,6 +419,35 @@ public class Lists {
       return head;
     else
       return new ConcatList<>(head, tail);
+  }
+  
+  
+  
+  public static <T> List<T> concat(T head, List<T> list) {
+    return concatLists(List.of(head), list);
+  }
+  
+  public static <T> List<T> concat(List<T> list, T tail) {
+    return concatLists(list, List.of(tail));
+  }
+  
+  
+  
+  public static <T> List<T> concat(T head, List<T> list, T tail) {
+    return concatLists(List.of(head), list, List.of(tail));
+  }
+  
+  
+  
+  @SafeVarargs
+  public static <T> List<T> concatLists(List<T>... lists) {
+    var notEmpties = Arrays.asList(lists).stream().filter(list -> !list.isEmpty()).toList();
+    switch (notEmpties.size()) {
+    case 0:   return List.of();
+    case 1:   return notEmpties.get(0);
+    case 2:   return new ConcatList<>(notEmpties.get(0), notEmpties.get(1));
+    default:  return new MultiCatList<>(notEmpties);
+    }
   }
   
   
@@ -678,6 +752,85 @@ public class Lists {
     */
     public List<T> tailList() {
       return tail;
+    }
+  }
+  
+  
+  
+  
+  public static class MultiCatList<T> extends RandomAccessList<T> {
+    
+    private final int BINARY_SEARCH_SIZE_THRESHOLD = 32;
+    
+    private final Object[] lists;
+    private final int[] cumulativeSizes;
+    private final boolean binarySearchIndex;
+    
+    public MultiCatList(List<List<T>> lists) {
+      this(lists, true, false);
+    }
+    
+    public MultiCatList(List<List<T>> lists, boolean binarySearchIndex) {
+      this(lists, false, binarySearchIndex);
+    }
+    
+    private MultiCatList(List<List<T>> lists, boolean auto, boolean binarySearchIndex) {
+      Objects.requireNonNull(lists, "null lists");
+      this.lists = lists.toArray();
+      
+      final int count = lists.size();
+      if (count < 2)
+        throw new IllegalArgumentException("too few lists (" + count + ")");
+      
+      this.cumulativeSizes = new int[count];
+      int size = 0;
+      for (int index = 0; index < count; ++index) {
+        var list = lists.get(index);
+        if (list == null)
+          throw new NullPointerException("list [" + index + "] is null");
+        int subSize = list.size();
+        if (subSize == 0)
+          throw new IllegalArgumentException("empty list [" + index + "]");
+        size += subSize;
+        cumulativeSizes[index] = size;
+      }
+      
+      this.binarySearchIndex = auto ? (count > BINARY_SEARCH_SIZE_THRESHOLD) : binarySearchIndex;
+    }
+    
+    @SuppressWarnings("unchecked")
+    private List<T> subList(int index) {
+      return (List<T>) lists[index];
+    }
+    
+    
+    
+    
+
+    @Override
+    public T get(int index) {
+      Objects.checkIndex(index, size());
+      int listIndex = listIndex(index);
+      var subList = subList(listIndex);
+      int headSize = listIndex == 0 ? 0 : cumulativeSizes[listIndex - 1];
+      
+      return subList.get(index - headSize);
+    }
+    
+    private int listIndex(int index) {
+      if (binarySearchIndex) {
+        int si = Arrays.binarySearch(cumulativeSizes, index);
+        return si < 0 ? -1 - si : si + 1;
+      } else {
+        int ic = cumulativeSizes.length - 1;
+        while (ic-- > 0 && cumulativeSizes[ic] > index);
+        return ic + 1;
+      }
+    }
+
+    @Override
+    public final int size() {
+      return cumulativeSizes[cumulativeSizes.length - 1];
     }
   }
   
