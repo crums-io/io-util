@@ -13,12 +13,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.Optional;
 
 import io.crums.util.Maps;
 import io.crums.util.Strings;
 
 /**
- * A partition with named parts. This is not envisioned as a heavily 
+ * A partition with named parts. This is not envisioned with very many parts
+ * (tho the parts themselves can be big), so there's no attempt at say
+ * prefix compressing the keys.
  */
 public class NamedParts extends Partitioning {
   
@@ -44,9 +47,11 @@ public class NamedParts extends Partitioning {
   /**
    * Regular constructor.
    * 
-   * @param block
+   * @param block with capacity &ge; 1 (you're mine now: position and limit don't matter)
    * @param names   unique list of part names (of length {@code sizes})
-   * @param sizes   list of part sizes (in bytes). Must sum to the {@code block.capacity()}.
+   * @param sizes list of non-negative sizes defining the boundaries between adjacent partitions.
+   *              Must sum to the {@code block.capacity()}
+   * @see #EMPTY
    */
   public NamedParts(ByteBuffer block, List<String> names, List<Integer> sizes) {
     super(block, sizes);
@@ -130,11 +135,19 @@ public class NamedParts extends Partitioning {
   
   
   
-  public ByteBuffer getPart(String name) throws NoSuchElementException {
+  public ByteBuffer part(String name) throws NoSuchElementException {
     Integer index = indexMap.get(name);
     if (index == null)
       throw new NoSuchElementException(name);
     return getPart(index);
+  }
+  
+  
+  public Optional<ByteBuffer> getPart(String name) {
+    Integer index = indexMap.get(name);
+    if (index == null)
+      return Optional.empty();
+    return Optional.of(getPart(index));
   }
   
   
@@ -207,6 +220,18 @@ public class NamedParts extends Partitioning {
   }
 
   
+  
+  
+  
+  
+  
+  // - - -  S T A T I C   L O A D   M E T H O D S  - - -
+  
+  
+  
+  
+  
+  
   /**
    * Loads a read-only instance from its {@linkplain Serial} byte representation.
    * 
@@ -275,6 +300,28 @@ public class NamedParts extends Partitioning {
       block = block.asReadOnlyBuffer();
     
     return new NamedParts(block, names, sizes);
+  }
+  
+  
+  
+  
+  public static NamedParts createInstance(Map<String, ByteBuffer> map) {
+    if (map.isEmpty())
+      return NamedParts.EMPTY;
+    int blockSize = map.values().stream().map(ByteBuffer::remaining).reduce(0, Integer::sum);
+    ByteBuffer block = ByteBuffer.allocate(blockSize);
+    List<Integer> sizes = new ArrayList<>(map.size());
+    List<String> names = new ArrayList<>(map.size());
+    for (var entry : map.entrySet()) {
+      var buf = entry.getValue().duplicate();
+      names.add(entry.getKey());
+      sizes.add(buf.remaining());
+      block.put(buf);
+    }
+    assert !block.hasRemaining();
+    block.flip();
+    
+    return new NamedParts(block.asReadOnlyBuffer(), names, sizes);
   }
   
 

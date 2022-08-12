@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Random;
+import java.util.TreeMap;
 
 import org.junit.jupiter.api.Test;
 
@@ -58,12 +59,29 @@ public class NamedPartsTest {
   }
   
   
+  @Test
+  public void testCreateInstance() {
+    var map = new TreeMap<String, ByteBuffer>();
+    String[] names = {
+        "hello",
+        "hello hello",
+        "i say hello",
+    };
+    for (var name : names) {
+      map.put(name, ByteBuffer.wrap(name.getBytes()));
+    }
+    
+    NamedParts parts = NamedParts.createInstance(map);
+    assertEquals(map, parts.asMap());
+  }
+  
+  
   void test(Integer... sizes) {
     var parts = newMockInstance(sizes);
     assertSerialTrip(parts);
     for (int index = 0; index < sizes.length; ++index) {
       assertEquals(sizes[index].intValue(), parts.getPartSize(index));
-      assertEquals(parts.getPart(nameForIndex(index)), parts.getPart(index));
+      assertEquals(parts.part(nameForIndex(index)), parts.getPart(index));
     }
   }
   
@@ -90,6 +108,9 @@ public class NamedPartsTest {
     assertEquals(expected.asList(), actual.asList());
     assertEquals(expected.asMap(), actual.asMap());
   }
+  
+  
+  
 
 }
 
