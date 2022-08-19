@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Map.Entry;
@@ -13,7 +15,6 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.logging.Logger;
 
 import org.junit.jupiter.api.Test;
 
@@ -30,7 +31,7 @@ import io.crums.io.store.table.order.RowOrders;
  */
 public class ListMergeSortTest extends IoTestCase {
   
-  private final static Logger LOG = Logger.getLogger(ListMergeSortTest.class.getSimpleName());
+  private final static Logger LOG = System.getLogger(ListMergeSortTest.class.getSimpleName());
   
   
   private File unitTestDir;
@@ -352,7 +353,7 @@ public class ListMergeSortTest extends IoTestCase {
       }
     }
     
-    LOG.fine("merge.getCompZeroEdgeCase(): " + merge.getCompZeroEdgeCase());
+    LOG.log(Level.INFO, "merge.getCompZeroEdgeCase(): " + merge.getCompZeroEdgeCase());
     
     
     // clean up

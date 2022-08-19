@@ -4,7 +4,8 @@
 package io.crums.util.cc.throt;
 
 
-import java.util.logging.Logger;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 
 import org.junit.jupiter.api.Test;
 
@@ -16,7 +17,7 @@ import com.gnahraf.test.SelfAwareTestCase;
  */
 public class ThrottledTickerTest extends SelfAwareTestCase {
   
-  private final static Logger LOG = Logger.getLogger(ThrottledTickerTest.class.getName());
+  private final static Logger LOG = System.getLogger(ThrottledTickerTest.class.getName());
 
   @Test
   public void demo5ms() {
@@ -27,15 +28,15 @@ public class ThrottledTickerTest extends SelfAwareTestCase {
     ticker.setThrottleNanos(targetAvg);
     
     final int count = 100;
-    LOG.info("[" + method + "] invoking " + count + " ticks");
+    LOG.log(Level.INFO, "[" + method + "] invoking " + count + " ticks");
     
     long now = System.nanoTime();
     for (int i = count; i-- > 0; )
       ticker.tick();
     long elapsedNanos = System.nanoTime() - now;
 
-    LOG.info("[" + method + "] ticker.getThrottleNanos(): " + ticker.getThrottleNanos());
-    LOG.info("[" + method + "] actual average nanos: " + elapsedNanos / count);
+    LOG.log(Level.INFO, "[" + method + "] ticker.getThrottleNanos(): " + ticker.getThrottleNanos());
+    LOG.log(Level.INFO, "[" + method + "] actual average nanos: " + elapsedNanos / count);
   }
 
   @Test
@@ -47,15 +48,15 @@ public class ThrottledTickerTest extends SelfAwareTestCase {
     ticker.setThrottleNanos(targetAvg);
     
     final int count = 20;
-    LOG.info("[" + method + "] invoking " + count + " ticks");
+    LOG.log(Level.INFO, "[" + method + "] invoking " + count + " ticks");
     
     long now = System.nanoTime();
     for (int i = count; i-- > 0; )
       ticker.tick();
     long elapsedNanos = System.nanoTime() - now;
 
-    LOG.info("[" + method + "] ticker.getThrottleNanos(): " + ticker.getThrottleNanos());
-    LOG.info("[" + method + "] actual average nanos: " + elapsedNanos / count);
+    LOG.log(Level.INFO, "[" + method + "] ticker.getThrottleNanos(): " + ticker.getThrottleNanos());
+    LOG.log(Level.INFO, "[" + method + "] actual average nanos: " + elapsedNanos / count);
   }
   
   

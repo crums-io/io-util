@@ -9,7 +9,7 @@
 
   <packaging>pom</packaging>
 
-
+  <name>Util (Root POM)</name>
 
 	<properties>
     <revision>1.0.0-SNAPSHOT</revision>

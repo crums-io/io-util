@@ -8,6 +8,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.UncheckedIOException;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channel;
 import java.nio.channels.ClosedChannelException;
@@ -16,7 +18,6 @@ import java.nio.channels.WritableByteChannel;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Logger;
 
 import io.crums.io.FileUtils;
 import io.crums.io.channels.ChannelUtils;
@@ -58,7 +59,7 @@ import io.crums.util.Lists;
  */
 public class Table implements Channel {
   
-  private final static Logger LOG = Logger.getLogger(Table.class.getName());
+  private final static Logger LOG = System.getLogger(Table.class.getName());
   
   protected final Object filePositionLock;
 
@@ -523,7 +524,7 @@ public class Table implements Channel {
     checkArgs(file, rowSize);
     long byteLength = file.size() - file.position();
     if (byteLength % rowSize != 0)
-      LOG.warning(
+      LOG.log(Level.WARNING, 
           "Table length (" + byteLength + " bytes) not a multiple of row size (" + rowSize +
           " bytes). File position: " + file.position() + " .. Ignoring incomplete trailing row.");
     Keystone rowCount = new VolatileKeystone(byteLength / rowSize);

@@ -9,9 +9,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.util.logging.Logger;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -27,7 +28,7 @@ import io.crums.io.store.ks.VolatileKeystone;
 
 public class TableTest extends IoTestCase {
 
-  private final Logger LOG = Logger.getLogger(getClass().getName());
+  private final Logger LOG = System.getLogger(getClass().getName());
 
   private FileChannel file;
   
@@ -76,7 +77,7 @@ public class TableTest extends IoTestCase {
     try {
       new Table(rowCount, file, -1, rowSize);
     } catch (Exception x) {
-      LOG.info("expected error: " + x.getMessage());
+      LOG.log(Level.INFO, "expected error: " + x.getMessage());
     }
   }
 
@@ -92,7 +93,7 @@ public class TableTest extends IoTestCase {
     try {
       new Table(rowCount, file, rowCount.size(), rowSize);
     } catch (Exception x) {
-      LOG.info("expected error: " + x.getMessage());
+      LOG.log(Level.INFO, "expected error: " + x.getMessage());
     }
   }
 
@@ -108,7 +109,7 @@ public class TableTest extends IoTestCase {
     try {
       new Table(rowCount, file, rowCount.size(), rowSize);
     } catch (Exception x) {
-      LOG.info("expected error: " + x.getMessage());
+      LOG.log(Level.INFO, "expected error: " + x.getMessage());
     }
   }
 
@@ -124,7 +125,7 @@ public class TableTest extends IoTestCase {
     try {
       new Table(rowCount, file, rowCount.size(), rowSize);
     } catch (Exception x) {
-      LOG.info("expected error: " + x.getMessage());
+      LOG.log(Level.INFO, "expected error: " + x.getMessage());
     }
   }
 

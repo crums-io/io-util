@@ -1,7 +1,6 @@
 module io.crums.util.xp {
   
   requires transitive io.crums.util;
-  requires transitive java.logging;
   
   
   exports io.crums.math.stats;

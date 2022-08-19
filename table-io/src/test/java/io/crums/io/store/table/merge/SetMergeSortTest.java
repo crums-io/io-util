@@ -7,6 +7,7 @@ package io.crums.io.store.table.merge;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
+import java.lang.System.Logger.Level;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
@@ -184,9 +185,9 @@ public class SetMergeSortTest extends TableTestHarness {
     
     long end = System.nanoTime();
     if (profile) {
-      log.info("___________________________");
+      log.log(Level.INFO, "___________________________");
       int tableCount = tableValues.length;
-      log.info(getMethod() + ": Merged " + tableCount + " tables");
+      log.log(Level.INFO, getMethod() + ": Merged " + tableCount + " tables");
       ArrayList<Integer> tableSizes = new ArrayList<>(tableCount);
       int totalSize = 0;
       for (int i = 0; i < tableCount; ++i) {
@@ -194,9 +195,9 @@ public class SetMergeSortTest extends TableTestHarness {
         tableSizes.add(size);
         totalSize += size;
       }
-      log.info("TableSizes: " + tableSizes);
-      log.info("Collisions: " + (totalSize - expectedValuesWithTableIds.size()) + "/" + totalSize);
-      log.info("Total time taken to merge: " + (end - start) / 1000 + " microseconds");
+      log.log(Level.INFO, "TableSizes: " + tableSizes);
+      log.log(Level.INFO, "Collisions: " + (totalSize - expectedValuesWithTableIds.size()) + "/" + totalSize);
+      log.log(Level.INFO, "Total time taken to merge: " + (end - start) / 1000 + " microseconds");
     }
 
     
@@ -217,8 +218,8 @@ public class SetMergeSortTest extends TableTestHarness {
     }
     end = System.nanoTime();
     if (profile) {
-      log.info("Total time taken to test corpus post merge: " + (end - start) / 1000 + " microseconds");
-      log.info("===========================");
+      log.log(Level.INFO, "Total time taken to test corpus post merge: " + (end - start) / 1000 + " microseconds");
+      log.log(Level.INFO, "===========================");
     }
   }
   

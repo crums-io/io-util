@@ -9,11 +9,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.lang.System.Logger;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Map;
 import java.util.Random;
-import java.util.logging.Logger;
 
 import com.gnahraf.test.IoTestCase;
 
@@ -28,7 +28,7 @@ import io.crums.io.store.table.order.RowOrders;
  */
 public class TableTestHarness extends IoTestCase {
   
-  protected final Logger log = Logger.getLogger(getClass().getName());
+  protected final Logger log = System.getLogger(getClass().getName());
   
   public final static String PERF_TEST_PROPERTY = "perf_test";
 

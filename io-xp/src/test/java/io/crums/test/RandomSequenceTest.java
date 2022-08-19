@@ -6,9 +6,10 @@ package io.crums.test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.logging.Logger;
 
 import org.junit.jupiter.api.Test;
 
@@ -19,7 +20,7 @@ import org.junit.jupiter.api.Test;
  */
 public class RandomSequenceTest {
   
-  private final static Logger LOG = Logger.getLogger(RandomSequenceTest.class.getName());
+  private final static Logger LOG = System.getLogger(RandomSequenceTest.class.getName());
 
   @Test
   public void testPedagogical1() {
@@ -74,7 +75,7 @@ public class RandomSequenceTest {
       corpus.add(seq.next());
     assertEquals(startIndex + count, seq.index());
     
-    LOG.info("testCollisions(): " + (count - corpus.size()) + "/" + count + " seedRate=" + seedRate);
+    LOG.log(Level.INFO, "testCollisions(): " + (count - corpus.size()) + "/" + count + " seedRate=" + seedRate);
   }
   
   /**
@@ -97,7 +98,7 @@ public class RandomSequenceTest {
       corpus.add(seq.next());
     assertEquals(startIndex + count, seq.index());
     
-    LOG.info("testCollisions(): " + (count - corpus.size()) + "/" + count + " seedRate=" + seedRate);
+    LOG.log(Level.INFO, "testCollisions(): " + (count - corpus.size()) + "/" + count + " seedRate=" + seedRate);
   }
   
   

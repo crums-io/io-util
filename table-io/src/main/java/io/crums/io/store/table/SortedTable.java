@@ -5,10 +5,11 @@ package io.crums.io.store.table;
 
 
 import java.io.IOException;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.util.logging.Logger;
 
 import io.crums.io.block.SortedBlock;
 import io.crums.io.store.Sorted;
@@ -27,7 +28,7 @@ import io.crums.test.PerfProf;
  */
 public class SortedTable extends Table implements Sorted {
   
-  private final static Logger LOG = Logger.getLogger(SortedTable.class.getName());
+  private final static Logger LOG = System.getLogger(SortedTable.class.getName());
   
   public enum Hint {
     BEFORE,
@@ -165,7 +166,7 @@ public class SortedTable extends Table implements Sorted {
           "zero row offset is " + zeroRowFileOffset + "; file length is " + file.size());
 
     if (byteLength % rowSize != 0)
-      LOG.warning(
+      LOG.log(Level.WARNING, 
           "Table length (" + byteLength + " bytes) not a multiple of row size (" + rowSize +
           " bytes). File position: " + file.position() + " .. Ignoring incomplete trailing row.");
     return new VolatileKeystone(byteLength / rowSize);

@@ -16,7 +16,6 @@ import java.util.RandomAccess;
 import java.util.TreeSet;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.function.Predicate;
 
 /**
  * Utility methods for lists. These are assume lists are <em>always</em> {@linkplain RandomAccess random access}.

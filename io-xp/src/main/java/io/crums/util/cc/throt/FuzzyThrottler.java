@@ -5,7 +5,8 @@ package io.crums.util.cc.throt;
 
 
 import java.text.DecimalFormat;
-import java.util.logging.Logger;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 
 import io.crums.util.ticker.Ticker;
 
@@ -17,7 +18,7 @@ import io.crums.util.ticker.Ticker;
  */
 public class FuzzyThrottler {
   
-  private final static Logger LOG = Logger.getLogger(FuzzyThrottler.class.getName());
+  private final static Logger LOG = System.getLogger(FuzzyThrottler.class.getName());
   
   private final ThrottledTicker ticker = new ThrottledTicker();
   /**
@@ -94,7 +95,7 @@ public class FuzzyThrottler {
     // bounded in the range 50 micros to 15 sec..
     long newThrottleNanos = (long) Math.min( Math.max(5e4, (1 + t) * currentThrottleNanos), 15e9);
     
-    LOG.info("Throttling to " + new DecimalFormat("#,###").format(newThrottleNanos) + " nanoseconds");
+    LOG.log(Level.INFO, "Throttling to " + new DecimalFormat("#,###").format(newThrottleNanos) + " nanoseconds");
     ticker.setThrottleNanos(newThrottleNanos);
   }
   

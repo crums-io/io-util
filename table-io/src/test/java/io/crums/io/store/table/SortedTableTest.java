@@ -9,11 +9,12 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.text.DecimalFormat;
 import java.util.Random;
-import java.util.logging.Logger;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterEach;
@@ -30,7 +31,7 @@ public class SortedTableTest extends IoTestCase {
   
   public final static String PERF_TEST_PROPERTY = "perf_test";
 
-  private final Logger log = Logger.getLogger(getClass().getName());
+  private final Logger log = System.getLogger(getClass().getName());
 
   private FileChannel file;
   
@@ -245,10 +246,10 @@ public class SortedTableTest extends IoTestCase {
     String method = method(label);
     
     if (!"true".equalsIgnoreCase(System.getProperty(PERF_TEST_PROPERTY))) {
-      log.info("Skipping " + method + "(): to activate set -D" + PERF_TEST_PROPERTY + "=true");
+      log.log(Level.INFO, "Skipping " + method + "(): to activate set -D" + PERF_TEST_PROPERTY + "=true");
       return;
     }
-    log.info("*** Benchmarking " + method + " ***");
+    log.log(Level.INFO, "*** Benchmarking " + method + " ***");
     
     setup(label);
 
@@ -279,10 +280,10 @@ public class SortedTableTest extends IoTestCase {
     String method = method(label);
     
     if (!"true".equalsIgnoreCase(System.getProperty(PERF_TEST_PROPERTY))) {
-      log.info("Skipping " + method + "(): to activate -D" + PERF_TEST_PROPERTY + "=true");
+      log.log(Level.INFO, "Skipping " + method + "(): to activate -D" + PERF_TEST_PROPERTY + "=true");
       return;
     }
-    log.info("*** Benchmarking " + method + " ***");
+    log.log(Level.INFO, "*** Benchmarking " + method + " ***");
     
     
     setup(label);
@@ -308,37 +309,37 @@ public class SortedTableTest extends IoTestCase {
   }
   
   private void showSearchStats(Searcher searcher) {
-    log.info("Profiler stats.. (in microseconds)");
+    log.log(Level.INFO, "Profiler stats.. (in microseconds)");
     showProf(searcher.getProfiler());
-    log.info("Block search profiler stats.. (in microseconds)");
+    log.log(Level.INFO, "Block search profiler stats.. (in microseconds)");
     showProf(searcher.getBlockSearchProfiler());
-    log.info("Number of disk reads per request..");
+    log.log(Level.INFO, "Number of disk reads per request..");
     showStats(searcher.getReadOpStats());
   }
 
 
   private void showProf(PerfProf prof) {
-    log.info("_______________");
-    log.info("    max: " + prof.getMaxNanos() / 1000);
-    log.info("    min: " + prof.getMinNanos() / 1000);
-    log.info("   mean: " + prof.getMeanNanos() / 1000);
-    log.info("  sigma: " + prof.getNansosSd() / 1000);
-    log.info("===============");
-    log.info("  count: " + NUM_FORMAT.format(prof.getCount()));
-    log.info("  total: " + NUM_FORMAT.format(prof.getSumNanos() / 1000));
-    log.info("---------------");
+    log.log(Level.INFO, "_______________");
+    log.log(Level.INFO, "    max: " + prof.getMaxNanos() / 1000);
+    log.log(Level.INFO, "    min: " + prof.getMinNanos() / 1000);
+    log.log(Level.INFO, "   mean: " + prof.getMeanNanos() / 1000);
+    log.log(Level.INFO, "  sigma: " + prof.getNansosSd() / 1000);
+    log.log(Level.INFO, "===============");
+    log.log(Level.INFO, "  count: " + NUM_FORMAT.format(prof.getCount()));
+    log.log(Level.INFO, "  total: " + NUM_FORMAT.format(prof.getSumNanos() / 1000));
+    log.log(Level.INFO, "---------------");
   }
   private final static DecimalFormat NUM_FORMAT = new DecimalFormat("#,###");
   
   private void showStats(SimpleSampler stats) {
-    log.info("_______________");
-    log.info("    max: " + stats.getMax());
-    log.info("    min: " + stats.getMin());
-    log.info("   mean: " + stats.getMean());
-    log.info("  sigma: " + stats.getSd());
-    log.info("===============");
-    log.info("  count: " + NUM_FORMAT.format(stats.getCount()));
-    log.info("---------------");
+    log.log(Level.INFO, "_______________");
+    log.log(Level.INFO, "    max: " + stats.getMax());
+    log.log(Level.INFO, "    min: " + stats.getMin());
+    log.log(Level.INFO, "   mean: " + stats.getMean());
+    log.log(Level.INFO, "  sigma: " + stats.getSd());
+    log.log(Level.INFO, "===============");
+    log.log(Level.INFO, "  count: " + NUM_FORMAT.format(stats.getCount()));
+    log.log(Level.INFO, "---------------");
   }
   
   

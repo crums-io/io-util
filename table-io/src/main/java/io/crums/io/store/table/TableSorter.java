@@ -3,12 +3,14 @@
  */
 package io.crums.io.store.table;
 
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.util.logging.Logger;
 
 import io.crums.io.FileUtils;
 import io.crums.io.block.SortedViewBlock;
@@ -20,7 +22,7 @@ import io.crums.io.store.table.order.RowOrder;
  */
 public class TableSorter {
   
-  private final static Logger LOG = Logger.getLogger(TableSorter.class.getName());
+  private final static Logger LOG = System.getLogger(TableSorter.class.getName());
   
   private final ByteBuffer memoryBuffer;
   
@@ -33,7 +35,7 @@ public class TableSorter {
     if (memoryBuffer == null)
       throw new IllegalArgumentException("null memoryBuffer");
     if (memoryBuffer.capacity() < 128)
-      LOG.warning("memory buffer size seems a bit small. Pedantic exercise? " + memoryBuffer);
+      LOG.log(Level.WARNING, "memory buffer size seems a bit small. Pedantic exercise? " + memoryBuffer);
     if (order == null)
       throw new IllegalArgumentException("null order");
   }

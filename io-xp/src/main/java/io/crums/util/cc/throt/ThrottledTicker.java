@@ -4,7 +4,7 @@
 package io.crums.util.cc.throt;
 
 
-import java.util.logging.Logger;
+import java.lang.System.Logger.Level;
 
 import io.crums.util.cc.ThreadUtils;
 import io.crums.util.ticker.Ticker;
@@ -54,7 +54,8 @@ public class ThrottledTicker extends Ticker {
     try {
       ThreadUtils.ensureSleepNanos(throttleNanos);
     } catch (InterruptedException ix) {
-      Logger.getLogger(ThrottledTicker.class.getName()).warning("Interrupted while throttling tick()");
+      System.getLogger(ThrottledTicker.class.getName())
+        .log(Level.WARNING, "Interrupted while throttling tick()");
       Thread.currentThread().interrupt();   // reset the interrupt flag
     }
   }

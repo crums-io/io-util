@@ -9,8 +9,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.nio.channels.FileChannel;
-import java.util.logging.Logger;
 
 import org.junit.jupiter.api.Test;
 
@@ -27,7 +28,7 @@ public class KeystoneImplTest extends IoTestCase {
 
 
   public KeystoneImplTest() {
-    log = Logger.getLogger(getClass().getSimpleName());
+    log = System.getLogger(getClass().getSimpleName());
   }
 
 
@@ -170,7 +171,7 @@ public class KeystoneImplTest extends IoTestCase {
       fail();
     } catch (Exception x) {
       // expected
-      log.info("expected error: " + x.getMessage() + "; " + x.getClass().getName());
+      log.log(Level.INFO, "expected error: " + x.getMessage() + "; " + x.getClass().getName());
     }
   }
 
@@ -181,7 +182,7 @@ public class KeystoneImplTest extends IoTestCase {
       fail();
     } catch (Exception x) {
       // expected
-      log.info("expected error: " + x.getMessage() + "; " + x.getClass().getName());
+      log.log(Level.INFO, "expected error: " + x.getMessage() + "; " + x.getClass().getName());
     }
   }
 

@@ -6,7 +6,9 @@ package io.crums.util.cc.throt;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.logging.Logger;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
+
 import org.junit.jupiter.api.Test;
 
 import com.gnahraf.test.SelfAwareTestCase;
@@ -18,7 +20,7 @@ import com.gnahraf.test.SelfAwareTestCase;
  */
 public class FuzzyThrottlerTest extends SelfAwareTestCase {
   
-  private final static Logger LOG = Logger.getLogger(FuzzyThrottlerTest.class.getName());
+  private final static Logger LOG = System.getLogger(FuzzyThrottlerTest.class.getName());
 
   @SuppressWarnings("unused")
   @Test
@@ -40,7 +42,7 @@ public class FuzzyThrottlerTest extends SelfAwareTestCase {
     
     ThrottledTicker ticker = (ThrottledTicker) throttler.throttledTicker();
     assertEquals(0, ticker.getThrottleNanos());
-    LOG.info("["+ method + "]: cruiserSpeed");
+    LOG.log(Level.INFO, "["+ method + "]: cruiserSpeed");
     throttler.updateThrottle();
     throttler.updateThrottle();
     
@@ -48,20 +50,20 @@ public class FuzzyThrottlerTest extends SelfAwareTestCase {
         speed.setAccelerating(0.3).setCruising(0.8).setDecelerating(0.1)
         .setTooFast(0.2).setJustRight(0.8).setTooSlow(0.05).snapshot();
 
-    LOG.info("["+ method + "]: ramp0");
+    LOG.log(Level.INFO, "["+ method + "]: ramp0");
     throttler.updateThrottle();
     throttler.updateThrottle();
     FuzzySpeed ramp1 =
         speed.setAccelerating(0.7).setCruising(0.3).setDecelerating(0)
         .setTooFast(0.7).setJustRight(0.2).setTooSlow(0).snapshot();
-    LOG.info("["+ method + "]: ramp1");
+    LOG.log(Level.INFO, "["+ method + "]: ramp1");
     throttler.updateThrottle();
     throttler.updateThrottle();
     
     FuzzySpeed glide0 =
         speed.set(ramp0).setAccelerating(0.2).setCruising(0.4).setDecelerating(0.7)
         .snapshot();
-    LOG.info("["+ method + "]: glide0");
+    LOG.log(Level.INFO, "["+ method + "]: glide0");
     throttler.updateThrottle();
     throttler.updateThrottle();
     
@@ -69,12 +71,12 @@ public class FuzzyThrottlerTest extends SelfAwareTestCase {
         speed.setAccelerating(0.2).setCruising(0.7).setDecelerating(0.3)
         .setTooFast(0.2).setJustRight(0.7).setTooSlow(0.05)
         .snapshot();
-    LOG.info("["+ method + "]: glide1");
+    LOG.log(Level.INFO, "["+ method + "]: glide1");
 
     throttler.updateThrottle();
     throttler.updateThrottle();
 
-    LOG.info("["+ method + "]: cruiserSpeed");
+    LOG.log(Level.INFO, "["+ method + "]: cruiserSpeed");
     speed.set(cruiserSpeed);
     throttler.updateThrottle();
     throttler.updateThrottle();
