@@ -10,8 +10,12 @@
   <packaging>pom</packaging>
 
   <name>${project.groupId}::${project.artifactId}</name>
+  <url>https://github.com/crums-io/io-util</url>
 
-
+  <description>
+    A small collection of utility modules for Java Collections, JSON, general I/O (java.nio), buffers,
+    and persistent fixed width tables.
+  </description>
 
 
 
