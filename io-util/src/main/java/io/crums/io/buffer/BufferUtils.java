@@ -15,7 +15,6 @@ import java.util.Comparator;
  * Utilities for manipulating buffers. Nothing magical here; just a bit of rigor.
  * 
  * @see BufferOp
- * @author Babak
  */
 public class BufferUtils {
   
@@ -28,21 +27,21 @@ public class BufferUtils {
   public final static ByteBuffer NULL_BUFFER = ByteBuffer.wrap(new byte[0]).asReadOnlyBuffer();
   
   /**
-   * Positions the given <tt>buffer</tt> at the start of the specified cell. Arguments
+   * Positions the given <code>buffer</code> at the start of the specified cell. Arguments
    * are not checked.
-   * <pre><tt>
+   * <pre><code>
    *   int position = cellIndex * cellbytes;
    *   int limit = position + cellbytes;
    *   buffer.limit(limit).position(position);
-   * </tt></pre>
+   * </code></pre>
    * 
    * 
    * @param cellIndex
-   *        zero based cell index (starts at the beginning of the <tt>buffer</tt>)
+   *        zero based cell index (starts at the beginning of the <code>buffer</code>)
    * @param cellbytes
    *        number of bytes in each buffer
    * @return
-   *        <tt>buffer</tt>
+   *        <code>buffer</code>
    */
   public static ByteBuffer setCell(ByteBuffer buffer, int cellIndex, int cellbytes) {
     int position = cellIndex * cellbytes;
@@ -117,13 +116,13 @@ public class BufferUtils {
   
   
   /**
-   * Returns the first index of the specified <tt>key</tt>, assuming the <tt>cells</tt> are sorted in
-   * ascending <tt>order</tt>. Results are undefined otherwise. If no matching cell is found,
+   * Returns the first index of the specified <code>key</code>, assuming the <code>cells</code> are sorted in
+   * ascending <code>order</code>. Results are undefined otherwise. If no matching cell is found,
    * then the [negative] index returned has the same semantics as that specified in
    * {@linkplain Arrays#binarySearch(Object[], Object, Comparator)}.
    * 
    * @param order
-   *        if <tt>null</tt>, then searched in lexical order
+   *        if <code>null</code>, then searched in lexical order
    */
   public static int binaryFirst(ByteBuffer[] cells, ByteBuffer key, Comparator<ByteBuffer> order) {
     int result = Arrays.binarySearch(cells, key, order);
@@ -143,16 +142,16 @@ public class BufferUtils {
   
   
   /**
-   * Returns the last index of the specified <tt>key</tt>, assuming the <tt>cells</tt> are sorted in
-   * ascending <tt>order</tt>. Results are undefined otherwise. If no matching cell is found,
+   * Returns the last index of the specified <code>key</code>, assuming the <code>cells</code> are sorted in
+   * ascending <code>order</code>. Results are undefined otherwise. If no matching cell is found,
    * then the [negative] index returned has the same semantics as that specified in
    * {@linkplain Arrays#binarySearch(Object[], Object, Comparator)}.
    * 
    * @param order
-   *        if <tt>null</tt>, then searched in lexical order
+   *        if <code>null</code>, then searched in lexical order
    * 
    * @throws NullPointerException
-   *         if <tt>key</tt>, <tt>cells</tt>, or any of its elements is <tt>null</tt>
+   *         if <code>key</code>, <code>cells</code>, or any of its elements is <code>null</code>
    */
   public static int binaryLast(ByteBuffer[] cells, ByteBuffer key, Comparator<ByteBuffer> order) {
     int result = Arrays.binarySearch(cells, key, order);
@@ -174,26 +173,24 @@ public class BufferUtils {
 
   
   /**
-   * Binary searches for the specified <tt>key</tt>, assuming the <tt>cells</tt> are sorted in
-   * ascending <tt>order</tt>. Results are undefined otherwise. If no matching cell is found,
+   * <p>
+   * Binary searches for the specified <code>key</code>, assuming the <code>cells</code> are sorted in
+   * ascending <code>order</code>. Results are undefined otherwise. If no matching cell is found,
    * then the [negative] index returned has the same semantics as that specified in
    * {@linkplain Arrays#binarySearch(Object[], Object, Comparator)}.
-   * <p/>
-   * This method behaves exactly as {@linkplain #binaryFirst(ByteBuffer, Comparator) binaryFirst} and
-   * {@linkplain #binaryLast(ByteBuffer, Comparator) binaryLast}, if there are no duplicate
+   * </p><p>
+   * This method behaves exactly as {@linkplain #binaryFirst(ByteBuffer[], ByteBuffer, Comparator) binaryFirst} and
+   * {@linkplain #binaryLast(ByteBuffer[], ByteBuffer, Comparator) binaryLast}, if there are no duplicate
    * cells (except that its faster); if there are dups, and there is a hit on a dupe,
    * then there is no guarantee which of the dups is chosen.
-   * <pre><tt>
-      public int binarySearch(ByteBuffer[] cells, ByteBuffer key, Comparator<ByteBuffer> order) {
-        return Arrays.binarySearch(cells, key, order);
-      }
-   * </tt></pre>
+   * </p>
    * 
    * @param order
-   *        if <tt>null</tt>, then searched in lexical order
+   *        if <code>null</code>, then searched in lexical order
+   * @return {@code java.util.Arrays.binarySearch(cells, key, order)}
    * 
    * @throws NullPointerException
-   *         if <tt>key</tt>, <tt>cells</tt>, or any of its elements is <tt>null</tt>
+   *         if <code>key</code>, <code>cells</code>, or any of its elements is <code>null</code>
    */
   public static int binarySearch(ByteBuffer[] cells, ByteBuffer key, Comparator<ByteBuffer> order) {
     return Arrays.binarySearch(cells, key, order);
@@ -207,10 +204,10 @@ public class BufferUtils {
    * Tests whether the cells are currently sorted.
    * 
    * @param order
-   *        if <tt>null</tt>, then searched in lexical order
+   *        if <code>null</code>, then searched in lexical order
    * 
    * @throws NullPointerException
-   *         if <tt>cells</tt> or any of its elements is <tt>null</tt>
+   *         if <code>cells</code> or any of its elements is <code>null</code>
    */
   public static boolean isSorted(ByteBuffer[] cells, Comparator<ByteBuffer> order) {
     int count = cells.length;
@@ -230,10 +227,10 @@ public class BufferUtils {
   }
   
   /**
-   * Convenience method to clear array of <tt>buffers</tt>.
+   * Convenience method to clear array of <code>buffers</code>.
    * 
    * @throws NullPointerException
-   *         if <tt>buffer</tt> or any of its elements is <tt>null</tt>
+   *         if <code>buffer</code> or any of its elements is <code>null</code>
    */
   public static void clearAll(ByteBuffer[] buffers) {
     for (int i = buffers.length; i-- > 0; )

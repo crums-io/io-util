@@ -25,7 +25,7 @@ public class Maps {
    * Returns a read-only view of the given map with its values converted using
    * the given function.
    * 
-   * <h2>Performance Note</h2>
+   * <h4>Performance Note</h4>
    * <p>
    * Do not use the returned {@code Map}'s {@linkplain Map#entrySet()} for
    * anything other than <em>iterating</em> over the entries; look-up methods

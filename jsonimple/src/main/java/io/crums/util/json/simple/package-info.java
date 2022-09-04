@@ -5,7 +5,7 @@
  * Lifted from <a href="https://github.com/fangyidong/json-simple">simple-json</a>.
  * A nice library (only 24k compiled) that is unfortunately not being maintained.
  * 
- * <h3>API Compatibility With simple-json</h3>
+ * <h2>API Compatibility With simple-json</h2>
  * <p>
  * Method names and signatures have not been changed. The objective is that updating
  * code using <code>simple-json</code> to use this library will only need update the

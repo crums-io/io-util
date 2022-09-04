@@ -10,11 +10,11 @@ import java.util.Objects;
 import java.util.RandomAccess;
 
 /**
- * <tt>List</tt> view of an underlying block of memory. This is suitable if only a
+ * <code>List</code> view of an underlying block of memory. This is suitable if only a
  * small subset of the elements will actually be accessed. The reaon why, is that
  * this uses what I call the <em>create-element-on-demand</em> pattern.
  * 
- * <h3>Concurrency Note</h3>
+ * <h2>Concurrency Note</h2>
  * <p>
  * <em>Instances are safe under concurrent access.</em>
  * </p>
@@ -31,13 +31,13 @@ public class ReadOnlyBufferList extends AbstractList<ByteBuffer> implements Rand
   
   /**
    * Creates a new instance. Equivalent to
-   * {@linkplain #BufferList(ByteBuffer, int, boolean) BufferList(block, elementWidth, true)}.
+   * {@linkplain #ReadOnlyBufferList(ByteBuffer, int, boolean) ReadOnlyBufferList(block, elementWidth, true)}.
    * 
    * @param block         the source block (whose remaining bytes are used to determine the size of this
    *                      list). If its read-only, then the elements of this list will
    *                      be read-only. If the underlying buffer's contents are externally modified, then
    *                      those modifications will be visible in this instance (and viceversa if
-   *                      <tt>block</tt> is not read-only).
+   *                      <code>block</code> is not read-only).
    * @param elementWidth  the number of bytes for each element in the block
    */
   public ReadOnlyBufferList(ByteBuffer block, int elementWidth) {
@@ -52,12 +52,12 @@ public class ReadOnlyBufferList extends AbstractList<ByteBuffer> implements Rand
    * @param block         the source block. If its read-only, then the elements of this list will
    *                      be read-only. If the underlying buffer's contents are externally modified, then
    *                      those modifications will be visible in this instance (and viceversa if
-   *                      <tt>block</tt> is not read-only).
+   *                      <code>block</code> is not read-only).
    * @param elementWidth  the number of bytes for each element in the block
-   * @param slice         if <tt>true</tt>, then <tt>block</tt> is sliced (and the
+   * @param slice         if <code>true</code>, then <code>block</code> is sliced (and the
    *                      caller can later freely modify the argument's position, limit, etc.);
-   *                      if <tt>false</tt>, then it is understood the caller will not modify
-   *                      positional fields in <tt>block</tt> and that the entire block (ignoring
+   *                      if <code>false</code>, then it is understood the caller will not modify
+   *                      positional fields in <code>block</code> and that the entire block (ignoring
    *                      position and limit) belongs to this list
    */
   public ReadOnlyBufferList(ByteBuffer block, int elementWidth, boolean slice) {

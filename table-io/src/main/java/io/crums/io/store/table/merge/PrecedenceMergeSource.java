@@ -10,12 +10,11 @@ import io.crums.io.store.table.SortedTable.Searcher;
 /**
  * A merge source with precedence. Instances' precedences are used as tie
  * breakers for when they would otherwise compare equal to one another.
- * <p/>
+ * <p>
  * The use case for this structure is a stack of tables with the the top
  * tables overriding the bottom ones. I.e. if we're merging the underlying tables
- * of a {@linkplain TableSet}.
- * 
- * @author Babak
+ * of a {@linkplain io.crums.io.store.table.TableSet}.
+ * </p>
  */
 public class PrecedenceMergeSource extends BaseMergeSource<PrecedenceMergeSource> {
   

@@ -35,7 +35,7 @@ import java.util.TreeMap;
  * <h2>Implementation Note</h2>
  * <p>
  * No effort was made to make this efficient. If the ordered names list is longer than
- * say a 1000, then certain speedups maybe called for since it performs <big>0</big>(N<sup>2</sup>).
+ * say a 1000, then certain speedups maybe called for since it performs <b>0</b>(N<sup>2</sup>).
  * I hope never to see a config file with that many values, so no bother.
  * </p>
  * @see #TidyProperties(List, boolean, Properties)

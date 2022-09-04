@@ -13,7 +13,7 @@ import io.crums.util.UnanonymousType;
 /**
  * If many console programs start to look alike, well you try..
  * <p>
- * All the methods in this class are <tt>protected</tt> because they
+ * All the methods in this class are <code>protected</code> because they
  * do dangerous things--like exit the program. 
  * </p>
  * 
@@ -32,14 +32,14 @@ public abstract class MainTemplate extends UnanonymousType {
   /**
    * Launch point handling help and errors. The model is as follows:
    * <ol>
-   * <li>If there's a <tt>-help</tt> command in the argument list, then
+   * <li>If there's a <code>-help</code> command in the argument list, then
    *     {@linkplain #printHelpAndExit()} is invoked and the program exits.
    * </li><li>
    *     Next, {@linkplain #init(String[])} is invoked. {@linkplain IllegalArgumentException}s
    *     thrown by this method are treated as user-input error and invoked
    *     {@linkplain #exitInputError(String)} which terminates the program.
    * </li><li>
-   *     Finally, {@linkplain #start()} gets invoked. Here, <tt>Exception</tt>s raised are generally
+   *     Finally, {@linkplain #start()} gets invoked. Here, <code>Exception</code>s raised are generally
    *     treated as <em>program</em> error. {@linkplain InterruptedException}s however are
    *     special and are used as interrupt handling.
    * </li>
@@ -146,15 +146,15 @@ public abstract class MainTemplate extends UnanonymousType {
   }
   
   /**
-   * Prints the given message on <tt>System.err</tt>, followed by an empty line.
+   * Prints the given message on <code>System.err</code>, followed by an empty line.
    */
   protected void printError(String message) {
     System.err.println(ERROR_TAG + message);
   }
   
   /**
-   * Exits the program after printing the given error <tt>message</tt>,
-   * followed by {@code See '}{@linkplain #getProgname()}{@code --help'}. Exit status
+   * Exits the program after printing the given error <code>message</code>,
+   * followed by {@code See '}{@linkplain #getProgname()}{@code  --help'}. Exit status
    * code 126.
    * 
    * @see StdExit#ILLEGAL_ARG
@@ -182,8 +182,10 @@ public abstract class MainTemplate extends UnanonymousType {
   }
   
   /**
-   * Prints the description to <tt>System.out</tt>. Something like
-   * <p><pre><tt>
+   * <p>
+   * Prints the description to <code>System.out</code>. Something like
+   * </p>
+   * <pre><code>
     System.out.println();
     System.out.println("Description:");
     System.out.println();
@@ -191,13 +193,15 @@ public abstract class MainTemplate extends UnanonymousType {
     System.out.println("This is a read only interface.");
     System.out.println();
     
-   * </tt></pre></p>
+   * </code></pre>
    */
   protected abstract void printDescription();
   
   /**
+   * <p>
    * Prints the usage. Something like
-   * <p><pre><tt>
+   * </p>
+   * <pre><code>
     out.println("Usage:");
     out.println();
     out.println("Arguments are specified as 'name=value' pairs.");
@@ -205,7 +209,7 @@ public abstract class MainTemplate extends UnanonymousType {
     TablePrint table = new TablePrint(out, 10, 65, 3);
     table.setIndentation(1);
     table.printRow(EXT + "=*", "the file extension (inc..
-   * </tt></pre></p>
+   * </code></pre>
    */
   protected abstract void printUsage(PrintStream out);
   
@@ -217,7 +221,7 @@ public abstract class MainTemplate extends UnanonymousType {
   }
   
   /**
-   * Returns the value of the required <tt>name=value</tt> pair or if it doesn't exits
+   * Returns the value of the required <code>name=value</code> pair or if it doesn't exits
    * with {@linkplain #exitInputError(String)}.
    */
   protected String getRequiredParam(String[] args, String param) {

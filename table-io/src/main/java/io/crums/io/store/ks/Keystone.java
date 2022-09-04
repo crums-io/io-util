@@ -13,8 +13,6 @@ import java.nio.channels.FileChannel;
  * Updates are atomic, all-or-nothing, and fail-safe in the face partial writes.
  * The point of this structure is its application in other fail-safe structures
  * that support higher order atomic operations.
- * 
- * @author Babak
  */
 public abstract class Keystone implements Channel {
   
@@ -42,8 +40,8 @@ public abstract class Keystone implements Channel {
    * 
    * @param file
    *          open channel to the underlying file. The file's position is not modified.
-   * @param fileOffset
-   *          the offset at which this keystone begins
+   * @param offset
+   *          the file offset at which this keystone begins
    *  
    * @return a {@linkplain RollingKeystone RollingKeystone} instance
    */
@@ -81,8 +79,8 @@ public abstract class Keystone implements Channel {
    * 
    * @param file
    *          open channel to the underlying file. The file's position is not modified.
-   * @param fileOffset
-   *          the offset at which this keystone begins
+   * @param offset
+   *          the offset (in the file) at which this keystone begins
    * @param initValue
    *          the initial value of the keystone
    *  
@@ -128,11 +126,11 @@ public abstract class Keystone implements Channel {
    * @param value
    *          the new value
    * @param rollingCommit
-   *          if <tt>true</tt>, then the final force to the keystone byte is
+   *          if <code>true</code>, then the final force to the keystone byte is
    *          omitted. This halves the number of forces to the file system,
    *          at the cost of the possible loss of the last put; in no event
    *          (er, never say that) will the keystone's value be corrupt with
-   *          this parameter set to <tt>true</tt>
+   *          this parameter set to <code>true</code>
    * @return the old value
    * @return
    * @throws IOException
@@ -161,7 +159,7 @@ public abstract class Keystone implements Channel {
    * @param delta
    *          the amount to be incremented
    * @param rollingCommit
-   *          if <tt>true</tt>, then the final force to the keystone byte is
+   *          if <code>true</code>, then the final force to the keystone byte is
    *          omitted.
    * @return the new, incremented value
    */
@@ -170,8 +168,8 @@ public abstract class Keystone implements Channel {
 
   /**
    * Forces a write to the underlying file. This figures in only if the last
-   * write (i.e. the last invocation of either of the <tt>put()</tt> or
-   * <tt>increment()</tt> methods) had the <tt>rollingCommit</tt> flag on.
+   * write (i.e. the last invocation of either of the <code>put()</code> or
+   * <code>increment()</code> methods) had the <code>rollingCommit</code> flag on.
    * 
    * @see #put(long, boolean)
    * @see #increment(long, boolean)

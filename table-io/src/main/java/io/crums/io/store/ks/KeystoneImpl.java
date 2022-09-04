@@ -13,25 +13,26 @@ import io.crums.io.channels.ChannelUtils;
 
 
 /**
+ * <p>
  * Manages reliable persistence of an 8 byte value to an I/O device. In
  * particular, a keystone updates values in a way that is resilient to partial
  * writes (say in the face of a power failure). Indeed, that's the whole point
  * of this thing.
- * <p/>
+ * </p>
  * 
- * <h3>File Format</h3>
- * 
+ * <h2>File Format</h2>
+ * <p>
  * This is serialized as a 17 byte sequence: two 8 byte wide
  * cells followed by a special, byte-wide index cell. On the read path, the
  * entire block is loaded, the index cell is consulted, and the relevant value
  * of the indexed cell is returned.
- * <p/>
+ * </p><p>
  * On the write path, the new value is first written to the next cell
  * (determined in a round robin scheme), then the file is flushed, and finally
  * the index cell is updated to point to the cell with the newly written value.
- * 
+ * </p>
  * <pre>
- * <tt>
+ * <code>
  *  
  * 
  *     cell              cell index (byte-size keystone)
@@ -47,7 +48,7 @@ import io.crums.io.channels.ChannelUtils;
  *  |                   |
  *   ` fileOffset        ` fileOffset + 16
  * 
- * </tt>
+ * </code>
  * </pre>
  * 
  * Subclasses can adjust the {@linkplain #cellCount() cell count} to a
@@ -57,8 +58,6 @@ import io.crums.io.channels.ChannelUtils;
  * 
  * It's possible to generalize this design to return anything, not just longs.
  * For now, this is good enough for me.
- * 
- * @author Babak
  */
 public class KeystoneImpl extends Keystone {
   

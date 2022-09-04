@@ -24,7 +24,7 @@ public class Sets {
   
   
   /**
-   * Returns a mapped view of the given <tt>source</tt> set. The elements of the
+   * Returns a mapped view of the given <code>source</code> set. The elements of the
    * set are lazily constucted.
    * 
    * @param <U> the source type
@@ -48,7 +48,7 @@ public class Sets {
   
   
   /**
-   * Returns the first element contained in both sets or <tt>null</tt>, if no such
+   * Returns the first element contained in both sets or <code>null</code>, if no such
    * element is found.
    */
   @SuppressWarnings("unchecked")
@@ -85,7 +85,7 @@ public class Sets {
   
   
   /**
-   * Returns the first intersection of the given 2 naturally ordered lists or <tt>null</tt>
+   * Returns the first intersection of the given 2 naturally ordered lists or <code>null</code>
    * if there isn't any.
    * 
    * @see #intersectionIterator(List, List)
@@ -216,7 +216,7 @@ public class Sets {
   
 
   /**
-   * Returns a <tt>SortedSet</tt> view of the given ordered list. The returned object has undefined behavior
+   * Returns a <code>SortedSet</code> view of the given ordered list. The returned object has undefined behavior
    * if the given list contains out-of-order elements.
    * 
    * @param orderedList the backing ordered list
@@ -228,20 +228,20 @@ public class Sets {
   }
   
   /**
-   * Returns a <tt>SortedSet</tt> view of the given ordered list. The returned object has undefined behavior
-   * if the given list contains out-of-order elements, or if the <tt>comparator</tt> is <tt>null</tt> and the
+   * Returns a <code>SortedSet</code> view of the given ordered list. The returned object has undefined behavior
+   * if the given list contains out-of-order elements, or if the <code>comparator</code> is <code>null</code> and the
    * elements are not mutually comparable.
    * 
    * <h4>Note</h4>
    * 
-   * <p>The generic parameter specification can be broadened with <tt>? super &lt;T&gt;</tt> types
+   * <p>The generic parameter specification can be broadened with <code>? super &lt;T&gt;</code> types
    * in arguments. Too many decisions: deferring for now.</p>
    * 
-   * @param <T> the type (implements <tt>Comparable&lt;T&gt;</tt> if <tt>comparator</tt> is <tt>null</tt>)
+   * @param <T> the type (implements <code>Comparable&lt;T&gt;</code> if <code>comparator</code> is <code>null</code>)
    * 
    * @param orderedList the backing ordered list
-   * @param comparator defines the ordering; if <tt>null</tt>, then <tt>&lt;T&gt;</tt> implements
-   *                   <tt>Comparable&lt;T&gt;</tt>
+   * @param comparator defines the ordering; if <code>null</code>, then <code>&lt;T&gt;</code> implements
+   *                   <code>Comparable&lt;T&gt;</code>
    * @return non-null
    */
   public static <T> SortedSet<T> sortedSetView(List<T> orderedList, Comparator<T> comparator) {

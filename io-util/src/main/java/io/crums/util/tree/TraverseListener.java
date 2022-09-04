@@ -16,16 +16,16 @@ package io.crums.util.tree;
 public interface TraverseListener<T> {
     
   /**
-   * Invoked by the <tt>Traverser</tt> on traversing a <tt>node</tt>
-   * in pre-order. Every <tt>node</tt> in the tree structure is
+   * Invoked by the <code>Traverser</code> on traversing a <code>node</code>
+   * in pre-order. Every <code>node</code> in the tree structure is
    * guaranteed to be represented by exactly one invocation of this
    * method.
    */
   void preorder(T node);
   
   /**
-   * Invoked by the <tt>Traverser</tt> on traversing a <tt>node</tt>
-   * in post-order. Every <tt>node</tt> in the tree structure is
+   * Invoked by the <code>Traverser</code> on traversing a <code>node</code>
+   * in post-order. Every <code>node</code> in the tree structure is
    * guaranteed to be represented by exactly one invocation of this
    * method.
    */

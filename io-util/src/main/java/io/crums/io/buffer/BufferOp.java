@@ -8,8 +8,6 @@ import java.nio.ByteBuffer;
 
 /**
  * A unary buffer operation.
- * 
- * @author Babak
  */
 public abstract class BufferOp {
   
@@ -144,12 +142,14 @@ public abstract class BufferOp {
 
 
   /**
+   * <p>
    * Ensures the input buffer is read-only; if read-only, the input is returned;
    * otherwise, a read-only view of the input is created and returned.
    * The input buffer itself is unmodified.
-   * <p/>
+   * </p><p>
    * {@linkplain #opAll(ByteBuffer[])} returns the input array, replacing
    * any writable elements with read-only views of the same.
+   * </p>
    */
   public final static BufferOp ENSURE_READONLY =
       new InplaceOp() {

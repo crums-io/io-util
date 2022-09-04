@@ -32,7 +32,7 @@ public abstract class BaseMergeSort<M extends BaseMergeSource<M>> {
   /**
    * For bookkeeping only. Unused. Once the entire contents of a
    * source has been written to the target, the source is placed
-   * in here and removed from <tt>sources</tt>.
+   * in here and removed from <code>sources</code>.
    */
   protected final ArrayList<M> finishedSources;
   
@@ -102,7 +102,7 @@ public abstract class BaseMergeSort<M extends BaseMergeSource<M>> {
   /**
    * Aborts a merge, unless of course no merge is no progress.
    * 
-   * @return <tt>true</tt>, if aborted an in-progress merge; <tt>false</tt>, o.w.
+   * @return <code>true</code>, if aborted an in-progress merge; <code>false</code>, o.w.
    */
   public boolean abort() {
     if (startTime == 0 || endTime != 0)
@@ -182,20 +182,20 @@ public abstract class BaseMergeSort<M extends BaseMergeSource<M>> {
   
   
   /**
-   * Processes the top of the <tt>MergeSource</tt> stack. If any of the merge
+   * Processes the top of the <code>MergeSource</code> stack. If any of the merge
    * {@linkplain #sources} is {@linkplain BaseMergeSource#finished() finished}
    * then that it should be removed from the {@linkplain sources} list and
    * placed in the {@linkplain #finishedSources} list.
    * <h4>Pre-condition</h4>
    * <ul><li>
    * {@linkplain #sources} is sorted
-   * </li></li>
+   * </li><li>
    * {@linkplain #sources} has at least 2 elements
    * </li></ul>
    * <h4>Post-condition</h4>
    * <ul><li>
    * {@linkplain #sources} is sorted
-   * </li></li>
+   * </li><li>
    * {@linkplain #sources} contains no {@linkplain BaseMergeSource#finished() finished}
    * instances.
    * </li></ul>

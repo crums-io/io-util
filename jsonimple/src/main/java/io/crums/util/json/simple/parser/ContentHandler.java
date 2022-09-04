@@ -9,16 +9,15 @@ import java.io.IOException;
 /**
  * A simplified and stoppable SAX-like content handler for stream processing of JSON text. 
  * 
- * @see org.xml.sax.ContentHandler
- * @see org.json.simple.parser.JSONParser#parse(java.io.Reader, ContentHandler, boolean)
+ * @see JSONParser#parse(java.io.Reader, ContentHandler, boolean)
  * 
- * @author FangYidong<fangyidong@yahoo.com.cn>
+ * @author Fang Yidong
  */
 public interface ContentHandler {
   /**
    * Receive notification of the beginning of JSON processing.
    * The parser will invoke this method only once.
-     * 
+   * 
    * @throws ParseException 
    *      - JSONParser will stop and throw the same exception to the caller when receiving this exception.
    */
@@ -36,8 +35,8 @@ public interface ContentHandler {
    * 
    * @return false if the handler wants to stop parsing after return.
    * @throws ParseException
-     *          - JSONParser will stop and throw the same exception to the caller when receiving this exception.
-     * @see #endJSON
+   *          - JSONParser will stop and throw the same exception to the caller when receiving this exception.
+   * @see #endJSON
    */
   boolean startObject() throws ParseException, IOException;
   

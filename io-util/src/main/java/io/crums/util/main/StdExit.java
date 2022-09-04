@@ -18,13 +18,13 @@ public enum StdExit {
   GENERAL_ERROR(1),
   /**
    * Illegal argument at the command line. Questionable consensus
-   * about the exact meaning of <tt>126</tt>, but adopting this
+   * about the exact meaning of <code>126</code>, but adopting this
    * semantic. 126.
    */
   ILLEGAL_ARG(126),
   /**
-   * Exit by interrupt signal. Assume as if by <tt><em>kill -9 &lt;JVM_PID&gt;</em></tt>.
-   * 137 (</tt>= 128 + 9</tt>)
+   * Exit by interrupt signal. Assume as if by <code><em>kill -9 &lt;JVM_PID&gt;</em></code>.
+   * 137 (<code>= 128 + 9</code>)
    */
   INTERRUPTED(137);
   
@@ -51,7 +51,7 @@ public enum StdExit {
   
   /**
    * Exits the Java process with this exit code. (Obviously, a dangerous
-   * method. But then so is <tt>System.exit</tt>.
+   * method. But then so is <code>System.exit</code>.
    */
   public void exit() {
     System.exit(code);

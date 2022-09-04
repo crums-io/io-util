@@ -122,7 +122,7 @@ public class SortedTable extends Table implements Sorted {
    * 
    * @param key semantics are defined by {@linkplain #order()}
    * 
-   * @return the row if found; <tt>null</tt> o.w.
+   * @return the row if found; <code>null</code> o.w.
    */
   public ByteBuffer search(ByteBuffer key) throws IOException {
     Searcher searcher = newSearcher(Searcher.MIN_BUFFER_ROWS);
@@ -343,7 +343,7 @@ public class SortedTable extends Table implements Sorted {
 
     /**
      * Returns the row index of the hit. If not found, it returns the insertion
-     * point as a negative value: <tt>-<em>insertionPoint</em> - 1 </tt>.
+     * point as a negative value: <code>-<em>insertionPoint</em> - 1 </code>.
      */
     public long getHitRowNumber() {
       return hitRowNumber;
@@ -356,11 +356,11 @@ public class SortedTable extends Table implements Sorted {
     
     /**
      * Returns the hit row, if any.
-     * <pre></tt>
+     * <pre><code>
         public ByteBuffer getHitRow() {
           return isHit() ? getRow(hitRowNumber) : null;
         }
-     * </tt></pre>
+     * </code></pre>
      */
     public ByteBuffer getHitRow() {
       return isHit() ? getRow(hitRowNumber) : null;
@@ -392,10 +392,8 @@ public class SortedTable extends Table implements Sorted {
     
     /**
      * Determines whether the given row is already loaded.
-     * <pre><tt>
-     *   return rowNumber < getLastRetrievedRowNumber() && rowNumber >= getFirstRetrievedRowNumber();
-     * </tt></pre>
      * 
+     * @return {@code rowNumber < getLastRetrievedRowNumber() && rowNumber >= getFirstRetrievedRowNumber()}
      * @see #getRow(long)
      */
     public boolean isRowInBuffer(long rowNumber) {
@@ -410,7 +408,7 @@ public class SortedTable extends Table implements Sorted {
      *        {@linkplain #getLastRetrievedRowNumber()} (exclusive)
      *        
      * @throws IndexOutOfBoundsException
-     *         if <tt>rowNumber</tt> is outside the retrieved range
+     *         if <code>rowNumber</code> is outside the retrieved range
      * 
      * @see #isRowInBuffer(long)
      * @see #copyRowInto(long, ByteBuffer)
@@ -420,17 +418,19 @@ public class SortedTable extends Table implements Sorted {
     }
     
     /**
-     * Copies the contents of the given already retrieved <tt>rowNumber</tt> to the
-     * specified <tt>buffer</tt>. The position of the given buffer is advanced by
+     * Copies the contents of the given already retrieved <code>rowNumber</code> to the
+     * specified <code>buffer</code>. The position of the given buffer is advanced by
      * the underlying {@linkplain #getTable() table}'s {@linkplain Table#getRowWidth() row width}.
-     * <p/>
+     * <p>
      * This is functionally equivalent to
-     * <pre><tt>
+     * </p>
+     * <pre><code>
      * Searcher seacher = ..
      * buffer.put(searcher.getRow(rowNumber));
-     * </tt></pre>
+     * </code></pre>
+     * <p>
      * except that it's marginally more efficient.
-     * <p/>
+     * </p>
      * 
      * @param rowNumber
      *        row number in the range {@linkplain #getFirstRetrievedRowNumber()} (inclusive),
@@ -438,9 +438,9 @@ public class SortedTable extends Table implements Sorted {
      * @param buffer
      *        the buffer to which the row's contents will be put
      * @throws IndexOutOfBoundsException
-     *         if <tt>rowNumber</tt> is outside the retrieved range
+     *         if <code>rowNumber</code> is outside the retrieved range
      * @throws BufferOverflowException
-     *         if <tt>buffer</tt>'s remaining bytes is less than the underlying table's row width
+     *         if <code>buffer</code>'s remaining bytes is less than the underlying table's row width
      * 
      * @see #isRowInBuffer(long)
      * @see #getRow(long)
@@ -453,8 +453,8 @@ public class SortedTable extends Table implements Sorted {
     
     
     /**
-     * Returns the result of comparing the given <tt>key</tt> with contents
-     * of the specified <tt>rowNumber</tt>.
+     * Returns the result of comparing the given <code>key</code> with contents
+     * of the specified <code>rowNumber</code>.
      */
     public int compareToRetrievedRow(ByteBuffer key, long rowNumber) {
       return block.compareToCell(key, toBlockIndex(rowNumber));

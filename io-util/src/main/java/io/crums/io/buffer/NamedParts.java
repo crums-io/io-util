@@ -167,7 +167,7 @@ public class NamedParts extends Partitioning {
   }
 
   /**
-   * <h2>Performance Note</h2>
+   * <h4>Performance Note</h4>
    * <p>Avoid if possible. Expensive. Write the header directly.</p>
    * {@inheritDoc}
    */
@@ -196,11 +196,11 @@ public class NamedParts extends Partitioning {
   
   
   /**
-   * <h3> Interface Description </h3>
+   * <h4> Interface Description </h4>
    * <p>
    * {@inheritDoc}
    * <p>
-   * <h3> Implementation </h3>
+   * <h4> Implementation </h4>
    * <p>
    * Allows 2-bytes per UT8-character. For ASCII names this is about twice
    * the actual space needed. If there are many names with more code-points
@@ -233,7 +233,7 @@ public class NamedParts extends Partitioning {
   
   
   /**
-   * Loads a read-only instance from its {@linkplain Serial} byte representation.
+   * Loads a read-only instance from its {@linkplain io.crums.io.Serial Serial} byte representation.
    * 
    * @return {@linkplain #load(ByteBuffer, boolean) load(serialForm, true)}
    */

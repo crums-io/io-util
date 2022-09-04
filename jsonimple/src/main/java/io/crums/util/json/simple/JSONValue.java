@@ -15,20 +15,20 @@ import io.crums.util.json.simple.parser.ParseException;
 
 
 /**
- * @author FangYidong<fangyidong@yahoo.com.cn>
+ * @author Fang Yidong
  */
 public class JSONValue {
   /**
    * Parse JSON text into java object from the input source. 
    * Please use parseWithException() if you don't want to ignore the exception.
    * 
-   * @see org.json.simple.parser.JSONParser#parse(Reader)
+   * @see JSONParser#parse(Reader)
    * @see #parseWithException(Reader)
    * 
    * @param in
    * @return Instance of the following:
-   *  org.json.simple.JSONObject,
-   *  org.json.simple.JSONArray,
+   *  JSONObject,
+   *  JSONArray,
    *  java.lang.String,
    *  java.lang.Number,
    *  java.lang.Boolean,
@@ -53,12 +53,12 @@ public class JSONValue {
   /**
    * Parse JSON text into java object from the input source.
    * 
-   * @see org.json.simple.parser.JSONParser
+   * @see io.crums.util.json.simple.parser.JSONParser
    * 
    * @param in
    * @return Instance of the following:
-   *  org.json.simple.JSONObject,
-   *  org.json.simple.JSONArray,
+   *  JSONObject,
+   *  JSONArray,
    *  java.lang.String,
    *  java.lang.Number,
    *  java.lang.Boolean,
@@ -81,15 +81,13 @@ public class JSONValue {
      * Encode an object into JSON text and write it to out.
      * <p>
      * If this object is a Map or a List, and it's also a JSONStreamAware or a JSONAware, JSONStreamAware or JSONAware will be considered firstly.
-     * <p>
+     * </p><p>
      * DO NOT call this method from writeJSONString(Writer) of a class that implements both JSONStreamAware and (Map or List) with 
      * "this" as the first parameter, use JSONObject.writeJSONString(Map, Writer) or JSONArray.writeJSONString(List, Writer) instead. 
+     * </p>
      * 
-     * @see org.json.simple.JSONObject#writeJSONString(Map, Writer)
-     * @see org.json.simple.JSONArray#writeJSONString(List, Writer)
-     * 
-     * @param value
-     * @param writer
+     * @see JSONObject#writeJSONString(Map, Writer)
+     * @see JSONArray#writeJSONString(List, Writer)
      */
   public static void writeJSONString(Object value, Writer out) throws IOException {
     if(value == null){
@@ -157,12 +155,13 @@ public class JSONValue {
    * Convert an object to JSON text.
    * <p>
    * If this object is a Map or a List, and it's also a JSONAware, JSONAware will be considered firstly.
-   * <p>
+   * </p><p>
    * DO NOT call this method from toJSONString() of a class that implements both JSONAware and Map or List with 
    * "this" as the parameter, use JSONObject.toJSONString(Map) or JSONArray.toJSONString(List) instead. 
+   * </p>
    * 
-   * @see org.json.simple.JSONObject#toJSONString(Map)
-   * @see org.json.simple.JSONArray#toJSONString(List)
+   * @see JSONObject#toJSONString(Map)
+   * @see JSONArray#toJSONString(List)
    * 
    * @param value
    * @return JSON text, or "null" if value is null or it's an NaN or an INF number.
@@ -214,7 +213,7 @@ public class JSONValue {
    * @param s
    * @return
    * 
-   * @see https://code.google.com/archive/p/json-simple/issues/8
+   * @see <a href="https://code.google.com/archive/p/json-simple/issues/8">Issue 8 (original)</a>
    */
   public static String escape(String s){
     if(s==null)

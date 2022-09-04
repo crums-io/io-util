@@ -7,9 +7,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 
 /**
- * Base wrapper implementation around an existing <tt>RowIterator</tt>.
- * 
- * @author Babak
+ * Base wrapper implementation around an existing <code>RowIterator</code>.
  */
 public class FilterRowIterator extends RowIterator {
   

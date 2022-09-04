@@ -8,8 +8,6 @@ import java.util.Arrays;
 
 /**
  * Compound ordering.
- * 
- * @author Babak
  */
 public final class CompoundOrder extends RowOrder {
   
@@ -20,12 +18,12 @@ public final class CompoundOrder extends RowOrder {
 
   
   /**
-   * Creates a new instance with the given array of <tt>RowOrder</tt>s.
+   * Creates a new instance with the given array of <code>RowOrder</code>s.
    * The precedence of the orderings is from front to back (first to last
    * index in the array).
    * 
    * @param orders
-   *        non-<tt>null</tt> array of row orders of length &gt; 0. On
+   *        non-<code>null</code> array of row orders of length &gt; 0. On
    *        return, you can do whatever with array: a defensive copy is
    *        maintained by this instance.
    */

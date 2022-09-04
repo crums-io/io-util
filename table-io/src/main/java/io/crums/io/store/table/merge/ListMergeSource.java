@@ -12,8 +12,6 @@ import io.crums.io.store.table.SortedTable;
 
 /**
  * Merge source allowing duplicates.
- * 
- * @author Babak
  */
 public class ListMergeSource extends BaseMergeSource<ListMergeSource> {
 
@@ -28,7 +26,7 @@ public class ListMergeSource extends BaseMergeSource<ListMergeSource> {
    * has row contents for <em>some</em> row, unless it's {@linkplain #finished()}.
    * 
    * @throws IllegalStateException
-   *         if <tt>this</tt> or the <tt>other</tt> is {@linkplain #finished() finished}
+   *         if <code>this</code> or the <code>other</code> is {@linkplain #finished() finished}
    */
   @Override
   public int compareTo(ListMergeSource other) {

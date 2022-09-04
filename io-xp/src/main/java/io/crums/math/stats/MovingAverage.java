@@ -17,18 +17,18 @@ public class MovingAverage {
   
   private final long[] window;
   /**
-   * Sum of the values in <tt>window</tt>. Always up-to-date.
+   * Sum of the values in <code>window</code>. Always up-to-date.
    */
   private long wSum;
   /**
-   * Circular index into <tt>window</tt>. Range invariant: [0, window.length).
+   * Circular index into <code>window</code>. Range invariant: [0, window.length).
    */
   private int wIndex;
   private long count;
   
 
   /**
-   * Creates a new instance initialized to zero with the given <tt>windowSize</tt>.
+   * Creates a new instance initialized to zero with the given <code>windowSize</code>.
    */
   public MovingAverage(int windowSize) {
     this(windowSize, 0);
@@ -36,8 +36,8 @@ public class MovingAverage {
 
 
   /**
-   * Creates a new instance with the given <tt>windowSize</tt>, initialized to the
-   * given <tt>initValue</tt>.
+   * Creates a new instance with the given <code>windowSize</code>, initialized to the
+   * given <code>initValue</code>.
    */
   public MovingAverage(int windowSize, long initValue) {
     if (windowSize < 1)
@@ -71,7 +71,7 @@ public class MovingAverage {
   
   /**
    * Clears the instance, and initializes the average to the given
-   * <tt>initValue</tt>.
+   * <code>initValue</code>.
    */
   public void clear(long initValue) {
     for (int index = window.length; index-- > 0; )

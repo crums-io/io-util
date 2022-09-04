@@ -38,8 +38,6 @@ public class OptionGroup implements Predicate<String> {
   /**
    * Creates an instance with the given full option names. Note their
    * short form symbols must not collide.
-   * 
-   * @param no duplicate first characters
    */
   public OptionGroup(String... optNames) {
     this(Lists.map(optNames, name -> new Option(name)));

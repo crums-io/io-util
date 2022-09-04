@@ -131,8 +131,8 @@ public class Lists {
    * a read-only view.
    * <p>
    * Motivation for this method is an opportunity to centralize how this can
-   * be done most efficiently (should {@code List.of(..) be mixed in with
-   * {{@code Collections.unmodifiableList}, for eg?}). TODO: gather/find data
+   * be done most efficiently (should {@code List.of(..)} be mixed in with
+   * {{@code Collections.unmodifiableList}, for eg?). TODO: gather/find data
    * for this.
    * </p>
    * 
@@ -166,7 +166,7 @@ public class Lists {
    * Returns a read-only copy of the argument. Used mostly with constructor
    * arguments of immutable classes.
    * 
-   * <h3>Duplicates semantics</h3>
+   * <h4>Duplicates semantics</h4>
    * <p>
    * These semantics are relevant only if invoked with {@code noDups} set to {@code true}.
    * </p><p>
@@ -398,7 +398,7 @@ public class Lists {
   
   /**
    * Returns a reversed, read-only view of the given source list.
-   * If the <tt>source</tt> is a singleton or empty, it is returned as-is.
+   * If the <code>source</code> is a singleton or empty, it is returned as-is.
    * <p>
    * Note, reversing an already reversed list <em>unwraps</em> the view.
    * (You needn't worry about needless double-wrappings.)
@@ -704,14 +704,12 @@ public class Lists {
     private final List<T> tail;
     
     /**
-     * Creates a new instance with the given <tt>first</tt> and <tt>second</tt>
+     * Creates a new instance with the given <code>first</code> and <code>second</code>
      * sublists.
      * 
      * @param head
      * @param tail
      * 
-     * @see #firstSubList()
-     * @see #secondSubList()
      */
     public ConcatList(List<T> head, List<T> tail) {
       this.head = Objects.requireNonNull(head, "null head");

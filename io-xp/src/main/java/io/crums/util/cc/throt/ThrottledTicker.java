@@ -10,13 +10,13 @@ import io.crums.util.cc.ThreadUtils;
 import io.crums.util.ticker.Ticker;
 
 /**
+ * <p>
  * A throttled ticker.
- * 
- * <h3>Concurrent Access OK</h3>
- * 
+ * </p>
+ * <h2>Concurrent Access OK</h2>
+ * <p>
  * This is designed to be well-behaved under concurrent access.
- * 
- * @author Babak
+ * </p>
  */
 public class ThrottledTicker extends Ticker {
   

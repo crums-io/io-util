@@ -90,8 +90,8 @@ public class FileUtils {
    * 
    * @param src an existing file
    * @param target the target file (the parent directory must exist).
-   * @return <tt>true</tt> iff the move succeeded; <tt>false</tt>, if the <tt>target</tt> file already
-   *  exists; failing that an <tt>IllegalStateException</tt> is raised
+   * @return <code>true</code> iff the move succeeded; <code>false</code>, if the <code>target</code> file already
+   *  exists; failing that an <code>IllegalStateException</code> is raised
    */
   public static boolean moveOrDelete(File src, File target) {
     if (!src.isFile())
@@ -290,9 +290,9 @@ public class FileUtils {
    * @param source       an existing path. If it's a directory, its files/subdirectories
    *                     are recursively copied/created
    * @param target       the target path
-   * @param overwrite    if <tt>true</tt>, and <tt>target</tt> is an existing file, then
+   * @param overwrite    if <code>true</code>, and <code>target</code> is an existing file, then
    *                     the file will be overwritten; o.w. an {@linkplain IllegalArgumentException}
-   *                     is raised. If <tt>target</tt> is a directory (and <tt>source</tt> is too),
+   *                     is raised. If <code>target</code> is a directory (and <code>source</code> is too),
    *                     then this argument doesn't matter
    * @return             the number of <em>files</em> (not directories) copied
    */

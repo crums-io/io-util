@@ -11,22 +11,22 @@ import io.crums.io.IoStateException;
 import io.crums.io.store.table.SortedTable;
 
 /**
- * A merge sort operation on <tt>SortedTable</tt>s, collectively representing a <em>set</em>.
+ * A merge sort operation on <code>SortedTable</code>s, collectively representing a <em>set</em>.
  * That is, this models a data structure with no duplicates.
  * 
  * @see BaseMergeSource
- * @author Babak
  */
 public class SetMergeSort extends BaseMergeSort<PrecedenceMergeSource> {
 
   /**
-   * Creates a new instance with the given <tt>sources</tt>, that will merge to the specified
-   * <tt>target</tt>. The precedence of the tables is from back to front. That is, higher index
+   * Creates a new instance with the given <code>sources</code>, that will merge to the specified
+   * <code>target</code>. The precedence of the tables is from back to front. That is, higher index
    * tables in the given array override lower index tables.
-   * <p/>
+   * <p>
    * The number of rows in each source
    * table's search buffer defaults to {@linkplain BaseMergeSort#DEFAULT_ROWS_PER_SEARCH_BUFFER
    * DEFAULT_ROWS_PER_SEARCH_BUFFER}.
+   * </p>
    * 
    * @param sources
    *        the source tables ordered in increasing order of precedence. Each table contains
@@ -39,8 +39,8 @@ public class SetMergeSort extends BaseMergeSort<PrecedenceMergeSource> {
 
 
   /**
-   * Creates a new instance with the given <tt>sources</tt>, that will merge to the specified
-   * <tt>target</tt>. The precedence of the tables is from back to front. That is, higher index
+   * Creates a new instance with the given <code>sources</code>, that will merge to the specified
+   * <code>target</code>. The precedence of the tables is from back to front. That is, higher index
    * tables in the given array override lower index tables.
    * 
    * @param sources

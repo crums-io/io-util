@@ -11,10 +11,8 @@ import io.crums.io.store.table.del.DeleteCodec;
 /**
  * Uses the natural order of rows.
  * <p>
- * <em>TODO: Remove. It's a bad design since it cannot work alongside a {@linkplain DeleteCodec}.
+ * <em>TODO: Remove. It's a bad design since it cannot work alongside a {@linkplain DeleteCodec}.</em>
  * </p>
- * 
- * @author Babak
  */
 public final class NaturalRowOrder extends RowOrder {
   

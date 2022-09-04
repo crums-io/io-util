@@ -26,7 +26,7 @@ import io.crums.util.Lists;
  * means -5 thru 9).
  * </p>
  * 
- * <h4>Performance note</h4>
+ * <h2>Performance note</h2>
  * 
  * <p>
  * This is inefficient. We're processing command-line args, where this is usually not
@@ -60,7 +60,7 @@ public class NumbersArg {
   /**
    * Minimum valid setting for the {@code maxRange} parameter.
    * 
-   * @see #parse(String, int)
+   * @see #parse(String, int, List)
    */
   public final static int MIN_RANGE = 3;
   

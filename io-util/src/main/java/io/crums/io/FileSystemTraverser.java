@@ -23,8 +23,7 @@ import io.crums.util.tree.TraverseListener;
  * </i></small></p>
  *
  * @see TraverseListener
- * @see Search:
- *      <a href="http://www.google.com/search?q=euler+traversal">Euler
+ * @see <a href="http://www.google.com/search?q=euler+traversal">Euler
  *      Traversal</a>
  */
 public class FileSystemTraverser extends AbstractTraverser<File> {
@@ -37,7 +36,7 @@ public class FileSystemTraverser extends AbstractTraverser<File> {
 
 
   /**
-   * Visits the <tt>root</tt> file, and if a directory, and traverses the
+   * Visits the <code>root</code> file, and if a directory, and traverses the
    * directory structure, firing pre-order events along the way. Ordinary
    * files in a same directory are visited <em>before</em> subdirectories.
    * 
@@ -46,7 +45,7 @@ public class FileSystemTraverser extends AbstractTraverser<File> {
    * @param visitor
    *        the callback interface invoked on traversal
    * @param filter
-   *        optional file filter (may be <tt>null</tt>)
+   *        optional file filter (may be <code>null</code>)
    */
   public static void visitPreorder(
       File root,
@@ -59,7 +58,7 @@ public class FileSystemTraverser extends AbstractTraverser<File> {
 
 
   /**
-   * Visits the <tt>root</tt> file, and if a directory, and traverses the
+   * Visits the <code>root</code> file, and if a directory, and traverses the
    * directory structure, firing pre-order events along the way.
    * 
    * @param root
@@ -67,10 +66,10 @@ public class FileSystemTraverser extends AbstractTraverser<File> {
    * @param visitor
    *        the callback interface invoked on traversal
    * @param filter
-   *        optional file filter (may be <tt>null</tt>)
+   *        optional file filter (may be <code>null</code>)
    * @param siblingOrder
    *        determines the order files in a same directory get visited. If
-   *        <tt>null</tt>, the files' natural ordering is used.
+   *        <code>null</code>, the files' natural ordering is used.
    */
   public static void visitPreorder(
       File root,
@@ -84,7 +83,7 @@ public class FileSystemTraverser extends AbstractTraverser<File> {
 
 
   /**
-   * Visits the <tt>root</tt> file, and if a directory, and traverses the
+   * Visits the <code>root</code> file, and if a directory, and traverses the
    * directory structure, firing post-order events along the way. Ordinary
    * files in a same directory are visited <em>after</em> subdirectories.
    * 
@@ -93,7 +92,7 @@ public class FileSystemTraverser extends AbstractTraverser<File> {
    * @param visitor
    *        the callback interface invoked on traversal
    * @param filter
-   *        optional file filter (may be <tt>null</tt>)
+   *        optional file filter (may be <code>null</code>)
    */
   public static void visitPostorder(
       File root,
@@ -106,7 +105,7 @@ public class FileSystemTraverser extends AbstractTraverser<File> {
 
 
   /**
-   * Visits the <tt>root</tt> file, and if a directory, and traverses the
+   * Visits the <code>root</code> file, and if a directory, and traverses the
    * directory structure, firing post-order events along the way.
    * 
    * @param root
@@ -114,10 +113,10 @@ public class FileSystemTraverser extends AbstractTraverser<File> {
    * @param visitor
    *        the callback interface invoked on traversal
    * @param filter
-   *        optional file filter (may be <tt>null</tt>)
+   *        optional file filter (may be <code>null</code>)
    * @param siblingOrder
    *        determines the order files in a same directory get visited. If
-   *        <tt>null</tt>, the files' natural ordering is used.
+   *        <code>null</code>, the files' natural ordering is used.
    */
   public static void visitPostorder(
       File root,
@@ -134,7 +133,7 @@ public class FileSystemTraverser extends AbstractTraverser<File> {
 
 
   /**
-   * Creates a new instance with the given <tt>root</tt> file (usually a
+   * Creates a new instance with the given <code>root</code> file (usually a
    * directory).
    */
   public FileSystemTraverser(File root) {
@@ -143,7 +142,7 @@ public class FileSystemTraverser extends AbstractTraverser<File> {
 
 
   /**
-   * Creates a new instance with the given <tt>root</tt> file (usually a
+   * Creates a new instance with the given <code>root</code> file (usually a
    * directory).
    */
   public FileSystemTraverser(
@@ -171,7 +170,7 @@ public class FileSystemTraverser extends AbstractTraverser<File> {
 
   /**
    * Returns the filter used to determine whether files will be visited.
-   * May be <tt>null</tt>.
+   * May be <code>null</code>.
    */
   public FileFilter getFilter() {
     return filter;
@@ -181,7 +180,7 @@ public class FileSystemTraverser extends AbstractTraverser<File> {
 
 
   /**
-   * Returns the files in the given directory <tt>node</tt>, applying
+   * Returns the files in the given directory <code>node</code>, applying
    * this instance's {@linkplain #setFilter(FileFilter) filter}, if
    * any.
    */
@@ -192,7 +191,7 @@ public class FileSystemTraverser extends AbstractTraverser<File> {
 
 
   /**
-   * Returns <tt>true</tt> is the specified file <tt>node</tt> is a
+   * Returns <code>true</code> is the specified file <code>node</code> is a
    * directory.
    */
   @Override

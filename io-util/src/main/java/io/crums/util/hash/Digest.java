@@ -59,7 +59,7 @@ public interface Digest {
   
   
   /**
-   * Creates and returns a new <tt>MessageDigest</tt>. The
+   * Creates and returns a new <code>MessageDigest</code>. The
    * returned instance must match this specification.
    */
   default MessageDigest newDigest() {

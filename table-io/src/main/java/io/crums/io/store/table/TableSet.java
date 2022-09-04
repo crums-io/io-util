@@ -45,8 +45,8 @@ public class TableSet implements Sorted, Closeable {
   }
   
   /**
-   * Creates a new instance using the given backing <tt>tables</tt>. The order
-   * of precedence in the given array is from back to front. Each <tt>SortedTable</tt>
+   * Creates a new instance using the given backing <code>tables</code>. The order
+   * of precedence in the given array is from back to front. Each <code>SortedTable</code>
    * element of the given array is assumed to not contain any rows with duplicate keys.
    */
   public TableSet(SortedTable[] tables) throws IOException {
@@ -83,7 +83,7 @@ public class TableSet implements Sorted, Closeable {
   
   
   /**
-   * Returns a new iterator positioned at the given search <tt>key</tt>.
+   * Returns a new iterator positioned at the given search <code>key</code>.
    */
   public TableSetIterator iterator() throws IOException {
     return new TableSetIterator(this);

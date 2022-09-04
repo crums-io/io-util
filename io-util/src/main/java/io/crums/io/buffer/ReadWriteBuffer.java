@@ -8,8 +8,8 @@ import java.nio.ByteBuffer;
 import java.util.Objects;
 
 /**
- * Read-write idiom using <tt>ByteBuffer</tt>s. Similar to that provided in Netty, this
- * partitions a <tt>ByteBuffer</tt> into readable and writable parts.
+ * Read-write idiom using <code>ByteBuffer</code>s. Similar to that provided in Netty, this
+ * partitions a <code>ByteBuffer</code> into readable and writable parts.
  */
 public class ReadWriteBuffer {
   
@@ -31,7 +31,7 @@ public class ReadWriteBuffer {
    * 
    * @param capacity the capacity of the buffer.
    * 
-   * @param direct <tt>true</tt> if a direct buffer (default <tt>false</tt>)
+   * @param direct <code>true</code> if a direct buffer (default <code>false</code>)
    */
   public ReadWriteBuffer(int capacity, boolean direct) {
     this(direct ? ByteBuffer.allocateDirect(capacity) : ByteBuffer.allocate(capacity), null);
@@ -60,7 +60,7 @@ public class ReadWriteBuffer {
   /**
    * Puts the given data. On return the {@linkplain #readBuffer() readBuffer}'s limit is advanced.
    * 
-   * @return <tt>this</tt>
+   * @return <code>this</code>
    */
   public final ReadWriteBuffer put(ByteBuffer data) {
     writeBuffer.put(data);
@@ -145,7 +145,7 @@ public class ReadWriteBuffer {
    * Clears the state for a new round of writes. On return, the {@linkplain #readBuffer() readBuffer}
    * is empty.
    * 
-   * @return <tt>this</tt>
+   * @return <code>this</code>
    */
   public final ReadWriteBuffer clear() {
     writeBuffer.clear();

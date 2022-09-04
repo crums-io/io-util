@@ -13,7 +13,7 @@ import io.crums.util.tree.TraverseListener;
 
 /**
  * Recursively removes the contents of a directory tree.
- * Similar to <tt>rm myDir -rf</tt>.
+ * Similar to <code>rm myDir -rf</code>.
  * <h2>Warning!</h2>
  * <p>
  * This class performs an inherently dangerous operation: it

@@ -14,8 +14,6 @@ import io.crums.io.store.table.order.RowOrder;
 
 /**
  * A {@linkplain TableSet} supporting delete overrides.
- * 
- * @author Babak
  */
 public class TableSetD extends TableSet {
 
@@ -83,7 +81,7 @@ public class TableSetD extends TableSet {
 
 
   /**
-   * May be <tt>null</tt>
+   * May be <code>null</code>
    */
   public final DeleteCodec getDeleteCodec() {
     return deleteCodec;

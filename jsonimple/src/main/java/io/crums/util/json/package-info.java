@@ -14,6 +14,7 @@
  * {@linkplain io.crums.util.json.simple} package.
  * </p><p>
  * This package contains a few utilities and abstractions for working with the object model:
+ * </p>
  * <ul>
  * <li>For indented output: {@linkplain io.crums.util.json.JsonPrinter}</li>
  * <li>For common validation steps used in parser implementations: {@linkplain io.crums.util.json.JsonUtils}</li>
@@ -21,7 +22,6 @@
  * {@linkplain io.crums.util.json.JsonEntityReader}. These come with useful default methods: a concrete type
  * usually needs to only implement one abstract method per interface.</li>
  * </ul>
- * </p>
  * 
  * @see io.crums.util.json.JsonEntityParser
  */

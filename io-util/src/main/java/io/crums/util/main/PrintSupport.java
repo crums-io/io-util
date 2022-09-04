@@ -66,7 +66,7 @@ public class PrintSupport {
   }
 
   /**
-   * Creates a new instance with 0/80 left/right margins using the given <tt>PrintStream</tt>. 
+   * Creates a new instance with 0/80 left/right margins using the given <code>PrintStream</code>. 
    */
   public PrintSupport(PrintStream out) {
     this.out = out;
@@ -137,7 +137,7 @@ public class PrintSupport {
    * Sets the left and right margins for {@linkplain #printJustified(String)}.
    * 
    * @param left synonym for indentation
-   * @param right distance from zero column (&gt; <tt>left</tt>)
+   * @param right distance from zero column (&gt; <code>left</code>)
    */
   public void setMargins(int left, int right) {
     if (right <= left)

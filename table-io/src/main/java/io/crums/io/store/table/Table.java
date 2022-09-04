@@ -34,25 +34,26 @@ import io.crums.util.Lists;
  * structure does not delve into defining multiple columns. You can build that
  * yourself; there's only one column in this implementation.
  * 
- * <h3>Concurrent Access</h3>
- * 
- * The underlying <tt>FileChannel</tt>'s position is never modified.
- * Consequently, if the <tt>FileChannel</tt>'s implementation is itself
+ * <h2>Concurrent Access</h2>
+ * <p>
+ * The underlying <code>FileChannel</code>'s position is never modified.
+ * Consequently, if the <code>FileChannel</code>'s implementation is itself
  * thread-safe, then concurrent reads on an instance of this class are also
  * safe. Not only that, concurrent readers with one append-only writer would
  * also be safe. I say <em>would</em>, because I vaguely recall a while back
  * discovering some crap standard API code that seemed to violate
- * <tt>FileChannel</tt>'s own spec: it would be changing the file position and then
+ * <code>FileChannel</code>'s own spec: it would be changing the file position and then
  * setting it back.
- * 
- * <h3>Instance Duplicates</h3>
- * 
+ * </p>
+ * <h2>Instance Duplicates</h2>
+ * <p>
  * Copy constructor semantics have special meaning. Instances share the underlying
- * <tt>FileChannel</tt> while still implementing the <tt>Channel</tt> interface methods
- * <tt>isOpen()</tt> and <tt>close()</tt> on the copied instance. This is done by
+ * <code>FileChannel</code> while still implementing the <code>Channel</code> interface methods
+ * <code>isOpen()</code> and <code>close()</code> on the copied instance. This is done by
  * maintained a reference count on the copied instances.  So the contract here is that
  * every user agrees to do the right thing: namely close their instance when they're done using
  * it.
+ * </p>
  * 
  * 
  * @author Babak
@@ -131,7 +132,7 @@ public class Table implements Channel {
 
 
   /**
-   * Sets the data for the given <tt>row</tt>.
+   * Sets the data for the given <code>row</code>.
    * 
    * @param row
    *          the row number (between zero and the {@linkplain #getRowCount()
@@ -187,9 +188,9 @@ public class Table implements Channel {
    *        must be an exact, non-zero multiple of the table's {@linkplain #getRowWidth() rowWidth}.
    * 
    * @throws NullPointerException
-   *         if the <tt>rows</tt> array is <tt>null</tt>, or if any of its elements is <tt>null</tt>
+   *         if the <code>rows</code> array is <code>null</code>, or if any of its elements is <code>null</code>
    * @throws IllegalArgumentException
-   *         if the total number of remaining bytes in the given <tt>rows</tt> is not a non-zero
+   *         if the total number of remaining bytes in the given <code>rows</code> is not a non-zero
    *         multiple of the table's {@linkplain #getRowWidth() rowWidth}
    */
   public long append(ByteBuffer[] rows) throws IOException {
@@ -217,7 +218,7 @@ public class Table implements Channel {
 
 
   /**
-   * Reads a block of one or more rows starting at the given <tt>row</tt>
+   * Reads a block of one or more rows starting at the given <code>row</code>
    * number.
    * 
    * @param row
@@ -243,7 +244,7 @@ public class Table implements Channel {
   
   
   /**
-   * Transfers (copies) a block of rows to the given <tt>target</tt>. This should
+   * Transfers (copies) a block of rows to the given <code>target</code>. This should
    * be far more efficient than using a secondary work buffer to first read and
    * then write data.
    * 
@@ -265,7 +266,7 @@ public class Table implements Channel {
   
   
   /**
-   * Appends rows from the given <tt>source</tt> table. This is likely a lot
+   * Appends rows from the given <code>source</code> table. This is likely a lot
    * faster than copying the rows to a buffer and then appending the buffer
    * in this instance.
    * 
@@ -482,7 +483,7 @@ public class Table implements Channel {
    * 
    * @param file      file path
    * @param rowSize   bytes per row
-   * @param readOnly  if <tt>true</tt>, then the table is opened in read-only mode. (Obviously, the
+   * @param readOnly  if <code>true</code>, then the table is opened in read-only mode. (Obviously, the
    *                  table must already exist on the file system.)
    */
   public static Table createInstance(File file, int rowSize, boolean readOnly) throws IOException {

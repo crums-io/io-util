@@ -46,7 +46,7 @@ public enum Opening {
    * 
    * @param dir path to directory
    * 
-   * @return <tt>dir</tt>
+   * @return <code>dir</code>
    */
   public File ensureDir(File dir) {
     checkDir(dir);
@@ -55,7 +55,7 @@ public enum Opening {
   
   
   /**
-   * Opens and returns a (random access) <tt>FileChannel</tt> from the file
+   * Opens and returns a (random access) <code>FileChannel</code> from the file
    * at the specified path. Creates it if it's supposed (in which event, the
    * parent directories are also created if needed).
    * 
@@ -106,7 +106,7 @@ public enum Opening {
    * Checks whether the existence or non-existence of the given resource
    * is permitted.
    * 
-   * @param exists <tt>true</tt> if the resource exists; <tt>false</tt> if it doesn't
+   * @param exists <code>true</code> if the resource exists; <code>false</code> if it doesn't
    * @param resource used to form the message on throwing the exception
    */
   public void checkAccept(boolean exists, Object resource) {
@@ -124,10 +124,10 @@ public enum Opening {
    * Determines whether the existence or non-existence of the given resource
    * is permitted.
    * 
-   * @param exists  <tt>true</tt> if the resource exists; <tt>false</tt> if it doesn't
+   * @param exists  <code>true</code> if the resource exists; <code>false</code> if it doesn't
    * 
-   * @return <tt>true</tt> if the resource exists <em>and</em> we're not
-   *         meant to create a new one; <tt>false</tt> if it doesn't
+   * @return <code>true</code> if the resource exists <em>and</em> we're not
+   *         meant to create a new one; <code>false</code> if it doesn't
    *              exist <em>and</em> this mode doesn't allow for it to be created
    */
   public boolean accept(boolean exists) {
@@ -188,10 +188,10 @@ public enum Opening {
    * 
    * @param file a path which may or may not exist
    * 
-   * @return <tt>true</tt> if <tt>dir</tt> is an existing file <em>or</em> the mode
+   * @return <code>true</code> if <code>dir</code> is an existing file <em>or</em> the mode
    *        allows the directory to be created
    * 
-   * @throws IllegalArgumentException if <tt>file</tt> is in fact an existing directory
+   * @throws IllegalArgumentException if <code>file</code> is in fact an existing directory
    */
   public boolean acceptFile(File file) throws IllegalArgumentException {
     switch (this) {
@@ -218,10 +218,10 @@ public enum Opening {
    * 
    * @param dir a path which may or may not exist
    * 
-   * @return <tt>true</tt> if <tt>dir</tt> is an existing directory <em>or</em> the mode
+   * @return <code>true</code> if <code>dir</code> is an existing directory <em>or</em> the mode
    *        allows the directory to be created
    *        
-   * @throws IllegalArgumentException if <tt>dir</tt> is in fact an existing file
+   * @throws IllegalArgumentException if <code>dir</code> is in fact an existing file
    */
   public boolean acceptDir(File dir) throws IllegalArgumentException {
     switch (this) {

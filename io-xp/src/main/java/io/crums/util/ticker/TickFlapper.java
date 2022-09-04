@@ -8,7 +8,7 @@ import java.util.Objects;
 /**
  * Flaps a relay-ticker every so many ticks.
  * 
- * <h3>Single Thread Use</h3>
+ * <h2>Single Thread Use</h2>
  * <p><em>This class is not threadsafe!</em></p>
  */
 public class TickFlapper extends Ticker {
@@ -33,7 +33,7 @@ public class TickFlapper extends Ticker {
   }
 
   /**
-   * Counts down 1 on every tick. If the {@linkplain count-down} is zero
+   * Counts down 1 on every tick. If the {@linkplain #getCountdown() count-down} is zero
    * (or less if, against advice, is invoked concurrently), then the tick
    * is passed down to the relay (set at construction {@linkplain #TickFlapper(Ticker, int)})
    * and the count-down is reset.

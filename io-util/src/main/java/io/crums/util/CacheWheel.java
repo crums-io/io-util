@@ -14,7 +14,8 @@ import java.util.function.Function;
 /**
  * A cache for objects indexed by (zero-based) numbers designed to support a
  * very simple notion of <em>locality-of-reference</em>.
- * <h3>Main Idea</h3>
+ * 
+ * <h2>Main Idea</h2>
  * <p>
  * This cache specializes in maintaining caches of objects indexed thru a
  * <em>contiguous</em> range of numbers. It's only property of note is that
@@ -26,7 +27,7 @@ import java.util.function.Function;
  * So this cache mostly works efficiently, if its {@linkplain #get(int) get(index)}
  * method is called with consecutive numbers.
  * </p>
- * <h3>Motivation</h3>
+ * <h2>Motivation</h2>
  * <p>
  * In GUI applications that have a scrollable view of a very long list of items,
  * maintaining such a cache is helpful. The items themselves may come from a database,

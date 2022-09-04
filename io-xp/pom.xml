@@ -9,7 +9,7 @@
   
   <artifactId>io-xp</artifactId>
   
-  <name>I/O XP</name>
+  <name>${project.groupId}::${project.artifactId}</name>
   <description>
     Adds more niche capabilities to io-util. (Less commonly used constructs gathered here.)
   </description>

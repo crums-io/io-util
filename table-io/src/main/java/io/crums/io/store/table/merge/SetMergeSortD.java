@@ -13,12 +13,10 @@ import io.crums.io.store.table.TableSetD;
 import io.crums.io.store.table.del.DeleteCodec;
 
 /**
- * A merge sort operation on <tt>SortedTable</tt>s with support for dealing with
+ * A merge sort operation on <code>SortedTable</code>s with support for dealing with
  * deletion entries. Like it's parent class, this models a data structure with no duplicates.
  * 
  * @see DeleteCodec#isDeleted(java.nio.ByteBuffer)
- * 
- * @author Babak
  */
 public class SetMergeSortD extends SetMergeSort {
 
@@ -31,21 +29,22 @@ public class SetMergeSortD extends SetMergeSort {
   /**
    * Creates a new instance with the given delete codec and back-set. The delete codec
    * encapsulates the protocol for delete overrides. The back-set determines whether or not
-   * any given delete entry in this merge should be preserved in the <tt>target</tt> of the
+   * any given delete entry in this merge should be preserved in the <code>target</code> of the
    * merge.
-   * <p/>
+   * <p>
    * The number of rows in each source
    * table's search buffer defaults to {@linkplain BaseMergeSort#DEFAULT_ROWS_PER_SEARCH_BUFFER
    * DEFAULT_ROWS_PER_SEARCH_BUFFER}.
+   * </p>
    * 
    * @param sources
    *        the source tables ordered in increasing order of precedence. Each table contains
    *        unique rows (no 2 rows in a given table compare to 0 using the tables' row comparator).
    *        Results are very much undefined, o.w.
    * @param deleteCodec
-   *        non-<tt>null</tt> delete codec
+   *        non-<code>null</code> delete codec
    * @param backSet
-   *        optional back-set (may be <tt>null</tt>). Deletion entries in are checked against
+   *        optional back-set (may be <code>null</code>). Deletion entries in are checked against
    *        this back set in order to determine whether a given delete entry should purged
    *        (skipped) during the merge: if a given deletion entry overrides an entry in the
    *        back-set, then the deletion entry is preserved in the merge. Will typically be an
@@ -63,7 +62,7 @@ public class SetMergeSortD extends SetMergeSort {
   /**
    * Creates a new instance with the given delete codec and back-set. The delete codec
    * encapsulates the protocol for delete overrides. The back-set determines whether or not
-   * any given delete entry in this merge should be preserved in the <tt>target</tt> of the
+   * any given delete entry in this merge should be preserved in the <code>target</code> of the
    * merge.
    * 
    * @param sources
@@ -71,9 +70,9 @@ public class SetMergeSortD extends SetMergeSort {
    *        unique rows (no 2 rows in a given table compare to 0 using the tables' row comparator).
    *        Results are very much undefined, o.w.
    * @param deleteCodec
-   *        non-<tt>null</tt> delete codec
+   *        non-<code>null</code> delete codec
    * @param backSet
-   *        optional back-set (may be <tt>null</tt>). Deletion entries are checked against
+   *        optional back-set (may be <code>null</code>). Deletion entries are checked against
    *        this back set in order to determine whether a given delete entry should purged
    *        (skipped) during the merge: if a given deletion entry overrides an entry in the
    *        back-set, then the deletion entry is preserved in the merge. Will typically be an

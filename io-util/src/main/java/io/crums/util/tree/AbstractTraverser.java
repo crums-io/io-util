@@ -19,24 +19,26 @@ import io.crums.util.CollectionUtils;
  * implements an Euler traversal over the tree structure (generalized
  * for tree nodes with arbitrary number of children). As it traverses
  * the tree, an instance fires pre-order and post-order events along the way.
- * <p/>
+ * <p>
  * The tree structure does not have to be defined by the parametric
- * type <tt>&lt;T&gt;</tt> itself (although it typically is); rather,
+ * type <code>&lt;T&gt;</code> itself (although it typically is); rather,
  * it is the implementation (a subclass of this class) that decides
  * the structure. This is done by implementing the following abstract
  * methods:
+ * </p>
  * <ul>
  * <li>{@link #hasChildren(Object)} hasChildren(T node)</li>
  * <li>{@link #getChildren(Object) getChildren(T node)}</li>
  * </ul>
+ * <p>
  * <small>
  * (Note we could had collapsed all the requirements into the single
- * method <tt>getChildren(T node)</tt>, but then would have had to
- * specify whether return value can be <tt>null</tt>, zero-length, etc.
+ * method <code>getChildren(T node)</code>, but then would have had to
+ * specify whether return value can be <code>null</code>, zero-length, etc.
  * So hopefully this is clearer.)
  * </small>
- * <p/>
- * <h3>Thread safety</h3>
+ * </p>
+ * <h2>Thread safety</h2>
  * <p>
  * <em>This class is not safe under concurrent access.</em> We'd have
  * to make the fields volatile for that to work.</p>
@@ -46,8 +48,7 @@ import io.crums.util.CollectionUtils;
  * </i></small></p>
  *
  * @see TraverseListener
- * @see Search:
- *      <a href="http://www.google.com/search?q=euler+traversal">Euler
+ * @see <a href="http://www.google.com/search?q=euler+traversal">Euler
  *      Traversal</a>
  *
  */
@@ -62,7 +63,7 @@ public abstract class AbstractTraverser<T> implements Runnable {
   
   
   /**
-   * Creates a new instance with the given <tt>root</tt> node.
+   * Creates a new instance with the given <code>root</code> node.
    */
   protected AbstractTraverser(T root) {
       Objects.requireNonNull(root, "null root");
@@ -73,14 +74,14 @@ public abstract class AbstractTraverser<T> implements Runnable {
 
   
   /**
-   * Sets the listener for the traversal. May be <tt>null</tt>.
+   * Sets the listener for the traversal. May be <code>null</code>.
    */
   public void setListener(TraverseListener<T> listener) {
       this.listener = listener;
   }
   
   /**
-   * Returns the listener set for traversal. May be <tt>null</tt>.
+   * Returns the listener set for traversal. May be <code>null</code>.
    */
   public TraverseListener<T> getListener() {
       return listener;
@@ -108,7 +109,7 @@ public abstract class AbstractTraverser<T> implements Runnable {
    * Traverses the tree and visits the tree nodes in pre-order.
    * This is done by setting
    * the {@linkplain #setListener(TraverseListener) listener} to be a
-   * pre-order adapter on the specified <tt>visitor</tt>.
+   * pre-order adapter on the specified <code>visitor</code>.
    * 
    * @throws IllegalStateException
    *         if the tree has already been traversed
@@ -130,7 +131,7 @@ public abstract class AbstractTraverser<T> implements Runnable {
    * Traverses the tree and visits the tree nodes in post-order.
    * This is done by setting
    * the {@linkplain #setListener(TraverseListener) listener} to be a
-   * post-order adapter on the specified <tt>visitor</tt>.
+   * post-order adapter on the specified <code>visitor</code>.
    * 
    * @throws IllegalStateException
    *         if the tree has already been traversed
@@ -148,12 +149,13 @@ public abstract class AbstractTraverser<T> implements Runnable {
   }
   
   /**
-   * Performs the traversal over the tree structure. Pre- and post-order
+   * <p>Performs the traversal over the tree structure. Pre- and post-order
    * events are fired to the {@linkplain #setListener(TraverseListener)
    * listener}, if any.
-   * <p/>
+   * </p><p>
    * <em>This method may only be invoked once. Otherwise, an exception is
    * thrown.</em>
+   * </p>
    * 
    * @throws IllegalStateException
    *         if the tree has already been traversed
@@ -193,8 +195,8 @@ public abstract class AbstractTraverser<T> implements Runnable {
   }
   
   /**
-   * Determines whether the given <tt>node</tt> has child nodes. Note, it's
-   * okay if an implementation returns <tt>true</tt> for a given <tt>node</tt>
+   * Determines whether the given <code>node</code> has child nodes. Note, it's
+   * okay if an implementation returns <code>true</code> for a given <code>node</code>
    * and returns an empty array on invoking {@linkplain #getChildren(Object)
    * getChildren(node)}. I.e. a subclass may treat the semantics of this
    * method as if it were named <em>canHaveChildren</em>.
@@ -202,11 +204,11 @@ public abstract class AbstractTraverser<T> implements Runnable {
   protected abstract boolean hasChildren(T node);
   
   /**
-   * Returns the child nodes for the specified <tt>node</tt>.
+   * Returns the child nodes for the specified <code>node</code>.
    * This method is invoked only if {@linkplain #hasChildren(Object)
-   * hasChildren(node)} returns <tt>true</tt>.
+   * hasChildren(node)} returns <code>true</code>.
    * 
-   * @return an array of child nodes, possibly empty; never <tt>null</tt>.
+   * @return an array of child nodes, possibly empty; never <code>null</code>.
    */
   protected abstract T[] getChildren(T node);
 

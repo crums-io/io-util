@@ -15,7 +15,7 @@ import io.crums.util.Strings;
  * Convention for <em>switch</em> options on the command line. An option of the form
  * {@code --Myopt} is also understood in short form {@code -M}.
  * 
- * <h3>Design Note</h3>
+ * <h2>Design Note</h2>
  * <p>
  * In the convention I'm adopting, argument order does not matter. Command line
  * options that take arguments are not dashed; instead they're spec'ed out as a

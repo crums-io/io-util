@@ -14,7 +14,6 @@ import io.crums.util.ticker.Ticker;
  * An experimental fuzzy controller for throttling.
  * 
  * @see FuzzySpeed
- * @author Babak
  */
 public class FuzzyThrottler {
   
@@ -22,7 +21,7 @@ public class FuzzyThrottler {
   
   private final ThrottledTicker ticker = new ThrottledTicker();
   /**
-   * This <tt>speed</tt> object represents a live, qualitative measurement of
+   * This <code>speed</code> object represents a live, qualitative measurement of
    * the activity that must be throttled.
    */
   protected final FuzzySpeed speed;

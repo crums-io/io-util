@@ -48,7 +48,7 @@ public class DirectionalMergeSource extends PrecedenceMergeSource {
 
   /**
    * Instance comparison is reversed if {@linkplain #getDirection() direction}
-   * is <tt>REVERSE</tt>. Note, however, the effect of {@linkplain #precedence()}
+   * is <code>REVERSE</code>. Note, however, the effect of {@linkplain #precedence()}
    * on tie-breaker comparisons is <em>not</em> reversed.
    */
   @Override
@@ -60,7 +60,7 @@ public class DirectionalMergeSource extends PrecedenceMergeSource {
 
   /**
    * Row comparison is reversed if {@linkplain #getDirection() direction}
-   * is <tt>REVERSE</tt>.
+   * is <code>REVERSE</code>.
    */
   @Override
   public int compareRowWithOther(ByteBuffer otherRow) {
@@ -70,9 +70,9 @@ public class DirectionalMergeSource extends PrecedenceMergeSource {
   /**
    * The semantics of {@linkplain BaseMergeSource#advanceRow()} and
    * {@linkplain BaseMergeSource#rewindRow()} are reversed iff the
-   * {@linkplain #getDirection() direction} is <tt>REVERSE</tt>.
+   * {@linkplain #getDirection() direction} is <code>REVERSE</code>.
    * 
-   * @return <tt>direction == FORWARD ? super.advanceRow() : super.rewindRow()</tt>
+   * @return <code>direction == FORWARD ? super.advanceRow() : super.rewindRow()</code>
    */
   @Override
   public boolean advanceRow() throws IOException {
@@ -83,9 +83,9 @@ public class DirectionalMergeSource extends PrecedenceMergeSource {
   /**
    * The semantics of {@linkplain BaseMergeSource#advanceRow()} and
    * {@linkplain BaseMergeSource#rewindRow()} are reversed iff the
-   * {@linkplain #getDirection() direction} is <tt>REVERSE</tt>.
+   * {@linkplain #getDirection() direction} is <code>REVERSE</code>.
    * 
-   * @return <tt>direction == FORWARD ? super.rewindRow() : super.advanceRow()</tt>
+   * @return <code>direction == FORWARD ? super.rewindRow() : super.advanceRow()</code>
    */
   @Override
   public boolean rewindRow() throws IOException {
@@ -94,22 +94,23 @@ public class DirectionalMergeSource extends PrecedenceMergeSource {
 
   
   /**
-   * Sets the current row to one matching the given <tt>key</tt> row, if found;
+   * Sets the current row to one matching the given <code>key</code> row, if found;
    * otherwise the current row is set to one immediately following the given
    * key, where <em>following</em> means
    * <ul>
-   * <li>the smallest row that compares greater than <tt>key</tt> if the
-   * {@linkplain #getDirection() direction} is <tt>FORWARD</tt>, or</li>
-   * <li>the greatest row that compares less than <tt>key</tt> if the
-   * {@linkplain #getDirection() direction} is <tt>REVERSE</tt>.</li>
+   * <li>the smallest row that compares greater than <code>key</code> if the
+   * {@linkplain #getDirection() direction} is <code>FORWARD</code>, or</li>
+   * <li>the greatest row that compares less than <code>key</code> if the
+   * {@linkplain #getDirection() direction} is <code>REVERSE</code>.</li>
    * </ul>
-   * If <tt>key</tt> is beyond the table range in either direction, then the
+   * If <code>key</code> is beyond the table range in either direction, then the
    * contents of the current {@linkplain #row() row} will be undefined, and
-   * the current {@linkplain #rowNumber() row number} will be <tt>-1</tt> or
+   * the current {@linkplain #rowNumber() row number} will be <code>-1</code> or
    * {@linkplain #rowCount() rowCount()}. I.e. the instance will be {@linkplain #finished()}.
-   * <p/>
+   * <p>
    * The return value indicates whether the contents of the current row is well
    * defined.
+   * </p>
    * 
    * @param key
    *        the look up key

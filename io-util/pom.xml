@@ -9,13 +9,12 @@
 	  <version>${revision}</version>
 	</parent>
 	
-	
-	
 	<artifactId>io-util</artifactId>
 	
-	<name>I/O Utils</name>
+	
+  <name>${project.groupId}::${project.artifactId}</name>
 	<description>
-	  I/O and other utilites. The most common constructs are gathered here.
+	  I/O and other utilites. This library's more common constructs are gathered here.
 	</description>
 
 

@@ -98,17 +98,17 @@ public class Strings {
    * based on ending) <em>if and only if</em> the given {@code count} is not
    * {@code 1}. (In English, zero of something is plural.)
    * 
-   * <h3>Ending Patterns</h3>
+   * <h4>Ending Patterns</h4>
    * <p>The default pluralizaton behavior is to simply append 's' to the end of the
    * input argument {@code single}. However the following endings are specially treated
    * (as per English rules-of-thumb):
+   * </p>
    * <ol>
    * <li>{@code ch}</li>
    * <li>{@code sh}</li>
    * <li>{@code s}</li>
    * <li>{@code y}</li>
-   * <ol>
-   * </p>
+   * </ol>
    * 
    * @param single  the word in singular form
    * @param count   &ge; 0. If {@code 1}, then {@code single} is returned
@@ -324,10 +324,11 @@ public class Strings {
    * Java class or package name. The name is expected to be qualified with dots (<b>.</b>)
    * in the usual way, but it's not a requirement.
    * 
-   * <h2>Examples</h2>
-   * <p>
+   * <h4>Examples</h4>
+   * <p>A few example input strings with their result on invoking this method are listed below:</p>
    * <table>
-   * <th><tr><td>Input</td><td></td><td>Output</td></tr></th>
+   * <caption>Example Inputs/Outputs</caption>
+   * <tr><th>In</th><th></th><th>Out</th></tr>
    * <tr><td>{@code abc.def.Xyz}</td><td></td><td>{@code true}</td></tr>
    * <tr><td>{@code abc.def8.X_yz}</td><td></td><td>{@code true}</td></tr>
    * <tr><td>{@code a.b}</td><td></td><td>{@code true}</td></tr>
@@ -340,8 +341,9 @@ public class Strings {
    * <tr><td>{@code .def.Xyz}</td><td></td><td>{@code false}</td></tr>
    * <tr><td>{@code abc..Xyz}</td><td></td><td>{@code false}</td></tr>
    * </table>
-   * </p>
    * 
+   * @param name    the Java entity name
+   * @return {@code true} if it looks okay to be a Java type name
    */
   public static boolean isPermissableJavaName(String name) {
     if (name == null || name.isEmpty())

@@ -6,7 +6,7 @@ package io.crums.io.store.table.del;
 import java.nio.ByteBuffer;
 
 /**
- * Defines a reserved-bit <tt>DeleteCodec</tt>. Reads and writes only that bit.
+ * Defines a reserved-bit <code>DeleteCodec</code>. Reads and writes only that bit.
  * <p>
  * Actually, this works with any number of on-bits in the byte, but it was
  * designed for a single bit. (Why would you need more than 1 bit? No idea..
@@ -49,8 +49,8 @@ public class BitDeleteCodec extends DeleteCodec {
   
   /**
    * {@inheritDoc}
-   * <h3>Implementation</h3>
-   * <p>Returns <tt>true</tt> if on reading, the bit flag is on.</p>
+   * <h4>Implementation</h4>
+   * <p>Returns <code>true</code> if on reading, the bit flag is on.</p>
    */
   @Override
   public boolean isDeleted(ByteBuffer row) {
@@ -60,7 +60,7 @@ public class BitDeleteCodec extends DeleteCodec {
   
   /**
    * {@inheritDoc}
-   * <h3>Implementation</h3>
+   * <h4>Implementation</h4>
    * <p>Writes the bit flag without touching the rest.</p>
    */
   @Override

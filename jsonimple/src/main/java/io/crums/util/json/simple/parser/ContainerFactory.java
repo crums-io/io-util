@@ -12,7 +12,7 @@ import java.util.Map;
  * 
  * @see JSONParser#parse(java.io.Reader, ContainerFactory)
  * 
- * @author FangYidong<fangyidong@yahoo.com.cn>
+ * @author Fang Yidong
  */
 public interface ContainerFactory {
   /**

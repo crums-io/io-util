@@ -11,8 +11,6 @@ import java.nio.ByteBuffer;
 
 /**
  * A contiguous block of cells.
- * 
- * @author Babak
  */
 public class Block {
   
@@ -23,7 +21,7 @@ public class Block {
   protected final ByteBuffer[] cells;
   
   /**
-   * The backing buffer. It's capacity is <tt>cells[0].capacity() * cells.length</tt>.
+   * The backing buffer. It's capacity is <code>cells[0].capacity() * cells.length</code>.
    */
   private final ByteBuffer buffer;
   
@@ -39,11 +37,11 @@ public class Block {
   
   
   /**
-   * Creates a new instance with the given <tt>block</tt> and <tt>cellByteWidth</tt>.
+   * Creates a new instance with the given <code>block</code> and <code>cellByteWidth</code>.
    * Nags if the block's capacity is not a multiple of the cell width.
    * 
    * @param readOnlyCells
-   *        if <tt>true</tt>, then the cells will be read-only. If the <tt>block</tt>
+   *        if <code>true</code>, then the cells will be read-only. If the <code>block</code>
    *        itself is read-only, then this parameter doesn't matter: the cells will
    *        be read-only, regardless.
    */
@@ -102,8 +100,8 @@ public class Block {
   }
   
   /**
-   * Tests whether this instance's cells are read-only. This method can return <tt>true</tt>
-   * even if {@linkplain #isReadOnly()} returns <tt>false</tt>.
+   * Tests whether this instance's cells are read-only. This method can return <code>true</code>
+   * even if {@linkplain #isReadOnly()} returns <code>false</code>.
    */
   public final boolean readOnlyCells() {
     return cells[0].isReadOnly();
@@ -123,7 +121,7 @@ public class Block {
    * of the capacities of its cells. Modifications in the returned buffer's content
    * are visible in the {@linkplain #cells() cells} and vice versa. The position and limit of
    * the returned buffer is independent of those of the cells.
-   * The returned buffer is read-only, if {@linkplain #isReadOnly()} returns <tt>true</tt>.
+   * The returned buffer is read-only, if {@linkplain #isReadOnly()} returns <code>true</code>.
    * Modifications to the buffer's position and limit are ignored by this class.
    * The contents of the returned buffer may be ordered differently than the order of
    * this instance's cells.
@@ -134,12 +132,12 @@ public class Block {
   
   /**
    * Returns a new copy of the cells array. Each of the cells is a view
-   * on to the backing {@linkplain block}. Modifications in any individual element's content
+   * on to the backing {@linkplain Block#buffer()}. Modifications in any individual element's content
    * are visible in the backing {@linkplain #buffer()} and vice versa. The position and limit of
    * the returned cells (set to zero and capacity, resp.) are independent of any other buffer.
-   * The returned buffers are read-only, if {@linkplain #readOnlyCells()} returns <tt>true</tt>.
+   * The returned buffers are read-only, if {@linkplain #readOnlyCells()} returns <code>true</code>.
    * 
-   * @see #buffer();
+   * @see #buffer()
    */
   public final ByteBuffer[] cells() {
     return duplicate(cells);
@@ -147,14 +145,14 @@ public class Block {
   
   
   /**
-   * Returns a new view of the cell at the specified <tt>index</tt>. The returned
+   * Returns a new view of the cell at the specified <code>index</code>. The returned
    * cell is a view on to the backing buffer: modifications in the returned buffer's content
    * are visible in the backing {@linkplain #buffer()} and vice versa. The position and limit of
    * the returned cell (set to zero and capacity, resp.) are independent of any other buffer.
-   * The returned buffer is read-only, if {@linkplain #readOnlyCells()} returns <tt>true</tt>.
+   * The returned buffer is read-only, if {@linkplain #readOnlyCells()} returns <code>true</code>.
    * 
    * @throws IndexOutOfBoundsException
-   *         if <tt>index</tt> is out of range
+   *         if <code>index</code> is out of range
    */
   public ByteBuffer cell(int index) {
     return cells[index].duplicate();
@@ -162,8 +160,8 @@ public class Block {
   
   
   /**
-   * Copies the contents of the cell at the given <tt>index</tt> into the
-   * <tt>buffer</tt>. The position of the given buffer is advanced by the
+   * Copies the contents of the cell at the given <code>index</code> into the
+   * <code>buffer</code>. The position of the given buffer is advanced by the
    * {@linkplain #cellWidth() cell width}.
    * 
    * @throws BufferOverflowException

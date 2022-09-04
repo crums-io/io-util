@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 
 /**
- * A read-ahead <tt>RowIterator</tt>. The buffering here has nothing to do with
+ * A read-ahead <code>RowIterator</code>. The buffering here has nothing to do with
  * performance optimization: if anything, this implementation is <em>less</em>
  * efficient.
  * 
@@ -44,7 +44,7 @@ public class BufferedRowIterator extends FilterRowIterator {
    * a subsequent call to {@linkplain #next()}. So it's best not to modify the returned
    * buffer (if any).
    * 
-   * @return the next row, or <tt>null</tt>, if at the end of the sequence.
+   * @return the next row, or <code>null</code>, if at the end of the sequence.
    */
   public ByteBuffer peek() {
     return currentRow;

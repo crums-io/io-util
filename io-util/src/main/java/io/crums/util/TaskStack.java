@@ -4,6 +4,7 @@
 package io.crums.util;
 
 
+import java.lang.System.Logger.Level;
 import java.nio.channels.Channel;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,36 +12,13 @@ import java.util.List;
 import java.util.concurrent.locks.Lock;
 
 /**
+ * <p>
  * Utility for resource releasing.  Mostly, this has to do
  * with the fact that exception-safe code in Java ends up with a clutter
  * of try/finally clauses.  (Language envy: C++ shines here..)
- * <p/>
- * <h3>Example usage</h3>
- * <h4>Java 1.6-</h4>
- * <p/>
- * <pre>
- *      TaskStack closer = new TaskStack();
- *      try {
- *          Lock a = ..
- *          a.lock();
- *          closer.pushUnlock(a);
- *          Lock b = ..
- *          
- *          if (!b.tryLock())
- *              return;
- *           
- *          FileChannel file = openFile();
- *          closer.pushClose(file);
- *          
- *          // do some work
- *          ..
- *      } finally {
- *          closer.close();
- *      }
- * </pre>
- * <p/>
- * <h4>Java 1.7+</h4>
- * <p/>
+ * </p>
+ * <h2>Example usage</h2>
+ * <p></p>
  * <pre>
  *      try (TaskStack closer = new TaskStack()) {
  *          Lock a = ..
@@ -50,6 +28,8 @@ import java.util.concurrent.locks.Lock;
  *          
  *          if (!b.tryLock())
  *              return;
+ *          
+ *          closer.pushUnlock(b);
  *           
  *          FileChannel file = openFile();
  *          closer.pushClose(file);
@@ -58,9 +38,6 @@ import java.util.concurrent.locks.Lock;
  *          ..
  *      }
  * </pre>
- * 
- * 
- * @author Babak
  */
 public class TaskStack implements Channel {
   
@@ -68,26 +45,14 @@ public class TaskStack implements Channel {
   
   
   
-//  public TaskStack() {
-//    this.log = Logger.getLogger(getClass().getName());
-//  }
-//  
-//  /**
-//   * Creates an instance using the given <tt>user</tt> object's class to determine
-//   * the logger.
-//   * 
-//   * @param user the user object, or <tt>null</tt>
-//   */
-//  public TaskStack(Object user) {
-//    Class<?> logClass = user == null ? getClass() : user.getClass();
-//    this.log = user instanceof Logger ? (Logger) user : Logger.getLogger(logClass.getName());
-//  }
-//  
-//  public TaskStack(Logger log) {
-//    this.log = log == null ? Logger.getLogger(getClass().getName()) : log;
-//  }
   
-  
+  /**
+   * Pushes a {@code Runnable} onto the stack, to be run when the stack
+   * unwinds (closes).
+   * 
+   * @param task the task to be run on closing
+   * @return {@code this}
+   */
   public TaskStack pushRun(final Runnable task) {
     if (task == null)
       throw new IllegalArgumentException("null task");
@@ -103,6 +68,13 @@ public class TaskStack implements Channel {
   }
   
   
+  /**
+   * Pushes a {@code resource} onto the stack, to be closed when the stack
+   * unwinds (closes).
+   * 
+   * @param resource the resource to be closed on closing
+   * @return {@code this}
+   */
   public TaskStack pushClose(AutoCloseable resource) {
     if (resource == null)
       throw new IllegalArgumentException("null resource");
@@ -113,12 +85,30 @@ public class TaskStack implements Channel {
   }
   
   
+
+  /**
+   * Pushes one or more {@code resource}s onto the stack, to be closed when the stack
+   * unwinds (closes).
+   * 
+   * @param resource the resource[s] to be closed on closing
+   * @return {@code this}
+   */
   public TaskStack pushClose(AutoCloseable... resource) {
     for (AutoCloseable r : resource)
       pushClose(r);
     return this;
   }
   
+  
+  /**
+   * Pushes zero or more {@code resources} onto the stack, to be closed when the stack
+   * unwinds (closes).
+   * 
+   * @param resources bunch of resources (not null but may be empty) to be unlocked
+   *                  (in the reverse order of the iteration, since this is a stack)
+   *                  when the instance closes
+   * @return {@code this}
+   */
   public TaskStack pushClose(Iterable<? extends AutoCloseable> resources) {
     for (AutoCloseable r : resources)
       pushClose(r);
@@ -126,6 +116,12 @@ public class TaskStack implements Channel {
   }
   
   
+  /**
+   * Pushes a {@code lock} onto the stack, to be unlocked when the stack unwinds (closes).
+   * 
+   * @param lock its {@linkplain Lock#unlock()} method to called when the instance closes
+   * @return {@code this}
+   */
   public TaskStack pushUnlock(final Lock lock) {
     if (lock == null)
       throw new IllegalArgumentException("null lock");
@@ -141,10 +137,10 @@ public class TaskStack implements Channel {
   }
   
   /**
-   * Pops <tt>count</tt> many times and returns the result.
+   * Pops <code>count</code> many times and returns the result.
    * 
    * @param count only meaningful if &gt; 0
-   * @return
+   * @return the return value from the last {@linkplain #pop() pop}
    */
   public int pop(int count) {
     while (count-- > 1)
@@ -154,6 +150,7 @@ public class TaskStack implements Channel {
   
   /**
    * Pops the last pushed operation from the stack and executes (closes) it.
+   * Any error on encountered is simply logged and ignored.
    *  
    * @return the remaining number of operations on the stack, or -1 if the stack was empty
    */
@@ -186,13 +183,17 @@ public class TaskStack implements Channel {
    * @param x
    */
   protected void onCloseError(int removedIndex, AutoCloseable resource, Exception x) {
-    System.err.println(
-        "[ERROR] On closing resource[" + removedIndex + "] ("  + resource + "): "+ x.getMessage());
+    System.getLogger(TaskStack.class.getSimpleName()).log(
+        Level.ERROR,
+        "On closing resource[" + removedIndex + "] ("  + resource + "): "+ x.getMessage());
   }
 
 
   /**
-   * Unwinds the stack.
+   * Unwinds the stack, closing (or running, unlocking, etc.) every resource
+   * as it does. As if invoking {@code while (pop() > 0);} directly.
+   * 
+   * @see #pop()
    */
   @Override
   public void close() {
@@ -218,7 +219,7 @@ public class TaskStack implements Channel {
   
   /**
    * Clears the stack. If there are any operations on the stack, they are discarded (ignored).
-   * This comes handy when the <tt>TaskStack</tt> is a clean-up-on-failure type of construct.
+   * This comes handy when the <code>TaskStack</code> is a clean-up-on-failure type of construct.
    * For example,
    * <pre>
    * {@code

@@ -8,12 +8,10 @@ import java.nio.ByteBuffer;
 import java.util.Comparator;
 
 /**
- * A <tt>RowIterator</tt> with a precedence tag. This comes into play when
- * composing a <tt>RowIterator</tt> from multiple other ones: the higher
+ * A <code>RowIterator</code> with a precedence tag. This comes into play when
+ * composing a <code>RowIterator</code> from multiple other ones: the higher
  * precedence iterators <em>override</em> (overwrite) the lower precedence
  * ones if their next rows are equal (as defined by the comparator).
- * 
- * @author Babak
  */
 public class PrecedenceRowIterator extends BufferedRowIterator
     implements Comparable<PrecedenceRowIterator> {

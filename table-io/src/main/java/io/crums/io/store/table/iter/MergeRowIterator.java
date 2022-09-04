@@ -11,7 +11,7 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * A nexus view over multiple <tt>RowIterator</tt> instances.
+ * A nexus view over multiple <code>RowIterator</code> instances.
  * 
  * @author Babak
  */

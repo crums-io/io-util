@@ -16,7 +16,7 @@ import java.util.Objects;
  * specifying boundary conditions in a way that does not require padding for our use case.
  * 
  * 
- * <h3>Format</h3>
+ * <h2>Format</h2>
  * <p>
  * As usual the encoding consists of mapping a sequence of 8-bit bytes to a
  * sequence of 6-bit data. We have 43 of these 6-bit sequences, with the first
@@ -32,7 +32,7 @@ import java.util.Objects;
  * on the left in chunks of 6 (base 64). The initialization, then, consists of filling this
  * bit-queue with 2 zero bits (followed by 8 bits from the first byte).
  * </p>
- * <h3>One-to-One</h3>
+ * <h2>One-to-One</h2>
  * <p>
  * Implementation-wise, the first 2 bits <em>could</em> be ignored (i.e. set them to
  * zero even if the base64 character read does not.) However, we <b>require padding bits be zero</b>
@@ -42,25 +42,25 @@ import java.util.Objects;
  * <p>
  * Compiled here to inform possible adoption.
  * </p>
- * <h4>Pros</h4>
- * <p>
+ * <h2>Pros</h2>
+ * 
  * <ul>
  * <li><em>Compact</em>. Nearly 50% savings compared to hex.</li>
  * <li><em>URL friendly</em>. Does not need URL encoding.</li>
  * </ul>
- * </p>
- * <h4>Cons</h4>
- * <p>
+ * 
+ * <h2>Cons</h2>
+ * 
  * <ul>
  * <li><em>Broken Doubleclick Selection</em>. Doubleclicking selects the whole number
  * as one word if it's all alphanumeric; the '-' character is not alphanumeric, so
  * it breaks the selection.</li>
  * <li>Not widely known.</li>
  * </ul>
- * </p>
  * 
  * 
- * @see https://en.bitcoin.it/wiki/Base58Check_encoding
+ * 
+ * @see <a href="https://en.bitcoin.it/wiki/Base58Check_encoding">Base58Check encoding</a>
  */
 public class Base64_32 {
   

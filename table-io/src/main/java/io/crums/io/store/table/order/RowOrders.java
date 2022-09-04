@@ -9,14 +9,13 @@ import java.nio.ByteBuffer;
  * Utility for creating common {@linkplain RowOrder}s. Note the orderings
  * defined here do not consider a buffer's position: they see the
  * buffer in absolute positions.
- * <p/>
+ * <p>
  * This is not necessarily a good thing. The
- * natural (lexical) ordering of <tt>ByteBuffer</tt> for example, considers
+ * natural (lexical) ordering of <code>ByteBuffer</code> for example, considers
  * the ordering relative to the buffer's current position. On the plus side,
  * with such orderings, you don't at least need to worry a buffer's positional
  * state.
- * 
- * @author Babak
+ * </p>
  */
 public class RowOrders {
 
@@ -40,7 +39,7 @@ public class RowOrders {
   
   
   /**
-   * Returns 4 byte <em>int</em> order at byte <tt>offset</tt>.
+   * Returns 4 byte <em>int</em> order at byte <code>offset</code>.
    */
   public static RowOrder intOrderAtOffset(int offset) {
     return new RowOrderAtOffset(offset) {
@@ -64,7 +63,7 @@ public class RowOrders {
   
 
   /**
-   * Returns 8 byte <em>long</em> order at byte <tt>offset</tt>.
+   * Returns 8 byte <em>long</em> order at byte <code>offset</code>.
    */
   public static RowOrder longOrderAtOffset(int offset) {
     return new RowOrderAtOffset(offset) {
@@ -88,7 +87,7 @@ public class RowOrders {
   
 
   /**
-   * Returns 2 byte <em>short</em> order at byte <tt>offset</tt>.
+   * Returns 2 byte <em>short</em> order at byte <code>offset</code>.
    */
   public static RowOrder shortOrderAtOffset(int offset) {
     return new RowOrderAtOffset(offset) {

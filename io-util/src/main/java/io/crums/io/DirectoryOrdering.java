@@ -12,7 +12,7 @@ import java.util.Objects;
 /**
  * Represent 2 types of file orderings by differentiating ordinary files
  * from directories. The implementation is used to prioritize how
- * files or directories are visited first by a <tt>FileSystemTraverser</tt> instance.
+ * files or directories are visited first by a <code>FileSystemTraverser</code> instance.
  *
  * @see FileSystemTraverser#setSiblingOrder(Comparator)
  * @author Babak Farhang
@@ -78,9 +78,9 @@ public class DirectoryOrdering implements Comparator<File> {
    * Hook for subclass refinement of ordering. Invoked when the 2 files being
    * {@linkplain #compare(File, File) compared} are either both directories,
    * or both ordinary files.  The default implementation just uses the natural
-   * ordering of <tt>File</tt>s.
+   * ordering of <code>File</code>s.
    * 
-   * @return <tt>f1.</tt>{@link File#compareTo(File) compareTo}<tt>(f2)</tt>
+   * @return <code>f1.</code>{@link File#compareTo(File) compareTo}<code>(f2)</code>
    */
   protected int compareSameType(File f1, File f2) {
     return f1.compareTo(f2);

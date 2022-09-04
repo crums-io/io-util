@@ -14,7 +14,7 @@ import java.util.Objects;
 import java.util.RandomAccess;
 
 /**
- * List adapter for a <tt>Table</tt>.
+ * List adapter for a <code>Table</code>.
  */
 public class FilebackedList extends AbstractList<ByteBuffer> implements Channel, RandomAccess {
   
@@ -33,7 +33,7 @@ public class FilebackedList extends AbstractList<ByteBuffer> implements Channel,
    * Creates an instance with the given backing table.
    * 
    * @param table     the backing fixed-width table
-   * @param autoFlush if <tt>true</tt>, then autoflush is on
+   * @param autoFlush if <code>true</code>, then autoflush is on
    */
   public FilebackedList(Table table, boolean autoFlush) {
     this.table = Objects.requireNonNull(table, "table");
@@ -134,7 +134,7 @@ public class FilebackedList extends AbstractList<ByteBuffer> implements Channel,
    * 
    * @param file      file path to the backing table
    * @param rowSize   bytes per row
-   * @param autoFlush if <tt>true</tt>, then on every add forces a flush to the file system. If <tt>false</tt>,
+   * @param autoFlush if <code>true</code>, then on every add forces a flush to the file system. If <code>false</code>,
    *                  then the last add may be lost on abnormal shutdown.
    */
   public static FilebackedList createInstance(File file, int rowSize, boolean autoFlush) throws IOException {
@@ -162,7 +162,7 @@ public class FilebackedList extends AbstractList<ByteBuffer> implements Channel,
    * 
    * @param file      file path to the backing table
    * @param rowSize   bytes per row
-   * @param readOnly  if <tt>true</tt>, then the list is opened in read-only mode. (Obviously, the backing
+   * @param readOnly  if <code>true</code>, then the list is opened in read-only mode. (Obviously, the backing
    *                  table must already exist on the file system.)
    */
   public static FilebackedList createInstanceImpl(File file, int rowSize, boolean readOnly, boolean autoFlush) throws IOException {

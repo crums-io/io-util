@@ -24,13 +24,13 @@ public interface Serial {
 
   /**
    * Writes the {@linkplain #serialize() serial representation} of this instance
-   * to the given <tt>out</tt> buffer. The position of the buffer is advanced by
+   * to the given <code>out</code> buffer. The position of the buffer is advanced by
    * {@linkplain #serialSize()} bytes.
    * 
-   * @throws BufferUnderflowException if <tt>out</tt> doesn't have adequate remaining
+   * @throws BufferUnderflowException if <code>out</code> doesn't have adequate remaining
    *          bytes
    *          
-   * @return <tt>out</tt> (for invocation chaining)
+   * @return <code>out</code> (for invocation chaining)
    * 
    * @see #serialize()
    */

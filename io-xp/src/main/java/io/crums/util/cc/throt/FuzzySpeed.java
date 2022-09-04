@@ -4,10 +4,11 @@
 package io.crums.util.cc.throt;
 
 /**
+ * <p>
  * Fuzzy membership set abstraction for <em>speed state</em>. The return value of each member function (method)
  * represents the degree by which the speed is in that state. Valid return values for any method are
- * anything non-negative, although typically normalized return values in the range <tt>[0, 1]</tt> will be used.
- * <p/>
+ * anything non-negative, although typically normalized return values in the range <code>[0, 1]</code> will be used.
+ * </p><p>
  * Think of <em>speed</em> here as some metric that when too high must be throttled.
  * It needn't be time-based;
  * it may be resource-based: for example, the number of threads servicing requests. To implement a method,
@@ -16,9 +17,9 @@ package io.crums.util.cc.throt;
  * and return 0 if inapt, 1 if certainly apt, or any where in between for the gray areas. It really doesn't
  * matter if you only return one of say 3 or 4 values: it works surprisingly well with simple, crude
  * models. 
+ * </p>
  * 
  * @see #snapshot()
- * @author Babak
  */
 public abstract class FuzzySpeed {
   
@@ -50,12 +51,14 @@ public abstract class FuzzySpeed {
   
   
   /**
+   * <p>
    * Returns a fixed snapshot of the instance's state.
-   * <p/>
+   * </p><p>
    * Note this method synchronizes on the instance itself. The goal here is
    * that a subclass only ever mutate an instance's state while holding the
    * instance's monitor. That way, this method can truly guarantee a <em>snapshot</em>
    * of the speed state.
+   * </p>
    */
   public synchronized FuzzySpeed snapshot() {
     

@@ -12,15 +12,15 @@ import io.crums.io.store.NotSortedException;
 import io.crums.io.store.table.SortedTable;
 
 /**
- * A merge sort operation on <tt>SortedTable</tt>s. The <tt>SortedTable</tt>s may contain
+ * A merge sort operation on <code>SortedTable</code>s. The <code>SortedTable</code>s may contain
  * duplicate (or equally ranked) rows, in which case all duplicates will be preserved.
- * <p/>
- * <h4>FIXME</h4>
+ * 
+ * <h2>FIXME</h2>
+ * <p>
  * The dupe logic is broken. There are edge cases where some duplicate rows may be dropped.
  * (I haven't written the failing test or encountered the bug, but can reason how it can
  * happen.)
- * 
- * @author Babak
+ * </p>
  */
 public class ListMergeSort extends BaseMergeSort<ListMergeSource> {
   

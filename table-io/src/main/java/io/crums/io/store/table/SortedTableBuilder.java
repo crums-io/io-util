@@ -24,8 +24,7 @@ import io.crums.io.store.table.order.RowOrder;
 
 
 /**
- * 
- * @author Babak
+ * Builds sorted tables.
  */
 public class SortedTableBuilder {
 
@@ -251,14 +250,14 @@ public class SortedTableBuilder {
   
   
   /**
-   * Flushes the sorted contents to the given <tt>file</tt>.
+   * Flushes the sorted contents to the given <code>file</code>.
    * 
    * @param file
    *        typically a {@linkplain FileChannel}
    * @param clear
-   *        if <tt>true</tt>, then the {@linkplain #clear()} is called on return.
+   *        if <code>true</code>, then the {@linkplain #clear()} is called on return.
    *        The reason why the parameter is offered is it's marginally more efficient
-   *        to pass <tt>true</tt> than to pass <tt>false</tt> and followed by <tt>clear()</tt>.
+   *        to pass <code>true</code> than to pass <code>false</code> and followed by <code>clear()</code>.
    */
   public void flush(GatheringByteChannel file, boolean clear) throws IOException {
     if (file == null)

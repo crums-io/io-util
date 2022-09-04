@@ -13,7 +13,7 @@ import java.util.RandomAccess;
 /**
  * An object caching list for layering on top of expensive, "item-on-demand" lists.
  * 
- * <h3>Motivation</h3>
+ * <h2>Motivation</h2>
  * <p>
  * We often use lazily loaded views of database objects as ordered (sorted) lists. These can be
  * useful abstractions, particularly when the list won't otherwise fit in memory. For such lists, it
@@ -22,9 +22,8 @@ import java.util.RandomAccess;
  * by index, you don't incur another I/O penalty.
  * </p>
  * 
- * TODO: move me to io-utils project
- * 
- * @see #cach(List, int, double)
+ * @see #cache(List)
+ * @see #cache(List, int, double)
  */
 public class CachingList<T> extends AbstractList<T> implements RandomAccess {
   
@@ -46,7 +45,7 @@ public class CachingList<T> extends AbstractList<T> implements RandomAccess {
   
   
   /**
-   * Returns a caching instance if the <tt>source</tt> is big enough.
+   * Returns a caching instance if the <code>source</code> is big enough.
    * 
    * @param <T>
    * @param source the underlying list
@@ -60,18 +59,18 @@ public class CachingList<T> extends AbstractList<T> implements RandomAccess {
   }
   
   /**
-   * Returns a caching instance if the <tt>source</tt> is big enough. If the source is empty it is
-   * returned as is. If <tt>source</tt> has only one element, then that element is pre-fetched and a
+   * Returns a caching instance if the <code>source</code> is big enough. If the source is empty it is
+   * returned as is. If <code>source</code> has only one element, then that element is pre-fetched and a
    * read-only singleton list is returned. Otherwise, an instance of this class is constructed and
    * returned.
    * 
    * @param <T>
    * @param source the underlying list
-   * @param maxCacheSize the maximum cache size &ge; 2 (the actual cache size might be lowered if <tt>source.size()</tt>
+   * @param maxCacheSize the maximum cache size &ge; 2 (the actual cache size might be lowered if <code>source.size()</code>
    *    is less than this)
    * @param tailRefreshFactor &gt; 0 and &lt; 1
    * 
-   * @return a view of the <tt>source</tt> list
+   * @return a view of the <code>source</code> list
    */
   public static <T> List<T> cache(List<T> source, int maxCacheSize, double tailRefreshFactor) {
     Objects.requireNonNull(source, "null source");
@@ -127,7 +126,7 @@ public class CachingList<T> extends AbstractList<T> implements RandomAccess {
    * 
    * @param source the underlying list
    * @param cacheSize the maximum number of items cached (&gt; 2)
-   * @param tailRefreshLength &ge; 0 and &lt; <tt>cacheSize</tt>
+   * @param tailRefreshLength &ge; 0 and &lt; <code>cacheSize</code>
    */
   public CachingList(List<T> source, int cacheSize, int tailRefreshLength) {
     this.source = Objects.requireNonNull(source, "null source");

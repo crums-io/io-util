@@ -11,9 +11,7 @@ import java.util.Iterator;
 import java.util.NavigableSet;
 
 /**
- * A <tt>RowIterator</tt> implementation over an in-memory sorted set of buffers.
- * 
- * @author Babak
+ * A <code>RowIterator</code> implementation over an in-memory sorted set of buffers.
  */
 public class SortedBufferIterator extends RowIterator {
   
@@ -22,12 +20,12 @@ public class SortedBufferIterator extends RowIterator {
   private final int rowWidth;
   
   /**
-   * Creates an instance using the given set of <tt>buffers</tt>, with the given <tt>direction</tt>
-   * and specified <tt>rowWidth</tt>.
+   * Creates an instance using the given set of <code>buffers</code>, with the given <code>direction</code>
+   * and specified <code>rowWidth</code>.
    * 
    * @param buffers
-   *        the ordered set of buffers. The members of this set are expected to be <tt>ByteBuffer</tt>s
-   *        with <tt>rowWidth</tt> remaining bytes. The constructor does not validate this condition.
+   *        the ordered set of buffers. The members of this set are expected to be <code>ByteBuffer</code>s
+   *        with <code>rowWidth</code> remaining bytes. The constructor does not validate this condition.
    * @param direction
    *        {@linkplain Direction#FORWARD FORWARD} or {@linkplain Direction#REVERSE REVERSE}
    * @param rowWidth

@@ -16,9 +16,9 @@ import java.util.Objects;
 import io.crums.util.json.simple.parser.JSONParser;
 
 /**
- * A JSON object. <strike>Key value pairs are unordered.</strike> JSONObject supports java.util.Map interface.
+ * A JSON object. JSONObject supports java.util.Map interface.
  * 
- * <h3>Babak's Changes</h3>
+ * <h2>Changes</h2>
  * <p>
  * Key/value pairs are ordered in insertion order.
  * This uses a swappable {@linkplain Map} implementation. The default is {@linkplain LinkedHashMap},
@@ -26,7 +26,7 @@ import io.crums.util.json.simple.parser.JSONParser;
  * (that is {@linkplain JSONParser}) the library uses the faster {@code HashMap} implementation. 
  * </p>
  * 
- * @author FangYidong<fangyidong@yahoo.com.cn>
+ * @author Fang Yidong
  * 
  * @see #newFastInstance() {@code JSONObject.newFastInstance()} &nbsp; for old-style implementation
  */
@@ -83,7 +83,7 @@ public class JSONObject extends DelegateMap<Object, Object> implements JSONAware
      * Encode a map into JSON text and write it to out.
      * If this map is also a JSONAware or JSONStreamAware, JSONAware or JSONStreamAware specific behaviours will be ignored at this top level.
      * 
-     * @see org.json.simple.JSONValue#writeJSONString(Object, Writer)
+     * @see JSONValue#writeJSONString(Object, Writer)
      * 
      * @param map
      * @param out
@@ -126,7 +126,7 @@ public class JSONObject extends DelegateMap<Object, Object> implements JSONAware
    * Convert a map to JSON text. The result is a JSON object. 
    * If this map is also a JSONAware, JSONAware specific behaviours will be omitted at this top level.
    * 
-   * @see org.json.simple.JSONValue#toJSONString(Object)
+   * @see JSONValue#toJSONString(Object)
    * 
    * @param map
    * @return JSON text, or "null" if map is null.
@@ -184,10 +184,8 @@ public class JSONObject extends DelegateMap<Object, Object> implements JSONAware
    * Escape quotes, \, /, \r, \n, \b, \f, \t and other control characters (U+0000 through U+001F).
    * It's the same as JSONValue.escape() only for compatibility here.
    * 
-   * @see org.json.simple.JSONValue#escape(String)
+   * @see JSONValue#escape(String)
    * 
-   * @param s
-   * @return
    */
   public static String escape(String s){
     return JSONValue.escape(s);

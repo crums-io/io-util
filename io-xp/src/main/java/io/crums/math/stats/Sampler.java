@@ -17,7 +17,7 @@ public abstract class Sampler {
   }
   
   /**
-   * Observes the given sample <tt>value</tt>.
+   * Observes the given sample <code>value</code>.
    */
   public abstract void observe(double value);
   

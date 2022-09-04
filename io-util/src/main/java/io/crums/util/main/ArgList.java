@@ -63,7 +63,7 @@ public class ArgList {
   
   /**
    * Copy constructor. The state of the new instance is initialized
-   * to the state of the <tt>copy</tt> but is henceforth independent.
+   * to the state of the <code>copy</code> but is henceforth independent.
    * 
    * @param copy
    */
@@ -331,11 +331,11 @@ public class ArgList {
   
   
   /**
-   * Removes and returns the value in the next <tt>name=<em>value</em></tt> pair,
-   * or <tt>null</tt> if the pattern does not occur. There may be multiple of these
+   * Removes and returns the value in the next <code>name=<em>value</em></code> pair,
+   * or <code>null</code> if the pattern does not occur. There may be multiple of these
    * for the same name. This method consumes the first one.
    * 
-   * @param name the name in the <tt>name=<em>value</em></tt> pair
+   * @param name the name in the <code>name=<em>value</em></code> pair
    */
   public String removeValue(String name) {
     String arg = popOrGetNextMatch(s -> s.startsWith(name + EQ), true);
@@ -415,9 +415,9 @@ public class ArgList {
   
   
   /**
-   * Removes the arguments matching the <tt>condition</tt>, collects and returns them.
+   * Removes the arguments matching the <code>condition</code>, collects and returns them.
    * If on evaluating a condition it throws an exception, the evaluation counts
-   * as <tt>false</tt>.
+   * as <code>false</code>.
    */
   public List<String> removeMatched(Predicate<String> condition) {
     return popOrGetMatches(s -> condition.test(s), true);

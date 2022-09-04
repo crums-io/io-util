@@ -27,7 +27,7 @@ public class Progress {
    * Returns an instance that ticks to std out the specified number of ticks till completion.
    * 
    * @param tickSymbol the symbol printed to std out per related progress tick
-   * @param relayedTicks the number of {@linkplain tickSymbol}s to print to completion
+   * @param relayedTicks the number of {@code tickSymbol}s to print to completion
    * @param expectedTicks expected number of actual ticks to completion
    */
   public static Ticker newStdOut(String tickSymbol, int relayedTicks, long expectedTicks) {

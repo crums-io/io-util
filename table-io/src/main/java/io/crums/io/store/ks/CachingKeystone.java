@@ -10,9 +10,7 @@ import io.crums.io.IoStateException;
 
 
 /**
- * Caching facade over a <tt>Keystone</tt> implementation.
- * 
- * @author Babak
+ * Caching facade over a <code>Keystone</code> implementation.
  */
 public class CachingKeystone extends Keystone {
 
@@ -22,7 +20,7 @@ public class CachingKeystone extends Keystone {
 
 
   /**
-   * Creates a new instance with the given <tt>base</tt> instance.
+   * Creates a new instance with the given <code>base</code> instance.
    */
   public CachingKeystone(Keystone base) throws IOException {
     if (base == null)

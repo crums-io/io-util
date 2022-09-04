@@ -6,9 +6,7 @@ package io.crums.io.store.ks;
 import java.io.IOException;
 
 /**
- * An immutable keystone. The mutator methods throw <tt>UnsupportedOperationException</tt>.
- * 
- * @author Babak
+ * An immutable keystone. The mutator methods throw <code>UnsupportedOperationException</code>.
  */
 public final class FixedKeystone extends Keystone {
   

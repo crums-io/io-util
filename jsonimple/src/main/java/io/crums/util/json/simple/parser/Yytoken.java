@@ -4,7 +4,7 @@
 package io.crums.util.json.simple.parser;
 
 /**
- * @author FangYidong<fangyidong@yahoo.com.cn>
+ * @author Fang Yidong
  */
 class Yytoken {
   public static final int TYPE_VALUE=0;//JSON primitive value: string,number,boolean,null

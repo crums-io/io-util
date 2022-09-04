@@ -15,7 +15,7 @@ import io.crums.io.store.table.TableSet;
  * stipulate ahead of time how a deleted row is encoded (for example, by using a special byte in the row): there
  * should be many occasions where a certain value in a row would naturally represent a non-entry as a deleted entry.
  * 
- * <h3>Equality semantics</h3>
+ * <h2>Equality semantics</h2>
  * <p>
  * Subclasses should override {@linkplain #hashCode()} and {@linkplain #equals(Object)}. Some classes
  * check this as a sanity check. (Most cases it's the same instance, but it's certainly conceivable in
@@ -27,12 +27,12 @@ import io.crums.io.store.table.TableSet;
 public abstract class DeleteCodec {
   
   /**
-   * Tests whether the given <tt>row</tt> encodes the deletion of the row.
+   * Tests whether the given <code>row</code> encodes the deletion of the row.
    */
   public abstract boolean isDeleted(ByteBuffer row);
   
   /**
-   * Encodes a deletion marker in the given <tt>row</tt>. An implementation must be careful not to modify the
+   * Encodes a deletion marker in the given <code>row</code>. An implementation must be careful not to modify the
    * <em>key</em> part[s] of the row. Put another way, the modification must not affect the rank of a row
    * with respect to the table's row order.
    */
