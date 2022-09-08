@@ -8,34 +8,34 @@ A small set of Java utility modules for some general / specific tasks:
 3. [io-xp](./io-xp/README.md) - Less used stuff. Includes a fuzzy controller.
 4. [table-io](./table-io/README.md) - Simple, fast, fail-safe, fixed-width, external tables (on disk).
 
-
-
-  
+(To use these as a maven dependency, use the artifact coordinates listed in the links above.)
 
 ## Build (install)
 
-This is a standard maven build. To use the library in your own project (include it as a dependency
-in your project's pom file), follow these steps.
+This is a standard maven build.
 
 ### Prerequisites
 
-* JDK 17. Should work with earlier JDKs.. edit the POM file
+* JDK 16+
 * Maven 3.x
 * Internet connection (possible dependency downloads by maven)
 
 ### Building & Installing
 
-Standard maven build. Change to the io-util project directory and invoke maven..
+Clone this repo and then invoke
 
->`$ mvn clean install`
+```
+$ mvn clean install -DskipTests
+```
 
+Note running the tests requires a local install of this small [library](https://github.com/gnahraf/junit-io). 
+(This will be fixed in the next version.) After running the tests you'll find a `target/test-outputs` directory containing the side effects of the tests.
 
-When maven finishes you'll find a `target/test-artifacts` directory containing the side effects of the tests.
+You'll want to profile performance. To get a rudimentary idea for stuff like external merges, include the `perf_test` switch (takes about 2 minutes):
 
-You'll want to profile performance. To get a rudimentary idea for stuff like external merges, include the perf_test switch (takes about 2 minutes):
-
->`$ mvn clean install -Dperf_test=true`
-
+```
+$ mvn clean install -Dperf_test=true`
+```
 
 ## JPMS Ready
 
@@ -44,6 +44,8 @@ Its only dependency is the default module `java.base`.
 
 
 ## Milestones
+
+Sept. 6, 2022: First version pushed to Maven Central
 
 Feb. 11, 2021: Released under LGPL.
 

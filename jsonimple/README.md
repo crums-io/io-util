@@ -5,6 +5,19 @@ A knock off of the [json-simple](https://github.com/fangyidong/json-simple) pars
 Like its parent, it aims to be simple and lightweight (no external dependencies).
 Another aim is to simplify migrating code from the parent to this one.
 
+## Maven
+
+To use this module add this dependency in your POM file:
+
+
+```
+  <dependency>
+    <groupId>io.crums</groupId>
+    <artifactId>jsonimple</artifactId>
+    <version>1.0.0</version>
+  </dependency>
+```
+
 ## API Compatibility With simple-json
 
 The base API for stuff like `JSONObject`, `JSONArray` has not changed. For most uses of the

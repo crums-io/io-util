@@ -3,6 +3,19 @@ io-util
 
 Common utility classes, some dealing with I/O.
 
+## Maven
+
+To use this module add this dependency in your POM file:
+
+
+```
+  <dependency>
+    <groupId>io.crums</groupId>
+    <artifactId>io-util</artifactId>
+    <version>1.0.0</version>
+  </dependency>
+```
+
 ## Notable Mentions
 
 Most of the utilities and types defined in this module are actually a bit specialized.
