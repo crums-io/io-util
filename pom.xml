@@ -64,7 +64,12 @@
 
 
 	<properties>
-    <revision>1.0.0</revision>
+	  <!-- NOTE: centralized revision property doesn't jive well with
+	             stable submodules.
+	             Stable submodules versions explicitly set to next SNAPSHOT
+	             When releasing don't remove explicit SNAPSHOT version tags
+	             in submodule POMs, unless something actually changed. -->
+    <revision>1.0.1-SNAPSHOT</revision>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.release>16</maven.compiler.release>
 		<flatten.version>1.2.2</flatten.version>
@@ -240,6 +245,7 @@
       <scope>test</scope>
     </dependency>
 		
+    <!--  Install this test scope dep manually. See https://github.com/gnahraf/junit-io -->
     <dependency>
       <groupId>com.gnahraf</groupId>
       <artifactId>junit-io</artifactId>

@@ -8,7 +8,7 @@ import java.io.PrintStream;
 import java.util.StringTokenizer;
 
 /**
- *
+ * Utility class for printing to the console.
  */
 public class PrintSupport {
   
@@ -121,14 +121,39 @@ public class PrintSupport {
 
   public void print(String lineSnippet) {
     printLineStart();
-    out.print(lineSnippet);
-    charsWrittenToLine += lineSnippet.length();
+    out.print(decode(lineSnippet));
+    charsWrittenToLine += length(lineSnippet);
+  }
+  
+  
+  /**
+   * Returns the given snippet in "decoded" format. This is a hook
+   * to support ANSI escape codes (elsewhere). The base class just
+   * returns the argument.
+   * 
+   * @param snippet possibly encoded string
+   * @see #length(String)
+   */
+  protected String decode(String snippet) {
+    return snippet;
+  }
+  
+  
+  /**
+   * Returns the assumed <em>console</em> length of the given string.
+   * 
+   * @param snippet the string (possibly w/ formatting info)
+   * @return defaults to {@code snippet.length()}
+   * @see #decode(String)
+   */
+  protected int length(String snippet) {
+    return snippet.length();
   }
   
   
   public void println(String restOfLine) {
     printLineStart();
-    out.println(restOfLine);
+    out.println(decode(restOfLine));
     lineEnded();
   }
   
