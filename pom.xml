@@ -66,10 +66,13 @@
 	<properties>
 	  <!-- NOTE: centralized revision property doesn't jive well with
 	             stable submodules.
-	             Stable submodules versions explicitly set to next SNAPSHOT
-	             When releasing don't remove explicit SNAPSHOT version tags
-	             in submodule POMs, unless something actually changed. -->
-    <revision>1.0.1</revision>
+	             
+	             -Ugh. Can't find a clean way
+	             to keep submodules at different versions on central.
+	             Giving in to updating the submodule versions en-bloc,
+	             even if nothing changed in the submodule -->
+	             
+    <revision>1.0.2-SNAPSHOT</revision>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.release>16</maven.compiler.release>
 		<flatten.version>1.2.2</flatten.version>
