@@ -32,24 +32,24 @@ import java.util.Objects;
  * on the left in chunks of 6 (base 64). The initialization, then, consists of filling this
  * bit-queue with 2 zero bits (followed by 8 bits from the first byte).
  * </p>
- * <h2>One-to-One</h2>
+ * <h3>One-to-One</h3>
  * <p>
  * Implementation-wise, the first 2 bits <em>could</em> be ignored (i.e. set them to
  * zero even if the base64 character read does not.) However, we <b>require padding bits be zero</b>
  * in order maintain a one-to-one mapping.
  * </p>
- * <h3>Pros &amp; Cons</h3>
+ * <h2>Pros &amp; Cons</h2>
  * <p>
  * Compiled here to inform possible adoption.
  * </p>
- * <h2>Pros</h2>
+ * <h3>Pros</h3>
  * 
  * <ul>
  * <li><em>Compact</em>. Nearly 50% savings compared to hex.</li>
  * <li><em>URL friendly</em>. Does not need URL encoding.</li>
  * </ul>
  * 
- * <h2>Cons</h2>
+ * <h3>Cons</h3>
  * 
  * <ul>
  * <li><em>Broken Doubleclick Selection</em>. Doubleclicking selects the whole number

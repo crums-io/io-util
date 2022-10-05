@@ -4,7 +4,7 @@ Overview
 A small set of Java utility modules for some general / specific tasks:
 
 1. [io-util](./io-util/README.md) - I/O, buffer, and some common utilities. The `Lists` utility methods find a lot of use in other crums.io projects. *(No external dependencies.)*
-2. [jsonimple](https://github.com/crums-io/io-util/tree/master/jsonimple) - json-simple knock off with some bug fixes, and a few added features. *(No external dependencies.)*
+2. [jsonimple](./jsonimple/README.md) - json-simple knock off with some bug fixes, and a few added features. *(No external dependencies.)*
 3. [io-xp](./io-xp/README.md) - Less used stuff. Includes a fuzzy controller.
 4. [table-io](./table-io/README.md) - Simple, fast, fail-safe, fixed-width, external tables (on disk).
 
@@ -20,12 +20,12 @@ This is a standard maven build.
 * Maven 3.x
 * Internet connection (possible dependency downloads by maven)
 
-### Building & Installing
+### Building
 
 Clone this repo and then invoke
 
 ```
-$ mvn clean install -DskipTests
+$ mvn clean package -DskipTests
 ```
 
 Note running the tests requires a local install of this small [library](https://github.com/gnahraf/junit-io). 
@@ -34,7 +34,7 @@ Note running the tests requires a local install of this small [library](https://
 You'll want to profile performance. To get a rudimentary idea for stuff like external merges, include the `perf_test` switch (takes about 2 minutes):
 
 ```
-$ mvn clean install -Dperf_test=true`
+$ mvn clean package -Dperf_test=true`
 ```
 
 ## JPMS Ready
