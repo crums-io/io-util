@@ -573,6 +573,38 @@ public class Lists {
   }
   
   
+  /** Returns a read-only view of the given {@code array}. */
+  public static List<Double> doubleList(double[] array) {
+    Objects.requireNonNull(array, "null array");
+    return new RandomAccessList<Double>() {
+      @Override
+      public Double get(int index) {
+        return array[index];
+      }
+      @Override
+      public int size() {
+        return array.length;
+      }
+    };
+  }
+  
+  
+  /** Returns a read-only view of the given {@code array}. */
+  public static List<Float> floatList(float[] array) {
+    Objects.requireNonNull(array, "null array");
+    return new RandomAccessList<Float>() {
+      @Override
+      public Float get(int index) {
+        return array[index];
+      }
+      @Override
+      public int size() {
+        return array.length;
+      }
+    };
+  }
+  
+  
   
   public static <T> List<T> repeatedList(T repeated, int size) {
     Objects.requireNonNull(repeated);

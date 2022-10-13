@@ -19,6 +19,13 @@ import java.util.function.Function;
 public class Maps {
   
   
+  /**
+   * Returns a read-only view of the given map. Not designed for
+   * later modifying the given underlying map.
+   */
+  public static <K,V> Map<K,V> asReadOnly(Map<K,V> map) {
+    return map.isEmpty() ? Map.of() : Collections.unmodifiableMap(map);
+  }
   
   
   /**
@@ -40,7 +47,7 @@ public class Maps {
    * @return
    */
   public static <K,U,V> Map<K,V> mapValues(Map<K,U> base, Function<U,V> valueMapper) {
-    return base.isEmpty() ? Collections.emptyMap() : new MappedValue<>(base, valueMapper);
+    return base.isEmpty() ? Map.of() : new MappedValue<>(base, valueMapper);
   }
   
   
