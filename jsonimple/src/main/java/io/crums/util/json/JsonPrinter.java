@@ -4,55 +4,116 @@
 package io.crums.util.json;
 
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UncheckedIOException;
+import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.BiConsumer;
 
 /**
- * A pretty-printer for JSON.
+ * A pretty-printer for JSON. This always prints with indentation (by default, 2 spaces).
+ * 
+ * 
+ * <h2>Historical Note</h2>
  * <p>
- * Since the JSON library I'm using (currently {@code json-simple-1.1.1})
- * does not support pretty printing, on looking at their code I realized
- * I can adapt it without having to use any of its constructs directly.
+ * Since the JSON library I was using ({@code json-simple-1.1.1})
+ * did not support pretty printing, on looking at their code I realized
+ * I could adapt it without having to use any of its constructs directly.
+ * (As it turned out, I brought in the entirety of the small library.)
  * </p><p>
- * Note because of that library's clean design ({@code JSONObject} is
+ * Because of the original library's clean design ({@code JSONObject} is
  * a {@code Map}, and {@code JSONArray} is a {@code List}) it's objects
  * work out-of-the-box with this class.
  * </p>
  * <h2>Single Thread Use</h2>
  * <p>
- * <em>Not suitable for use under concurrent access!</em>
+ * Instances are <em>not suitable for use under concurrent access!</em>
+ * The static methods are obviously OK under concurrent access, tho you
+ * still should take care not to interleave writing to the same streams.
  * </p>
  */
 public class JsonPrinter {
   
   
-  
+  /** Returns the JSON map as indented string. */
   public static String toJson(Map<?,?> map) {
     StringBuilder out = new StringBuilder(32);
     new JsonPrinter(out).print(map);
     return out.toString();
   }
   
-  
+
+  /** Returns the JSON list as indented string. */
   public static String toJson(List<?> list) {
     StringBuilder out = new StringBuilder(32);
     new JsonPrinter(out).print(list);
     return out.toString();
   }
   
-  
+
+  /** Shortcut for {@code println(map, System.out)}. */
   public static void println(Map<?,?> map) {
     println(map, System.out);
   }
   
+  /** Shortcut for {@code println(list, System.out)}. */
+  public static void println(List<?> list) {
+    println(list, System.out);
+  }
+  
+  
+  /** Prints {@code map} to the stream {@code out}. */
   public static void println(Map<?,?> map, PrintStream out) {
     new JsonPrinter(out).print(map);
     out.println();
   }
+  
+
+  /** Prints {@code list} to the stream {@code out}. */
+  public static void println(List<?> list, PrintStream out) {
+    new JsonPrinter(out).print(list);
+    out.println();
+  }
+  
+  
+  
+  /**
+   * Writes the given JSON {@code map} to the specified filepath.
+   * 
+   * @param file      must not exist; it's parent directory must exist
+   */
+  public static void write(Map<?,?> map, File file) throws UncheckedIOException {
+    writeImpl(JsonPrinter::println, map, file);
+  }
+
+  /**
+   * Writes the given JSON {@code list} to the specified filepath.
+   * 
+   * @param file      must not exist; it's parent directory must exist
+   */
+  public static void write(List<?> list, File file) throws UncheckedIOException {
+    writeImpl(JsonPrinter::println, list, file);
+  }
+  
+  
+  
+  private static <T> void writeImpl(BiConsumer<T, PrintStream> writer, T jObj, File file) throws UncheckedIOException {
+    if (file.exists())
+      throw new IllegalArgumentException("cannot overwrite existing file: " + file);
+    
+    try (var out = new PrintStream(file, UTF_8)) {
+      
+      writer.accept(jObj, out);
+      
+    } catch (IOException iox) {
+      throw new UncheckedIOException("on writing to " + file, iox);
+    }
+  }
+  private final static Charset UTF_8 = Charset.forName("UTF-8");
   
   
   
@@ -64,12 +125,23 @@ public class JsonPrinter {
   
   private int indents;
   
+  /**
+   * Constructs an instance with 2 spaces for indentation and the system line separator
+   * (windows or unix flavor).
+   * 
+   * @param out         typically a {@linkplain PrintStream} or a {@linkplain StringBuilder}
+   */
   public JsonPrinter(Appendable out) {
     this(out, "  ", System.lineSeparator());
   }
 
+
   /**
+   * Full constructor.
    * 
+   * @param out         typically a {@linkplain PrintStream} or a {@linkplain StringBuilder}
+   * @param indentUnit  must be blank. Default is 2 spaces.
+   * @param newLine     either {@code '\r\n'} or {@code '\n'}
    */
   public JsonPrinter(Appendable out, String indentUnit, String newLine) {
     this.out = Objects.requireNonNull(out, "null out");
