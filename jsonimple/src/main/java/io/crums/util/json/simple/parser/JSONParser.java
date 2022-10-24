@@ -35,6 +35,27 @@ public class JSONParser {
   private Yytoken token = null;
   private int status = S_INIT;
   
+  
+  private final boolean preserveOrder;
+  
+  /** Default constructor. */
+  public JSONParser() {
+    this(false);
+  }
+  
+  /**
+   * On rare occasions, we want the parser to <em>perserve the order</em>
+   * in which elements in the JSON are defined. This is purely for aesthetic /
+   * presentation related reasons and only figures in when the JSON is to be
+   * written back out again.
+   * 
+   * @param preserveOrder if {@code true}, then parsed {@linkplain JSONObject}s
+   *        fields preserve order.
+   */
+  public JSONParser(boolean preserveOrder) {
+    this.preserveOrder = preserveOrder;
+  }
+  
   private int peekStatus(LinkedList<?> statusStack){
     if(statusStack.size()==0)
       return -1;
@@ -272,12 +293,17 @@ public class JSONParser {
   
   private Map<Object,Object> createObjectContainer(ContainerFactory containerFactory){
     if(containerFactory == null)
-      return JSONObject.newFastInstance();
+      return newJsonObjInstance();
     var m = containerFactory.createObjectContainer();
     
     if(m == null)
-      return JSONObject.newFastInstance();
+      return newJsonObjInstance();
     return m;
+  }
+  
+  
+  private JSONObject newJsonObjInstance() {
+    return preserveOrder ? new JSONObject() : JSONObject.newFastInstance();
   }
   
   private List<Object> createArrayContainer(ContainerFactory containerFactory){
