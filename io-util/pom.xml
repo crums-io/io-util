@@ -14,7 +14,7 @@
 	<artifactId>io-util</artifactId>
 	
 	
-  <name>${project.groupId}::${project.artifactId}</name>
+  <name>${project.groupId}:${project.artifactId}</name>
 	<description>
 	  I/O and other utilites. This library's more common constructs are gathered here.
 	</description>
