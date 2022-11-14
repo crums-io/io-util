@@ -6,7 +6,9 @@ package io.crums.io;
 import java.io.FilterOutputStream;
 import java.io.Flushable;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintStream;
+import java.io.RandomAccessFile;
 import java.io.Writer;
 import java.nio.CharBuffer;
 import java.util.Objects;
@@ -20,6 +22,14 @@ public class IoBridges {
   
   // never invoked
   private IoBridges() {  }
+  
+  
+  /** Stateless, empty input stream. */
+  public final static InputStream EMPTY_INPUT_STREAM = new InputStream() {
+    @Override
+    public int read() throws IOException { return -1; }
+    
+  };
   
   
   /**
@@ -64,6 +74,128 @@ public class IoBridges {
   public static <T extends Appendable, Closeable> Writer toCloseableWriter(T out) {
     return new AppendableWriterAdaptor(out, true);
   }
+  
+  
+  
+
+  
+  
+  /**
+   */
+  /**
+   * Returns an {@code InputStream} view of the given {@code RandomAccessFile}.
+   * Bytes read advance the underlying stream's position by as many bytes.
+   * The returned instance does not close the underlying stream.
+   * 
+   * @param raf     the underlying stream
+   *                
+   * @return        An {@code InputStream} view of the underlying stream starting from
+   *                its current position
+   */
+  public static InputStream toInputStream(RandomAccessFile raf) {
+    return new RandomAccessInputStream(raf, false);
+  }
+
+  
+  
+  /**
+   * Returns an {@code InputStream} view of the given {@code RandomAccessFile}.
+   * Bytes read advance the underlying stream's position by as many bytes.
+   * 
+   * @param raf     the underlying stream
+   * @param closes  if {@code true} then the returned stream's {@code close()} method
+   *                closes the underlying stream.
+   *                
+   * @return        An {@code InputStream} view of the underlying stream starting from
+   *                its current position
+   */
+  public static InputStream toInputStream(RandomAccessFile raf, boolean closes) {
+    return new RandomAccessInputStream(raf, closes);
+  }
+  
+  
+
+  /**
+   * Returns an {@code InputStream} view of the given {@code RandomAccessFile}, starting
+   * from the given offset and ending after the given number of bytes ({@code length})
+   * are read. The returned view does not close the underlying stream.
+   * 
+   * @param raf     the underlying stream (note its state must not be modified before finishing
+   *                use with the returned stream)
+   * @param offset  the starting position in the file (0 &ge; {@code offset} &ge; {@code raf.length()})
+   * @param length  the number of bytes to be read after the offset (&ge; 0)
+   */
+  public static InputStream sliceInputStream(
+      RandomAccessFile raf, long offset, long length) throws IOException {
+    return sliceInputStream(raf, offset, length, false);
+  }
+  
+  
+  /**
+   * Returns an {@code InputStream} view of the given {@code RandomAccessFile}, starting
+   * from the given offset and ending after the given number of bytes ({@code length})
+   * are read.
+   * 
+   * @param raf     the underlying stream (note its state must not be modified before finishing
+   *                use with the returned stream)
+   * @param offset  the starting position in the file (0 &ge; {@code offset} &ge; {@code raf.length()})
+   * @param length  the number of bytes to be read after the offset (&ge; 0)
+   * @param closes  if {@code true} then the returned stream's {@code close()} method
+   *                closes the underlying stream.
+   */
+  public static InputStream sliceInputStream(
+      RandomAccessFile raf, long offset, long length,
+      boolean closes) throws IOException {
+    
+    Objects.requireNonNull(raf, "null random access file");
+    if (offset < 0)
+      throw new IllegalArgumentException("negative offset: " + offset);
+    if (length < 0)
+      throw new IllegalArgumentException("negative length: " + length);
+    
+    long size = raf.length();
+
+    if (offset + length > size)
+      throw new IllegalArgumentException(
+          "offset out-of-bounds (offset, length): (" + offset + ", " + length +
+          "); file length " + size);
+    
+    if (length == 0)
+      return EMPTY_INPUT_STREAM;
+    
+    raf.seek(offset);
+    InputStream is = toInputStream(raf, closes);
+    return new TruncatedInputStream(is, length, closes);
+  }
+  
+
+  /**
+   * Truncates the stream to the specified maximum length. The returned stream
+   * does not close the underlying stream.
+   * 
+   * @param is      the underlying stream
+   * @param length  <em>maximum</em> length of the stream (&ge; 0)
+   */
+  public static InputStream truncateInputStream(InputStream is, long length) {
+    return truncateInputStream(is, length, false);
+  }
+  
+  
+  /**
+   * Truncates the stream to the specified maximum length.
+   * 
+   * @param is      the underlying stream
+   * @param length  <em>maximum</em> length of the stream (&ge; 0)
+   * @param closes  if {@code true} then the returned stream's {@code close()} method
+   *                closes the underlying stream.
+   */
+  public static InputStream truncateInputStream(InputStream is, long length, boolean closes) {
+    return new TruncatedInputStream(is, length, closes);
+  }
+  
+  
+  
+  
   
   
   private static class AppendableWriterAdaptor extends Writer {
@@ -142,5 +274,172 @@ public class IoBridges {
     }
     
   }
+  
+  
+  
+  /** Boiler plate wrapper allowing an underlying stream to be closed, or not. */
+  static abstract class OwnedInputStream extends InputStream {
+    
+    private final boolean owns;
+    
+    protected OwnedInputStream(boolean owns) { this.owns = owns; }
+    
+    /**
+     * Conditionally closes the underlying base stream, if it's <em>owned</em>.
+     * @see #ownsBase()
+     */
+    @Override
+    public void close() throws IOException {
+      if (owns)
+        closeBase();
+    }
+    
+    /** Determines whether the base is closed by this instance. */
+    public boolean ownsBase() {
+      return owns;
+    }
+    /** {@code close()} implementation when the underlying stream is owned. */
+    protected abstract void closeBase() throws IOException;
+    
+  }
+  
+  
+  
+  /** {@code RandomAccessFile} to {@code InputStream} adaptor. */
+  public static class RandomAccessInputStream extends OwnedInputStream {
+
+    protected final RandomAccessFile raf;
+    
+    /** Creates an instance that does not own (close) the underlying stream. */
+    public RandomAccessInputStream(RandomAccessFile raf) {
+      this(raf, false);
+    }
+    
+    /**
+     * Full constructor.
+     * 
+     * @param raf   the underlying stream
+     * @param owns  if {@code true}, then the underlying stream is actually closed on {@linkplain #close()}
+     */
+    public RandomAccessInputStream(RandomAccessFile raf, boolean owns) {
+      super(owns);
+      this.raf = Objects.requireNonNull(raf, "null raf");
+    }
+    
+    
+
+    @Override
+    public int read() throws IOException {
+      return raf.read();
+    }
+
+    
+    @Override
+    public int read(byte[] b, int off, int len) throws IOException {
+      return raf.read(b, off, len);
+    }
+    
+    protected void closeBase() throws IOException {
+      raf.close();
+    }
+    
+  }
+  
+  
+  /** Truncates an {@code InputStream}. */
+  public static class TruncatedInputStream extends OwnedInputStream {
+    
+    private final InputStream base;
+    
+    private long remaining;
+    
+
+    /**
+     * Creates an instance that does not own (close) the underlying stream.
+     * 
+     * @param base    the underlying stream
+     * @param length  the <em>maximum</em> length of the stream
+     */
+    public TruncatedInputStream(InputStream base, long length) {
+      this(base, length, false);
+    }
+    
+    /**
+     * Full constructor.
+     * 
+     * @param base    the underlying stream
+     * @param length  the <em>maximum</em> length of the stream
+     * @param owns    if {@code true}, then the underlying stream is actually closed on {@linkplain #close()}
+     */
+    public TruncatedInputStream(InputStream base, long length, boolean owns) {
+      super(owns);
+      this.base = Objects.requireNonNull(base, "null base stream");
+      if (length < 0)
+        throw new IllegalArgumentException("negative length: " + length);
+      this.remaining = length;
+    }
+    
+
+
+    @Override
+    public int read() throws IOException {
+      if (remaining <= 0) {
+        assert remaining == 0;
+        return -1;
+      }
+      int b = base.read();
+      if (b == -1)
+        remaining = 0;
+      else
+        --remaining;
+      return b;
+    }
+    
+
+    
+    @Override
+    public int read(byte[] b, int off, int len) throws IOException {
+      if (remaining <= 0) {
+        assert remaining == 0;
+        return -1;
+      }
+      if (len > remaining)
+        len = (int) remaining;
+      
+      int bytesRead = base.read(b, off, len);
+      if (bytesRead == -1)
+        remaining = 0;
+      else
+        remaining -= bytesRead;
+      return bytesRead;
+    }
+    
+    
+    
+    @Override
+    protected void closeBase() throws IOException {
+      base.close();
+    }
+    
+    
+    
+  }
+  
+  
+  
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
