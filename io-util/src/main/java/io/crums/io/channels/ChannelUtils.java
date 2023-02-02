@@ -17,6 +17,7 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.GatheringByteChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
+import java.util.Objects;
 
 
 /**
@@ -128,6 +129,7 @@ public class ChannelUtils {
   
 
 
+  /** @deprecated Use {@linkplain Channels#newChannel(InputStream)} instead */
   public static ReadableByteChannel asChannel(InputStream in) throws IOException {
     ReadableByteChannel channel;
     if (in instanceof FileInputStream)
@@ -138,6 +140,7 @@ public class ChannelUtils {
   }
 
 
+  /** @deprecated Use {@linkplain Channels#newChannel(OutputStream)} instead */
   public static WritableByteChannel asChannel(OutputStream out) throws IOException {
     WritableByteChannel channel;
     if (out instanceof FileOutputStream)
@@ -187,5 +190,76 @@ public class ChannelUtils {
     if (progress != 0)
       throw new IOException("assertion failure. progress = " + progress);
   }
+  
+  
+  /**
+   * Returns a view of the given {@code base} channel that reads at most
+   * {@code maxBytes}.
+   * 
+   * @param base      not null
+   * @param maxBytes  the maximum number of bytes to read (&ge; 0)
+   * 
+   * @return  truncated view of {@code base}
+   */
+  public static ReadableByteChannel truncate(ReadableByteChannel base, long maxBytes) {
+    return new TruncatedChannel(base, maxBytes);
+  }
+  
+  
+  static class TruncatedChannel implements ReadableByteChannel {
+    
+    private final ReadableByteChannel base;
+    private long remainingBytes;
+    
+    public TruncatedChannel(ReadableByteChannel base, long maxBytes) {
+      this.base = Objects.requireNonNull(base, "null base");
+      this.remainingBytes = maxBytes;
+      if (maxBytes < 0)
+        throw new IllegalArgumentException("negative max bytes: " + maxBytes);
+    }
+
+    @Override
+    public boolean isOpen() {
+      return base.isOpen();
+    }
+
+    @Override
+    public void close() throws IOException {
+      base.close();
+    }
+
+    @Override
+    public int read(ByteBuffer dst) throws IOException {
+      if (remainingBytes < 1) {
+        assert remainingBytes == 0;
+        return -1;
+      }
+      if (dst.remaining() > remainingBytes) {
+        int savedLimit = dst.limit();
+        dst.limit(dst.position() + (int) remainingBytes);
+        try {
+          int bytesRead = base.read(dst);
+          if (bytesRead >= 0) {
+            remainingBytes -= bytesRead;
+          } else
+            assert bytesRead == -1;
+          
+          return bytesRead;
+        
+        } finally {
+          dst.limit(savedLimit);
+        }
+      }
+      return base.read(dst);
+    }
+  }
+  
 
 }
+
+
+
+
+
+
+

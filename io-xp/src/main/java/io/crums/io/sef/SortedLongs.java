@@ -108,6 +108,12 @@ public class SortedLongs extends AscLongs implements Channel {
     lastCommitHiIndex = hiIndex;
     lastCommitCount = size;
   }
+  
+  
+  
+  private void clearCommits() {
+    lastCommitCount = lastCommitHiIndex = 0;
+  }
 
 
 
@@ -117,12 +123,25 @@ public class SortedLongs extends AscLongs implements Channel {
   }
 
 
-
   @Override
   public void close() throws IOException {
+    close(false);
+  }
+
+  
+  public void close(boolean commit) throws IOException {
+    if (commit)
+      commit();
     blobFile.close();
   }
   
+  
+  @Override
+  public void trimSize(long newSize, boolean trimFile) throws IOException {
+    super.trimSize(newSize, trimFile);
+    clearCommits();
+    commit();
+  }
   
 
 }

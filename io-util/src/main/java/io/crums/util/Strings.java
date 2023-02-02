@@ -171,6 +171,13 @@ public class Strings {
   
   
   public static String utf8String(ByteBuffer bytes) {
+    if (bytes.hasArray()) {
+      return new String(
+          bytes.array(),
+          bytes.arrayOffset() + bytes.position(),
+          bytes.remaining(),
+          UTF_8);
+    }
     byte[] b = new byte[bytes.remaining()];
     bytes.get(b);
     return new String(b, UTF_8);

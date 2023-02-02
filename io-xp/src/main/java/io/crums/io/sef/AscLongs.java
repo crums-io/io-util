@@ -76,6 +76,32 @@ public class AscLongs {
     return wFreq.size();
   }
   
+
+  /**
+   * Trims the size (number of entries) of the collection.
+   * Shorthand for {@code trimSize(newSize, true)}.
+   * 
+   * @see #trimSize(long, boolean)
+   */
+  public void trimSize(long newSize) throws IOException {
+    trimSize(newSize, true);
+  }
+  
+  /**
+   * Trims the size (number of entries) of the collection, optionally
+   * trimming the blob file of offsets as well. (The blob file needn't
+   * be truncated.)
+   * 
+   * @param newSize       0 &ge; {@code newSize} &le; {@code size()}
+   * @param trimFile      if {@code true}, then the blob file is truncated
+   */
+  public void trimSize(long newSize, boolean trimFile) throws IOException {
+    boolean trimmed = wFreq.trimSize(newSize);
+    if (trimFile && (trimmed || wFreq.blobBytes() + zeroOffset < blobFile.size())) {
+      blobFile.truncate(wFreq.blobBytes() + zeroOffset);
+    }
+  }
+  
   /** Returns {@code size() == 0}. */
   public final boolean isEmpty() {
     return size() == 0;

@@ -9,6 +9,8 @@ import java.nio.channels.Channel;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.Callable;
 import java.util.concurrent.locks.Lock;
 
 /**
@@ -61,6 +63,27 @@ public class TaskStack implements Channel {
       @Override
       public void close() {
         task.run();
+      }
+    };
+    opStack.add(asClose);
+    return this;
+  }
+  
+  
+  public TaskStack pushCall(Callable<?> task) {
+    Objects.requireNonNull(task, "null task");
+    AutoCloseable asClose = new AutoCloseable() {
+      @Override
+      public void close() {
+        try {
+          task.call();
+        } catch (Exception x) {
+          throw new RuntimeException("on closing " + task, x);
+        }
+      }
+      @Override
+      public String toString() {
+        return "AutoClosedCallable<" + task + ">";
       }
     };
     opStack.add(asClose);

@@ -78,6 +78,13 @@ class AscBitsHistogram {
    * 
    */
   public AscBitsHistogram(long[] freq) {
+    reset(freq);
+  }
+  
+  
+  
+  
+  private void reset(long[] freq) {
     if (freq.length != this.freq.length)
       throw new IllegalArgumentException(
           "wrong number of elements (" + freq.length +
@@ -85,6 +92,7 @@ class AscBitsHistogram {
 
     long count = 0;
     long bitCount = 0;
+    hiIndex = 0;
     
     for (int index = 0; index < this.freq.length; ++index) {
       long f = freq[index];
@@ -107,6 +115,43 @@ class AscBitsHistogram {
         hiIndex = index;
     }
   }
+  
+  
+  
+  public boolean trimSize(long newSize) {
+    long size = size();
+    if (newSize == size)
+      return false;
+    
+    // return true beyond here
+    
+    if (newSize > size)
+      throw new IllegalArgumentException(
+          "newSize %d > size %d".formatted(newSize, size));
+    if (size < 0)
+      throw new IllegalArgumentException("newSize: " + newSize);
+    
+    if (size == 0) {
+      
+      for (int index = freq.length; index-- > 0;)
+        freq[index] = 0;
+    
+    } else {
+    
+      int binIndex = binIndex(newSize - 1);
+      long toRemove = size - newSize;
+      for (int index = freq.length - 1; index > binIndex; --index) {
+        toRemove -= freq[index];
+        freq[index] = 0;
+      }
+      freq[binIndex] -= toRemove;
+      assert freq[binIndex] >= 0;
+    }
+    
+    reset(freq);
+    return true;
+  }
+  
   
   
   /**
@@ -234,19 +279,8 @@ class AscBitsHistogram {
    */
   public long bitOffset(long index, byte[] wout) throws IndexOutOfBoundsException {
     Objects.checkIndex(index, size());
-    final long count = index + 1; // (recall, the histogram records counts)
     // we want to set cumuIndex to the frequency bin *index* is registered in
-    final int cumuIndex;
-    {
-      int searchIdx = Arrays.binarySearch(cumuFreq, 0, hiIndex + 1, count);
-      if (searchIdx < 0)
-        cumuIndex = -1 - searchIdx;
-      else {
-        while (searchIdx > 0 && cumuFreq[searchIdx -1] == cumuFreq[searchIdx])
-          searchIdx--;
-        cumuIndex = searchIdx;
-      }
-    }
+    final int cumuIndex = binIndex(index);
     
     long bitOffset = cumuIndex == 0 ? 0 : cumuBits[cumuIndex - 1];
     
@@ -257,6 +291,22 @@ class AscBitsHistogram {
     assert bitOffset >= 0;
     
     return bitOffset;
+  }
+  
+  
+  
+  private int binIndex(long index) {
+    long count = index + 1;   // (recall, the histogram records counts)
+    
+
+    int searchIdx = Arrays.binarySearch(cumuFreq, 0, hiIndex + 1, count);
+    if (searchIdx < 0)
+      return -1 - searchIdx;
+    else {
+      while (searchIdx > 0 && cumuFreq[searchIdx -1] == cumuFreq[searchIdx])
+        searchIdx--;
+      return searchIdx;
+    }
   }
   
   
