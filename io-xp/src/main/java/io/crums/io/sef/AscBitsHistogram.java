@@ -120,14 +120,11 @@ class AscBitsHistogram {
   
   public boolean trimSize(long newSize) {
     long size = size();
-    if (newSize == size)
+    if (newSize >= size)
       return false;
     
     // return true beyond here
     
-    if (newSize > size)
-      throw new IllegalArgumentException(
-          "newSize %d > size %d".formatted(newSize, size));
     if (size < 0)
       throw new IllegalArgumentException("newSize: " + newSize);
     

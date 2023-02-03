@@ -66,8 +66,14 @@ public class AscLongs {
       throw new IllegalArgumentException(
           "expected " + minBytes + " bytes in offset file; actual is " + actualBytes);
     // set maxValue (inclusive).. also, kick the tires
+    setMaxValue();
+  }
+  
+  
+  private void setMaxValue() throws IOException {
     long size = size();
     this.maxValue = size == 0 ? -1 : get(size - 1);
+    
   }
   
   
@@ -100,6 +106,7 @@ public class AscLongs {
     if (trimFile && (trimmed || wFreq.blobBytes() + zeroOffset < blobFile.size())) {
       blobFile.truncate(wFreq.blobBytes() + zeroOffset);
     }
+    setMaxValue();
   }
   
   /** Returns {@code size() == 0}. */
