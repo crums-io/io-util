@@ -45,6 +45,7 @@ public class AscLongs {
   
   protected final long zeroOffset;
   
+  /** Last (highest) recorded number, or -1 if empty. */
   private long maxValue;
   
   

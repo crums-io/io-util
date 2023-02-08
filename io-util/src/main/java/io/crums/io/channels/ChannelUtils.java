@@ -254,6 +254,51 @@ public class ChannelUtils {
     }
   }
   
+  
+  /**
+   * Returns a view of the given {@code base} channel that is <em>trimmed</em>
+   * on invoking {@code close()}. <em>The underlying stream is not itself closed.</em>
+   * Once closed, {@linkplain ReadableByteChannel#read(ByteBuffer) read(ByteBuffer)}
+   * returns -1, as if at the end of the stream.
+   */
+  public static ReadableByteChannel trimmableChannel(ReadableByteChannel base) {
+    return new TrimmableChannel(base);
+  }
+  
+  static class TrimmableChannel implements ReadableByteChannel {
+    
+    private final ReadableByteChannel base;
+    
+    private boolean trimmed;
+
+
+    TrimmableChannel(ReadableByteChannel base) {
+      this.base = Objects.requireNonNull(base, "null base");
+    }
+     
+
+    @Override
+    public boolean isOpen() {
+      return base.isOpen();
+    }
+
+    /**
+     * <em>Trims</em> the channel so that no more bytes will be read.
+     * Does not actually close the underlying channel.
+     */
+    @Override
+    public void close() throws IOException {
+      trimmed = true;
+    }
+
+    
+    @Override
+    public int read(ByteBuffer dst) throws IOException {
+      return trimmed ? -1 : base.read(dst);
+    }
+    
+  }
+  
 
 }
 

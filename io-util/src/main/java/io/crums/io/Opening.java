@@ -188,8 +188,8 @@ public enum Opening {
    * 
    * @param file a path which may or may not exist
    * 
-   * @return <code>true</code> if <code>dir</code> is an existing file <em>or</em> the mode
-   *        allows the directory to be created
+   * @return <code>true</code> if <code>file</code> is an existing file <em>or</em> the mode
+   *        allows the file to be created
    * 
    * @throws IllegalArgumentException if <code>file</code> is in fact an existing directory
    */
