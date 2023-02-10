@@ -73,8 +73,6 @@ public class BackedupFile {
    * Rollsback the file to its backup version (if it exists). Noop if the backup file
    * doesn't exist ({@code false} return value). If the {@linkplain #getFile file}
    * didn't exist at instantation, then it is simply deleted (no file is restored).
-   * (So if you're writing to the file for the first time, and an error occurs,
-   * you'll still be able to see how far it got.)
    * 
    * @return {@code true} iff the backup file was moved to the {@linkplain #getFile() file}
    * @see #initExists()
