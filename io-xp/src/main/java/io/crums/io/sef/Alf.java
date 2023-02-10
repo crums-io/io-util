@@ -12,9 +12,44 @@ import java.nio.channels.FileChannel;
 import io.crums.io.channels.ChannelUtils;
 
 /**
+ * Ascending longs file.
  * Single-file implementation of a set of non-negative, ascending {@code long}s.
+ * The overhead per value added is measured in bits: it is the number of
+ * right-most significant bits in the value.
+ * <h2>Basic Design</h2>
+ * <p>
+ * The ascending values are recorded in 2 places. One, their right-most significant
+ * bits are appended to the end of a blob of <em>bits</em> (that is, we keep track
+ * of the bit offset in a blob of bytes in a file). Two, each recorded value
+ * increments the counter corresponding to its bit-width (those right-most
+ * significant bits), that is, the bit-width histogram.
+ * </p><p>
+ * Since the values are ascending, the bit-width histogram is updated
+ * left-to-right, from the low-bit bins to the hi-bit bins. This, in turn,
+ * makes lookups possible in constant time. For any index, we calculate its
+ * position in the bit-width histogram (which bin it incremented), from that
+ * its offset in the bits blob, and retrieve the value directly.
+ * </p>
+ * <h2>Some Details</h2>
+ * <p>
+ * The bit-width histogram, a fixed length structure, is recorded at the head
+ * of the file. The number of bits written per value is actually one less than
+ * the value's bit-width (since if we already know the bit-width, then the
+ * hi bit is redundant). The edge cases for values 0 and 1 are a bit thorny
+ * under this scheme: rather than deal with these, we add 2 to every value on
+ * the way in; subtract 2, on the way out.
+ * </p>
+ * <h2>Future Directions?</h2>
+ * <p>
+ * So this simplified Elias-Fano encoding uses only a single prefix bit (the
+ * hi bit). Going full EF is possible. It requires a more interesting bit prefix
+ * histogram. The histogram, btw, need not be linear (e.g. we might prefix encode
+ * the bins for higher values differently than for lower ones). Also, since full
+ * EF histograms can be quite beefy (still small enough to be held in-memory), a
+ * growable version (pay-as-you-go) in its own file might make sense.
+ * </p>
  */
-public class SortedLongs extends AscLongs implements Channel {
+public class Alf extends AscLongs implements Channel {
   
   
   
@@ -59,7 +94,7 @@ public class SortedLongs extends AscLongs implements Channel {
   
   
   /** Creates or loads an instance, sans the user-defined header. */
-  public SortedLongs(FileChannel file) throws IOException {
+  public Alf(FileChannel file) throws IOException {
     this(file, 0L);
   }
   
@@ -71,7 +106,7 @@ public class SortedLongs extends AscLongs implements Channel {
    *                      then it must be in "write" mode.
    * @param headerBytes   number of bytes in optional file header (&ge; 0)
    */
-  public SortedLongs(FileChannel file, long headerBytes) throws IOException {
+  public Alf(FileChannel file, long headerBytes) throws IOException {
     super(file, HISTOGRAM_BYTES + headerBytes, loadHistogram(file, headerBytes));
     lastCommitHiIndex = this.wFreq.hiIndex();
     lastCommitCount = size();
@@ -79,7 +114,7 @@ public class SortedLongs extends AscLongs implements Channel {
   
   
   
-  /** Returns the last committed value (non-negative), or -1 if empty. */
+  /** Returns the last committed size (non-negative). */
   public long lastCommitSize() {
     return lastCommitCount;
   }
@@ -123,12 +158,21 @@ public class SortedLongs extends AscLongs implements Channel {
   }
 
 
+  /**
+   * Closes the instances without committing the changes.
+   * 
+   * @see #close(boolean)
+   */
   @Override
   public void close() throws IOException {
     close(false);
   }
 
-  
+  /**
+   * Closes the instance, optionally committing the changes.
+   * 
+   * @param commit  if ({@code false} then the changes are <em>not</em> committed
+   */
   public void close(boolean commit) throws IOException {
     if (commit)
       commit();

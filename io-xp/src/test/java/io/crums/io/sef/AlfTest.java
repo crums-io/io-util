@@ -19,7 +19,7 @@ import com.gnahraf.test.IoTestCase;
 /**
  * 
  */
-public class SortedLongsTest extends IoTestCase {
+public class AlfTest extends IoTestCase {
 
   
   @Test
@@ -57,10 +57,10 @@ public class SortedLongsTest extends IoTestCase {
   
   
   
-  private SortedLongs createOrLoad(File f, int headerBytes) throws IOException {
+  private Alf createOrLoad(File f, int headerBytes) throws IOException {
     @SuppressWarnings("resource")
     var ch = new RandomAccessFile(f, "rw").getChannel();
-    return new SortedLongs(ch, headerBytes);
+    return new Alf(ch, headerBytes);
   }
   
   
@@ -172,7 +172,7 @@ public class SortedLongsTest extends IoTestCase {
   }
   
   
-  private void assertValues(SortedLongs set, long[] ascVals) throws IOException {
+  private void assertValues(Alf set, long[] ascVals) throws IOException {
     assertEquals(ascVals.length, set.size());
     var work = ByteBuffer.wrap(new byte[16]);
     for (int index = 0; index < ascVals.length; ++index)
@@ -215,6 +215,20 @@ public class SortedLongsTest extends IoTestCase {
       last += rand.nextInt(deltaRange) + 1;
       values[index] = last;
     }
+    testManyByDir(dir, values);
+  }
+  
+  
+  
+  @Test
+  public void test1MContiguous() throws IOException {
+
+    final Object label = new Object() {  };
+    final int count = 1024 * 1024;
+    long[] values = new long[count];
+    for (int index = 0; index < count; ++index)
+      values[index] = index;
+    File dir = makeDir(label);
     testManyByDir(dir, values);
   }
   
