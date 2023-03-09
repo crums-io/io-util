@@ -13,12 +13,14 @@ public class Digests {
   
   
   /**
-   * SHA-256 spec. Hash width: 32 bytes.
+   * SHA-256 spec. Hash width: 32 bytes. {@linkplain Digest#sentinelHash() sentinelHash()}
+   * method is efficient (returns a new view of the same zeroed buffer).
    */
   public final static Digest SHA_256 = new Digest() {
     
     private final ByteBuffer sentinel = ByteBuffer.allocate(32).asReadOnlyBuffer();
 
+    
     @Override
     public int hashWidth() {
       return 32;
