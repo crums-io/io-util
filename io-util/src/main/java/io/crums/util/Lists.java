@@ -995,6 +995,75 @@ public class Lists {
     
   }
   
+  /**
+   * Zips the 2 given lists into a lazily merged resultant list.
+   * The size of the returned zipped list is that of the <em>left</em> list.
+   * 
+   * @param <T> type of returned list
+   * @param <U> type of left list
+   * @param <V> type of right list
+   * @param left      not null
+   * @param right     not null and of size &ge; {@code left.size()}
+   * @param mergeFunc merge function {@code (U,V) -> T} invoked every time
+   *                  an element is accessed
+   * 
+   * @return non-null, read-only list
+   */
+  public static <T, U, V> List<T> zip(List<U> left, List<V> right, BiFunction<U, V, T> mergeFunc) {
+    if (left.isEmpty()) {
+      checkZipArgs(left, right, mergeFunc);
+      return List.of();
+    }
+    return new ZipList<>(left, right, mergeFunc);
+  }
+  
+  
+  private static <U, V> void checkZipArgs(List<U> left, List<V> right, BiFunction<U, V, ?> mergeFunc) {
+    if (left.size() > right.size())
+      throw new IllegalArgumentException(
+          "left size (%d) > right size (%d)"
+          .formatted(left.size(), right.size()));
+    Objects.requireNonNull(mergeFunc, "null merge function");
+  }
+  
+  
+  public static class ZipList<T,U,V> extends RandomAccessList<T> {
+    
+    private final List<U> left;
+    private final List<V> right;
+    
+    private final BiFunction<U, V, T> mergeFunc;
+    
+    
+    /**
+     * Constructs an list using 2 lists and a merge function. The size of the
+     * list is equal to that of the <em>left</em> list.
+     * 
+     * @param left
+     * @param right
+     * @param mergeFunc
+     */
+    public ZipList(List<U> left, List<V> right, BiFunction<U, V, T> mergeFunc) {
+      
+      this.left = left;
+      this.right = right;
+      this.mergeFunc = mergeFunc;
+      
+      checkZipArgs(left, right, mergeFunc);
+    }
+
+    @Override
+    public T get(int index) {
+      return mergeFunc.apply(left.get(index), right.get(index));
+    }
+
+    @Override
+    public int size() {
+      return left.size();
+    }
+    
+  }
+  
   
 
 }
