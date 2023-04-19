@@ -4,13 +4,16 @@
 package io.crums.io.sef;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.List;
 import java.util.Objects;
 
 import io.crums.io.bp.BitBuffer;
 import io.crums.io.bp.Bits;
 import io.crums.io.channels.ChannelUtils;
+import io.crums.util.Lists;
 
 /**
  * Base implementation of a set of non-negative, ascending {@code long}s.
@@ -244,6 +247,30 @@ public class AscLongs {
     
     ChannelUtils.writeRemaining(blobFile, offset, bitBuffer.asByteBuffer());
     
+  }
+  
+  
+  
+  /**
+   * Returns the collection as a lazy, ascending list of non-negative numbers.
+   * The maximum size of the list is limited by the 4-byte signed representation
+   * of {@code int}s.
+   */
+  public List<Long> asList() {
+    long size = size();
+    return Lists.functorList(
+        size > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) size,
+        this::getUnchecked);
+  }
+  
+  
+  
+  private long getUnchecked(int index) {
+    try {
+      return get(index);
+    } catch (IOException iox) {
+      throw new UncheckedIOException(iox);
+    }
   }
   
   
