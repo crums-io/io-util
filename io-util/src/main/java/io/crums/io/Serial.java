@@ -8,11 +8,12 @@ import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 
 /**
+ * <p>
  * Simple serialization interface. This serves mostly as documentation, since to
  * be useful an implementation must be complimented with a constructor or
  * pseudo-constructor that <em>loads</em> the binary representation. Typically,
  * this is achieved with something like
- * <p>
+ * </p>
  * <pre>
  *   class A implements Serial {
  *     .
@@ -27,7 +28,6 @@ import java.nio.ByteBuffer;
  *     }
  *   }
  * </pre>
- * </p>
  * 
  * <h2>Self-delimiting</h2>
  * <p>
