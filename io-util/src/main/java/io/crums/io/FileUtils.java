@@ -265,8 +265,7 @@ public class FileUtils {
 
   
   public static void delete(File file) throws IllegalStateException {
-    file.delete();
-    if (file.exists())
+    if (!file.delete() && file.exists())
       throw new IllegalStateException("failed to delete " + file.getAbsolutePath());
   }
 
@@ -292,8 +291,7 @@ public class FileUtils {
    * @param target       the target path
    * @param overwrite    if <code>true</code>, and <code>target</code> is an existing file, then
    *                     the file will be overwritten; o.w. an {@linkplain IllegalArgumentException}
-   *                     is raised. If <code>target</code> is a directory (and <code>source</code> is too),
-   *                     then this argument doesn't matter
+   *                     is raised.
    * @return             the number of <em>files</em> (not directories) copied
    */
   public static int copyRecurse(File source, File target, boolean overwrite) throws IOException {
@@ -320,20 +318,41 @@ public class FileUtils {
   }
   
 
-  
-  
+  /**
+   * Copies the {@code source} file to the given <em>target</em> path.
+   * 
+   * @param source    path to source file (must exist)
+   * @param target    path to destination file; must not exist
+   * 
+   * @throws IllegalArgumentException if an argument violates the constraints
+   */
   public static void copy(File source, File target) throws IOException {
     copy(source, target, false);
   }
   
-  
+  /**
+   * Copies the {@code source} file to the given <em>target</em> path.
+   * 
+   * @param source    path to source file (must exist)
+   * @param target    path to destination file; must not exist, if {@code overwrite} is {@code false}
+   * @param overwrite if {@code true}, overwrites {@code target} file
+   * 
+   * @throws IllegalArgumentException if an argument violates the constraints
+   */
   public static void copy(File source, File target, boolean overwrite) throws IOException {
-    Objects.requireNonNull(source, "source");
-    Objects.requireNonNull(target, "target");
-    if (source.equals(target))
+    
+    if (!source.isFile()) {
+      var preamble = source.isDirectory() ?
+          "source path is a directory: " : "source path does not exist: ";
+      throw new IllegalArgumentException(preamble + source);
+    }
+    
+    if (source.equals(target) || source.getAbsoluteFile().equals(target.getAbsoluteFile()))
       return;
+    
     copyImpl(source, target, overwrite);
   }
+  
   
   private static void copyImpl(File source, File target, boolean overwrite) throws IOException {
     if (source.isFile()) {

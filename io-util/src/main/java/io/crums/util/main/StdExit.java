@@ -51,7 +51,7 @@ public enum StdExit {
   
   /**
    * Exits the Java process with this exit code. (Obviously, a dangerous
-   * method. But then so is <code>System.exit</code>.
+   * method. But then so is {@code System.exit}.)
    */
   public void exit() {
     System.exit(code);

@@ -3,10 +3,12 @@
  */
 package io.crums.util;
 
+import java.util.AbstractCollection;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.RandomAccess;
 import java.util.Set;
@@ -40,6 +42,34 @@ public class CollectionUtils {
       return array.length;
     }
   }
+  
+  
+  /**
+   * Returns a live, read-only view of the concatenation of the given
+   * collections.
+   */
+  public static <T> Collection<T> concat(Collection<T> first, Collection<T> second) {
+    return first.isEmpty() ? second : (second.isEmpty() ? first :
+        new AbstractCollection<T>() {
+    
+          @Override
+          public Iterator<T> iterator() {
+            return Iterators.concat(first.iterator(), second.iterator());
+          }
+    
+          @Override
+          public int size() {
+            return first.size() + second.size();
+          }
+        });
+  }
+  
+  
+  @SafeVarargs
+  public static <T> Collection<T> concat(Collection<T> first, T... next) {
+    return concat(first, Lists.asReadOnlyList(next));
+  }
+  
   
   
   public static <T> List<T> asReadOnlyList(final T[] array) {

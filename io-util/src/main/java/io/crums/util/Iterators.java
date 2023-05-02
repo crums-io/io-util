@@ -47,7 +47,7 @@ public class Iterators {
    * ordering. If the 2 iterators are already sorted with respect to this order
    * then merged order will also be sorted.
    */
-  public static <T extends Comparable<T>> Iterator<T> merge(Iterator<T> a, Iterator<T> b) {
+  public static <T extends Comparable<T>> Iterator<T> mergeOrdered(Iterator<T> a, Iterator<T> b) {
     return merge(a, b, Comparator.naturalOrder());
   }
   
@@ -59,6 +59,28 @@ public class Iterators {
    */
   public static <T> Iterator<T> merge(Iterator<T> a, Iterator<T> b, Comparator<T> comparator) {
     return new MergeIterator<>(a, b, comparator);
+  }
+  
+  
+  /**
+   * Returns an iterator that is the concatentation of the given two iterators.
+   */
+  public static <T> Iterator<T> concat(Iterator<T> first, Iterator<T> second) {
+    Objects.requireNonNull(first, "null first iterator");
+    Objects.requireNonNull(second, "null second iterator");
+    
+    return new Iterator<T>() {
+
+      @Override
+      public boolean hasNext() {
+        return first.hasNext() || second.hasNext();
+      }
+
+      @Override
+      public T next() {
+        return first.hasNext() ? first.next() : second.next();
+      }
+    };
   }
 
   

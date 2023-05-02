@@ -1,15 +1,40 @@
 /*
- * Copyright 2020 Babak Farhang
+ * Copyright 2020-2023 Babak Farhang
  */
 package io.crums.io;
 
-import java.nio.BufferUnderflowException;
+
+import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 
 /**
  * Simple serialization interface. This serves mostly as documentation, since to
  * be useful an implementation must be complimented with a constructor or
- * pseudo-constructor that <em>loads</em> the binary representation.
+ * pseudo-constructor that <em>loads</em> the binary representation. Typically,
+ * this is achieved with something like
+ * <p>
+ * <pre>
+ *   class A implements Serial {
+ *     .
+ *     .
+ *     
+ *     static A load(ByteBuffer in) {
+ *        // read from the buffer, advancing its position by
+ *        // exactly as many bytes as was written on the way out
+ *        .
+ *        .
+ *        return new A(..);
+ *     }
+ *   }
+ * </pre>
+ * </p>
+ * 
+ * <h2>Self-delimiting</h2>
+ * <p>
+ * The serialization protocol must be self delimiting. This means one can load
+ * an instance from a byte stream or a buffer without reading beyond the last offset
+ * of the instance's serial representation.
+ * </p>
  */
 public interface Serial {
   
@@ -26,15 +51,15 @@ public interface Serial {
    * Writes the {@linkplain #serialize() serial representation} of this instance
    * to the given <code>out</code> buffer. The position of the buffer is advanced by
    * {@linkplain #serialSize()} bytes.
-   * 
-   * @throws BufferUnderflowException if <code>out</code> doesn't have adequate remaining
-   *          bytes
    *          
    * @return <code>out</code> (for invocation chaining)
    * 
+   * @throws BufferOverflowException if {@code out} doesn't have adequate remaining
+   *          bytes
+   * 
    * @see #serialize()
    */
-  ByteBuffer writeTo(ByteBuffer out);
+  ByteBuffer writeTo(ByteBuffer out) throws BufferOverflowException;
   
 
   /**
