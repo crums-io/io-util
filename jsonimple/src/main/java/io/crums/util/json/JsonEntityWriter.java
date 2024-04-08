@@ -25,6 +25,7 @@ public interface JsonEntityWriter<T> {
    * Returns the given {@code entity} as JSON.
    * 
    * @return {@code injectEntity(entity, new JSONObject())}
+   * @see #injectEntity(Object, JSONObject)
    */
   default JSONObject toJsonObject(T entity) {
     return injectEntity(entity, new JSONObject());
@@ -33,12 +34,17 @@ public interface JsonEntityWriter<T> {
   
   /**
    * Injects the given {@code entity}'s fields into the
-   * given {@code JSONObject}.
+   * given {@code JSONObject}. The rationale behind this method
+   * is to support a kind of JSON polymorphism, wherein a higher
+   * level object encodes its constituent parts in flattened form
+   * (instead of encoding each constituent part as another separate,
+   * named JSON object).
    * 
    * @param entity  not null
    * @param jObj    not null
    * 
    * @return the given {@code jObj}
+   * @see #toJsonObject(Object)
    */
   JSONObject injectEntity(T entity, JSONObject jObj);
   
