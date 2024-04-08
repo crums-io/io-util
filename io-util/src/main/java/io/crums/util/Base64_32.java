@@ -130,7 +130,10 @@ public class Base64_32 {
   public static String encodeNext32(ByteBuffer data) {
     if (Objects.requireNonNull(data).remaining() < 32)
       throw new IllegalArgumentException("expected at least 32 bytes; actual is " + data.remaining() + " bytes");
-    
+    return encodeNext32(data, true);
+  }
+  
+  private static String encodeNext32(ByteBuffer data, boolean advance) {
     StringBuilder out = new StringBuilder(43);
     
     final int pos = data.position();
@@ -154,9 +157,24 @@ public class Base64_32 {
       }
     }
     
-    data.position(pos + 32);
+    if (advance)
+      data.position(pos + 32);
     
     return out.toString();
+  }
+  
+
+  /**
+   * Encodes and returns 32 bytes as a 43-character base64 string.
+   * The positional state of the given input is not changed.
+   * 
+   * @param data  extactly 32-bytes remaining
+   */
+  public static String encode(ByteBuffer data) {
+    if (data.remaining() != 32)
+      throw new IllegalArgumentException(
+          "expected 32 bytes; actual is " + data.remaining() + " bytes");
+    return encodeNext32(data, false);
   }
   
   
