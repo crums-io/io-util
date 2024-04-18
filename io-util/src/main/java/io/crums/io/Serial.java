@@ -19,12 +19,17 @@ import java.nio.ByteBuffer;
  *     .
  *     .
  *     
- *     static A load(ByteBuffer in) {
+ *     static A load(ByteBuffer in) throws BufferUnderflowException, SerialFormatException {
  *        // read from the buffer, advancing its position by
  *        // exactly as many bytes as was written on the way out
- *        .
- *        .
- *        return new A(..);
+ *        try {
+ *          .
+ *          return new A(..);
+ *        } catch (SerialFormatException sfx) {
+ *          throw sfx;
+ *        } catch (Exception x) {
+ *          throw new SerialFormatException("..", x);
+ *        }
  *     }
  *   }
  * </pre>
@@ -35,6 +40,8 @@ import java.nio.ByteBuffer;
  * an instance from a byte stream or a buffer without reading beyond the last offset
  * of the instance's serial representation.
  * </p>
+ * 
+ * @see SerialFormatException
  */
 public interface Serial {
   
