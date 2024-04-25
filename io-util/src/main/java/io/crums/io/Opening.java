@@ -234,6 +234,7 @@ public enum Opening {
     case CREATE:
       return !dir.exists();
     case CREATE_ON_DEMAND:
+      checkNotFile(dir);
       return true;
     default:
       throw new RuntimeException("unaccounted " + this);
