@@ -52,9 +52,10 @@ public class FileUtils {
   
   public static File ensureDir(File dir) throws IllegalStateException {
     nonNullPath(dir);
+    
     if (dir.isDirectory())
       return dir;
-    if (dir.exists())
+    if (dir.isFile())
       throw new IllegalStateException("cannot overwrite ordinary file as dir: " + dir.getAbsolutePath());
     
     if (!dir.mkdirs() && !dir.isDirectory())
