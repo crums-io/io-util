@@ -1,11 +1,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>io.crums</groupId>
-	<artifactId>util</artifactId>
-	<version>${revision}</version>
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>io.crums</groupId>
+  <artifactId>util</artifactId>
+  <version>${revision}</version>
 
   <packaging>pom</packaging>
 
@@ -35,7 +36,29 @@
     </developer>
   </developers>
 
-  
+  <profiles>
+    <profile>
+      <id>deploy-profile</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>1.5</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
   
   <scm>
     <connection>scm:git:git://github.com/crums-io/io-util.git</connection>
@@ -157,80 +180,67 @@
 
 
       <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-javadoc-plugin</artifactId>
-          <version>3.4.1</version>
-          <configuration>
-            <!--
-            Note the following is necessary only if _other_ javadoc errors are present,
-            i.e. unnecessary:
-            
-            <sourceFileExcludes>module-info.java</sourceFileExcludes>
-            
-            -->
-            <!--
-            Following are defaults:
-            
-            <quiet>false</quiet> (not exactly "quiet" when set to true)
-            <failOnWarnings>false</failOnWarnings>
-            <failOnError>true</failOnError>
-            
-            -->
-            
-            <bottom>
-              <![CDATA[
-              <table width="100%">
-              <tr>
-              <td style="text-align: left;">&nbsp;io.crums:]]>${project.artifactId} v${revision}
-              <![CDATA[ <br/>
-              &nbsp;Licensed under the GNU Lesser General Public License v3
-              (<a href="https://www.gnu.org/licenses/lgpl-3.0.txt">LGPL</a>)
-              </td>
-              <td style="text-align: right;"><br/>&copy; 2020-2023 <a href="http://crums.io">crums.io</a> All Rights Reserved.&nbsp;&nbsp;</td>
-              </tr>
-              </table>
-              ]]>
-            </bottom>
-            
-          </configuration>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>3.4.1</version>
+        <configuration>
+          <!--
+          Note the following is necessary only if _other_ javadoc errors are present,
+          i.e. unnecessary:
           
-          <executions>
-            <execution>
-              <id>attach-javadocs</id>
-              <goals>
-                <goal>jar</goal>
-              </goals>
-              </execution>
-          </executions>
-        </plugin>
+          <sourceFileExcludes>module-info.java</sourceFileExcludes>
+          
+          -->
+          <!--
+          Following are defaults:
+          
+          <quiet>false</quiet> (not exactly "quiet" when set to true)
+          <failOnWarnings>false</failOnWarnings>
+          <failOnError>true</failOnError>
+          
+          -->
+          
+          <bottom>
+            <![CDATA[
+            <table width="100%">
+            <tr>
+            <td style="text-align: left;">&nbsp;io.crums:]]>${project.artifactId} v${revision}
+            <![CDATA[ <br/>
+            &nbsp;Licensed under the GNU Lesser General Public License v3
+            (<a href="https://www.gnu.org/licenses/lgpl-3.0.txt">LGPL</a>)
+            </td>
+            <td style="text-align: right;"><br/>&copy; 2020-2023 <a href="http://crums.io">crums.io</a> All Rights Reserved.&nbsp;&nbsp;</td>
+            </tr>
+            </table>
+            ]]>
+          </bottom>
+          
+        </configuration>
         
-        <plugin>
-          <groupId>org.sonatype.plugins</groupId>
-          <artifactId>nexus-staging-maven-plugin</artifactId>
-          <version>1.6.13</version>
-          <extensions>true</extensions>
-          <configuration>
-            <serverId>ossrh</serverId>
-            <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
-            <autoReleaseAfterClose>true</autoReleaseAfterClose>
-          </configuration>
-        </plugin>
-        
-        
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-gpg-plugin</artifactId>
-          <version>1.5</version>
-          <executions>
-            <execution>
-              <id>sign-artifacts</id>
-              <phase>verify</phase>
-              <goals>
-                <goal>sign</goal>
-              </goals>
+        <executions>
+          <execution>
+            <id>attach-javadocs</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
             </execution>
-          </executions>
-        </plugin>
+        </executions>
+      </plugin>
+        
+      <plugin>
+        <groupId>org.sonatype.plugins</groupId>
+        <artifactId>nexus-staging-maven-plugin</artifactId>
+        <version>1.6.13</version>
+        <extensions>true</extensions>
+        <configuration>
+          <serverId>ossrh</serverId>
+          <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
+          <autoReleaseAfterClose>true</autoReleaseAfterClose>
+        </configuration>
+      </plugin>
+      
+      
+      
       
       
 		</plugins>
