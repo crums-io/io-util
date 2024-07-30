@@ -15,7 +15,7 @@ import java.nio.channels.FileChannel;
 import java.util.Map;
 import java.util.Random;
 
-import com.gnahraf.test.IoTestCase;
+import io.crums.testing.IoTestCase;
 
 import io.crums.io.store.table.merge.ListMergeSortTest;
 import io.crums.io.store.table.order.RowOrder;

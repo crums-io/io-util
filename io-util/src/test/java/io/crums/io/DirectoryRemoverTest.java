@@ -11,7 +11,7 @@ import java.io.IOException;
 
 import org.junit.jupiter.api.Test;
 
-import com.gnahraf.test.IoTestCase;
+import io.crums.testing.IoTestCase;
 
 /**
  * 

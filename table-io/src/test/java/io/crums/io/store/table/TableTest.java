@@ -17,7 +17,7 @@ import java.nio.channels.FileChannel;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-import com.gnahraf.test.IoTestCase;
+import io.crums.testing.IoTestCase;
 
 import io.crums.io.channels.ChannelUtils;
 import io.crums.io.store.ks.Keystone;

@@ -18,7 +18,7 @@ import java.util.TreeSet;
 
 import org.junit.jupiter.api.Test;
 
-import com.gnahraf.test.IoTestCase;
+import io.crums.testing.IoTestCase;
 
 import io.crums.io.store.table.SortedTable;
 import io.crums.io.store.table.order.RowOrder;

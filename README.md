@@ -7,6 +7,7 @@ A small set of Java utility modules for some general / specific tasks:
 2. [jsonimple](./jsonimple/README.md) - json-simple knock off with some bug fixes, and a few added features. *(No external dependencies.)*
 3. [io-xp](./io-xp/README.md) - Less used stuff. Includes a fuzzy controller.
 4. [table-io](./table-io/README.md) - Simple, fast, fail-safe, fixed-width, external tables (on disk).
+Multi-way external merge sort.
 
 (To use these as a maven dependency, use the artifact coordinates listed in the links above.)
 
@@ -25,16 +26,15 @@ This is a standard maven build.
 Clone this repo and then invoke
 
 ```
-$ mvn clean package -DskipTests
+$ mvn clean install
 ```
 
-Note running the tests requires a local install of this small [library](https://github.com/gnahraf/junit-io). 
-(This will be fixed in the next version.) After running the tests you'll find a `target/test-outputs` directory containing the side effects of the tests.
+Note after running the tests you'll find a `target/test-outputs` directory containing the side effects of the tests.
 
 You'll want to profile performance. To get a rudimentary idea for stuff like external merges, include the `perf_test` switch (takes about 2 minutes):
 
 ```
-$ mvn clean package -Dperf_test=true`
+$ mvn clean install -Dperf_test=true`
 ```
 
 ## JPMS Ready

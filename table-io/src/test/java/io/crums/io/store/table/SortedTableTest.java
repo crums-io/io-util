@@ -19,7 +19,7 @@ import java.util.Random;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterEach;
 
-import com.gnahraf.test.IoTestCase;
+import io.crums.testing.IoTestCase;
 
 import io.crums.io.store.table.SortedTable.Searcher;
 import io.crums.io.store.table.order.RowOrder;

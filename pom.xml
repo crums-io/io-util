@@ -99,7 +99,6 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.release>16</maven.compiler.release>
 		<flatten.version>1.2.2</flatten.version>
-    <junit.version>4.13.2</junit.version>
 	</properties>
 
 
@@ -209,7 +208,7 @@
             &nbsp;Licensed under the GNU Lesser General Public License v3
             (<a href="https://www.gnu.org/licenses/lgpl-3.0.txt">LGPL</a>)
             </td>
-            <td style="text-align: right;"><br/>&copy; 2020-2023 <a href="http://crums.io">crums.io</a> All Rights Reserved.&nbsp;&nbsp;</td>
+            <td style="text-align: right;"><br/>&copy; 2020-2024 <a href="http://crums.io">crums.io</a> All Rights Reserved.&nbsp;&nbsp;</td>
             </tr>
             </table>
             ]]>
@@ -257,12 +256,12 @@
       <version>5.8.2</version>
       <scope>test</scope>
     </dependency>
-		
-    <!--  Install this test scope dep manually. See https://github.com/gnahraf/junit-io -->
+
+    
     <dependency>
-      <groupId>com.gnahraf</groupId>
-      <artifactId>junit-io</artifactId>
-      <version>0.0.1</version>
+      <groupId>io.crums</groupId>
+      <artifactId>unit-io</artifactId>
+      <version>1.0.0</version>
       <scope>test</scope>
     </dependency>
 

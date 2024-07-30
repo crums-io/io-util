@@ -9,7 +9,7 @@ import java.lang.System.Logger.Level;
 
 import org.junit.jupiter.api.Test;
 
-import com.gnahraf.test.SelfAwareTestCase;
+import io.crums.testing.SelfAwareTestCase;
 
 /**
  * 
