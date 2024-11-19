@@ -95,7 +95,7 @@
 	             Giving in to updating the submodule versions en-bloc,
 	             even if nothing changed in the submodule -->
 	             
-    <revision>1.0.4-SNAPSHOT</revision>
+    <revision>1.0.4</revision>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.release>16</maven.compiler.release>
 		<flatten.version>1.2.2</flatten.version>
