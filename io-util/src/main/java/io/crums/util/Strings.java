@@ -169,7 +169,12 @@ public class Strings {
     return new String(bytes, UTF_8);
   }
   
-  
+  /**
+   * Returns a copy of the given buffer as a UTF-8 encoded {@code String}.
+   * The positional state of the argument is not touched.
+   * 
+   * @param bytes copied but not touched
+   */
   public static String utf8String(ByteBuffer bytes) {
     if (bytes.hasArray()) {
       return new String(
@@ -179,7 +184,7 @@ public class Strings {
           UTF_8);
     }
     byte[] b = new byte[bytes.remaining()];
-    bytes.get(b);
+    bytes.get(bytes.position(), b);
     return new String(b, UTF_8);
   }
   
