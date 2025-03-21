@@ -18,7 +18,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
- * Utility methods for lists. These are assume lists are <em>always</em> {@linkplain RandomAccess random access}.
+ * Utility methods for lists. These assume lists are <em>always</em> {@linkplain RandomAccess random access}.
  * To my mind, linked lists (despite having "list" in their name) don't belong to the interface.
  */
 public class Lists {
@@ -408,6 +408,48 @@ public class Lists {
     case 2:   return new ConcatList<>(notEmpties.get(0), notEmpties.get(1));
     default:  return new MultiCatList<>(notEmpties);
     }
+  }
+  
+  
+  /**
+   * Returns a read-only view of the given {@code list} with the given
+   * index {@code i} removed.
+   * <h4>IndexOutOfBoundsException Note</h4>
+   * <p>
+   * The returned list's {@code <T> get(int)} method correctly detects
+   * out-of-bounds errors, however the index noted in the exception thrown
+   * may be off-by-one (or more if multiple such views are chained together).
+   * </p>
+   * @param <T>
+   * @param i         the index removed: &ge; 0 and &lt; {@code list.size()}
+   * @param list      preferrably read-only (not empty)
+   * @return          a possibly empty list sans the element at index {@code i}
+   */
+  public static <T> List<T> removeIndex(int i, List<T> list) {
+    int size = list.size();
+    Objects.checkIndex(i, size);
+    
+    
+    if (i == 0)
+      return list.subList(1, size);
+    if (i == size - 1)
+      return list.subList(0, size - 1);
+    
+    // note the above also cover the cases where size is 1 or 2
+    
+    return
+
+        new RandomAccessList<T>() {
+          @Override
+          public int size() {
+            return list.size() - 1;
+          }
+          @Override
+          public T get(int index) {
+            return index < i ? list.get(index) : list.get(index + 1);
+          }
+        };
+    
   }
   
   

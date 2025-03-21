@@ -80,6 +80,46 @@ public class ListsTest {
   
   
   
+  @Test
+  public void testRemoveIndex() {
+    testRemoveIndex(List.of(99));
+    testRemoveIndex(List.of(99, 100));
+    
+    List<Integer> in = List.of(10, 11, 12, 13, 14);
+    testRemoveIndex(in);
+    
+    var sansIndex2 = Lists.removeIndex(2, in);
+    try {
+      sansIndex2.get(4);
+    } catch (IndexOutOfBoundsException expected) {
+      System.out.println("Expected error (but note off-by-one): " + expected);
+    }
+    
+    try {
+      Lists.removeIndex(in.size(), in);
+    } catch (IndexOutOfBoundsException expected) {
+      System.out.println("Expected error: " + expected);
+    }
+  }
+  
+  
+  private <T> void testRemoveIndex(List<T> in) {
+    for (int i = 0; i < in.size(); ++i)
+      testRemoveIndex(in, i);
+  }
+  
+  private <T> void testRemoveIndex(List<T> in, int i) {
+    List<T> rm = Lists.removeIndex(i, in);
+    assertRemoved(in, rm, i);
+  }
+  
+  private <T> void assertRemoved(List<T> in, List<T> rm,  int i) {
+    ArrayList<T> expected = new ArrayList<>(in);
+    expected.remove(i);
+    assertEquals(expected, rm);
+  }
+  
+  
 
 }
 
