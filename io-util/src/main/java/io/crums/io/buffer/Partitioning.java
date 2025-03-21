@@ -53,7 +53,7 @@ public class Partitioning implements Serial {
   public static Partitioning load(ByteBuffer serialForm, boolean readOnly) throws BufferUnderflowException {
     
     // begin header
-    final int partCount = Objects.requireNonNull(serialForm, "null serialForm").getInt();
+    final int partCount = serialForm.getInt();
     
     if (partCount == 0)
       return NULL;
@@ -103,7 +103,7 @@ public class Partitioning implements Serial {
   
   private Partitioning() {
     block = BufferUtils.NULL_BUFFER;
-    offsets = Collections.singletonList(0);
+    offsets = List.of(0);
   }
   
   
@@ -175,6 +175,12 @@ public class Partitioning implements Serial {
    */
   public final int getBlockSize() {
     return block.capacity();
+  }
+  
+  
+  
+  public final boolean isEmpty() {
+    return getBlockSize() == 0;
   }
   
   
