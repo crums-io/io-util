@@ -40,6 +40,13 @@ import java.nio.ByteBuffer;
  * an instance from a byte stream or a buffer without reading beyond the last offset
  * of the instance's serial representation.
  * </p>
+ * <h2>A Note on Partial Serialization</h2>
+ * <p>
+ * This is an <em>implementation interface</em> for low level serialization. There
+ * is no actual requirement that an instance write its entire state to the buffer:
+ * as long as the class is complimented with a static pseudo-constructor that takes
+ * both an argument (the left-out state) and a {@code ByteBuffer}, the strategy works.
+ * </p>
  * 
  * @see SerialFormatException
  */
