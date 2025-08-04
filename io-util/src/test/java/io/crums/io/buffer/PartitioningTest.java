@@ -6,6 +6,7 @@ package io.crums.io.buffer;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,12 +15,14 @@ import java.util.Random;
 
 import org.junit.jupiter.api.Test;
 
+import io.crums.io.Serial;
+import io.crums.testing.SelfAwareTestCase;
 import io.crums.util.Lists;
 
 /**
  * 
  */
-public class PartitioningTest {
+public class PartitioningTest extends SelfAwareTestCase {
   
   
   @Test
@@ -122,6 +125,90 @@ public class PartitioningTest {
     parts = Partitioning.load(parts.serialize());
     assertEquals(expectedParts, parts.asList());
     
+  }
+  
+  @Test
+  public void testWritePartitionOne() {
+    Object label = new Object() {  };
+    testWritePartition(label, 0);
+    testWritePartition(label, 1);
+    testWritePartition(label, 2);
+    testWritePartition(label, 3);
+  }
+  
+  @Test
+  public void testWritePartition2() {
+    Object label = new Object() {  };
+    testWritePartition(label, 0, 0);
+    testWritePartition(label, 3, 0);
+    testWritePartition(label, 0, 3);
+    testWritePartition(label, 1, 3);
+  }
+  
+  @Test
+  public void testWritePartitionMany() {
+    Object label = new Object() {  };
+    testWritePartition(label, 0, 0, 511, 6, 11, 1048, 22, 21, 21, 13289, 0, 6);
+  }
+  
+  
+  static class MockSerial implements Serial {
+    
+    static MockSerial load(ByteBuffer in) {
+      int size = in.getInt();
+      ByteBuffer data = BufferUtils.slice(in, size);
+      return new MockSerial(data);
+    }
+    
+    static ByteBuffer loadDataOnly(ByteBuffer in) {
+      return load(in).data;
+    }
+    
+    private final ByteBuffer data;
+    
+    private MockSerial(ByteBuffer data) {
+      this.data = data;
+    }
+    
+    MockSerial(int size, Random rand) {
+      byte[] bytes = new byte[size];
+      rand.nextBytes(bytes);
+      this.data = ByteBuffer.wrap(bytes);
+    }
+    
+    ByteBuffer data() {
+      return data.asReadOnlyBuffer();
+    }
+
+    @Override
+    public int serialSize() {
+      return 4 + data.capacity();
+    }
+
+    @Override
+    public ByteBuffer writeTo(ByteBuffer out) throws BufferOverflowException {
+      out.putInt(data.capacity());
+      out.put(data());
+      return out;
+    }
+    
+  }
+  
+  private void testWritePartition(Object methodLabel, Integer... sizes) {
+    long seed = method(methodLabel).hashCode();
+    Random rand = new Random(seed);
+    List<MockSerial> expected = new ArrayList<>(sizes.length);
+    int tally = 0;
+    for (int size : sizes) {
+      expected.add(new MockSerial(size, rand));
+      tally += size + 4;
+    }
+    // allocate *more than enuf; enuf = tally + 4 * (sizes.length + 1)
+    ByteBuffer buffer = ByteBuffer.allocate(tally + 4 * (sizes.length + 10));
+    Partitioning.writePartition(buffer, expected);
+    buffer.clear();
+    Partitioning p = Partitioning.load(buffer);
+    assertEquals(Lists.map(expected, MockSerial::data), Lists.map(p.asList(), MockSerial::loadDataOnly));
   }
   
 

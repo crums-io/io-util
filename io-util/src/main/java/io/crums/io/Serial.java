@@ -4,8 +4,12 @@
 package io.crums.io;
 
 
+import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
+import java.nio.channels.WritableByteChannel;
+
+import io.crums.io.channels.ChannelUtils;
 
 /**
  * <p>
@@ -100,6 +104,19 @@ public interface Serial {
    */
   default int estimateSize() {
     return serialSize();
+  }
+  
+  
+  
+  /**
+   * Writes the serial (binary) representation of this instance to the given
+   * {@code out} channel. By default, this just writes the buffer returned by
+   * {@linkplain #serialize()} to {@code out}. Overriding this method may allow
+   * avoiding the intermediate copying of some stuff, particularly if it's
+   * binary data to start with.
+   */
+  default void writeTo(WritableByteChannel out) throws IOException {
+    ChannelUtils.writeRemaining(out, serialize());
   }
 
 }

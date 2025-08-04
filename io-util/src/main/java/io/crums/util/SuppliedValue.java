@@ -56,6 +56,10 @@ public class SuppliedValue<T> implements Supplier<T> {
   }
   
   
+  /**
+   * Tests if this supplier's {@linkplain #get()} has been invoked, and if so
+   * returns the object returned.
+   */
   public Optional<T> peek() {
     return value == null ? Optional.empty() : Optional.of(value);
   }

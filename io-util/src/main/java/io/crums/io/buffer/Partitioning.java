@@ -3,14 +3,16 @@
  */
 package io.crums.io.buffer;
 
+import java.io.IOException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
+import java.nio.channels.WritableByteChannel;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
 import io.crums.io.Serial;
+import io.crums.io.channels.ChannelUtils;
 import io.crums.util.Lists;
 
 /**
@@ -18,8 +20,7 @@ import io.crums.util.Lists;
  * of sizes defining their boundaries. Supports both read/write
  * and read-only use cases.
  */
-public class Partitioning implements Serial {
-  
+public class Partitioning extends Partition implements Serial {
   
   
 
@@ -82,6 +83,40 @@ public class Partitioning implements Serial {
       block = block.asReadOnlyBuffer();
     
     return new Partitioning(block, sizes);
+  }
+  
+  
+  
+  
+  public static int serialSize(List<Integer> sizes) {
+    final int count = sizes.size();
+    int tally = headerSizeForCount(count);
+    for (int index = count; index-- > 0; )
+      tally += sizes.get(index);
+    return tally;
+  }
+  
+  
+  public static Partitioning initForWrite(ByteBuffer out, List<Integer> sizes)
+      throws BufferUnderflowException {
+    
+    if (out.isReadOnly())
+      throw new IllegalArgumentException("out buffer not writable:  " + out);
+    
+    int parts = sizes.size();
+    out.putInt(parts);
+    int totalBytes = 0;
+    for (int index = 0; index < parts; ++index) {
+      int partSize = sizes.get(index);
+      if (partSize < 0)
+        throw new IllegalArgumentException(
+            "negative part size (%d) at sizes[%d]"
+            .formatted(partSize, index));
+      out.putInt(partSize);
+      totalBytes += partSize;
+    }
+    ByteBuffer partitionBlock = BufferUtils.slice(out, totalBytes);
+    return new Partitioning(partitionBlock, sizes);
   }
   
   
@@ -202,23 +237,16 @@ public class Partitioning implements Serial {
   }
   
   
-  /**
-   * Returns the number of parts (partitions).
-   * 
-   * @see #getPart(int)
-   */
+  @Override
   public final int getParts() {
     return offsets.size() - 1;
   }
   
   
   /**
-   * Returns the partition at the given {@code index}.
-   * 
    * @return a <em>sliced</em> view of the partition
-   * 
-   * @see #getParts()
    */
+  @Override
   public final ByteBuffer getPart(int index) throws IndexOutOfBoundsException {
     Objects.checkIndex(index, offsets.size() - 1);
     int pos = offsets.get(index);
@@ -230,34 +258,15 @@ public class Partitioning implements Serial {
   }
   
   
-  /**
-   * Returns the number of bytes in the partition at the given {@code index}.
-   * 
-   * @return &ge; 0
-   * 
-   * @see #getParts()
-   */
+  @Override
   public final int getPartSize(int index) throws IndexOutOfBoundsException {
     Objects.checkIndex(index, offsets.size() - 1);
     return offsets.get(index + 1) - offsets.get(index);
   }
   
-  /**
-   * Determines if the partition at the given {@code index} is empty.
-   * 
-   * @return {@code getPartSize(index) == 0}
-   * 
-   * @see #getParts()
-   */
-  public final boolean isPartEmpty(int index) throws IndexOutOfBoundsException {
-    return getPartSize(index) == 0;
-  }
   
   
-  
-  /**
-   * Returns a list view of this instance.
-   */
+  @Override
   public final List<ByteBuffer> asList() {
     return new ListView();
   }
@@ -299,6 +308,7 @@ public class Partitioning implements Serial {
       out.putInt(offsets.get(index + 1) - offsets.get(index));
     return out;
   }
+  
 
 
   /**
@@ -319,6 +329,19 @@ public class Partitioning implements Serial {
     writeHeaderTo(out);
     out.put(getBlock());
     return out;
+  }
+
+  /**
+   * Avoids the intermediate copying of the {@linkplain #getBlock() block}.
+   * 
+   * @see Serial#writeTo(WritableByteChannel)
+   */
+  @Override
+  public void writeTo(WritableByteChannel out) throws IOException {
+    var header =
+        writeHeaderTo(ByteBuffer.allocate(serialHeaderSize())).flip();
+    ChannelUtils.writeRemaining(out, header);
+    ChannelUtils.writeRemaining(out, getBlock());
   }
 
 }
