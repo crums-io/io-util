@@ -145,22 +145,21 @@ public class Partitioning extends Partition implements Serial {
   
   
   /**
-   * Constructs a non-empty instance that is a view onto the
-   * given block. If it's read-only, then this instance is also read-only.
+   * Constructs an instance with at least one (possibly empty) part.
+   * The constructed instance is a view onto the given block. 
+   * If the {@code block} argument is read-only, then this instance is
+   * also read-only.
    * 
-   * @param block with capacity &ge; 1 (you're mine now: position and limit don't matter)
+   * @param block the <em>entire</em> buffer; position and limit don't matter
    * @param sizes list of non-negative sizes defining the boundaries between adjacent partitions.
-   *              Must sum to the {@code block.capacity()}.
+   *              Must sum to {@code block.capacity()}.
    * 
    * @see #NULL
    */
   public Partitioning(ByteBuffer block, List<Integer> sizes) {
-    if (Objects.requireNonNull(block, "null block").capacity() < 1)
-      throw new IllegalArgumentException("block capacity less than minimum (1): " + block.capacity());
-    if (Objects.requireNonNull(sizes, "null offset").isEmpty())
-      throw new IllegalArgumentException("empty sizes list");
     
-
+    if (sizes.isEmpty())
+      throw new IllegalArgumentException("empty sizes list");
     
     this.block = block.duplicate().clear();
     

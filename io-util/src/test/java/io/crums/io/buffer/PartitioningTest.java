@@ -25,6 +25,16 @@ import io.crums.util.Lists;
 public class PartitioningTest extends SelfAwareTestCase {
   
   
+  static void assertEmptyPartition(Partition empty) {
+    assertEquals(0, empty.getParts());
+    assertTrue(empty.asList().isEmpty());
+    try {
+      empty.getPart(0);
+      fail();
+    } catch (IndexOutOfBoundsException expected) { }
+    
+  }
+  
   @Test
   public void testEmpty() {
     Partitioning empty = Partitioning.NULL;
@@ -37,16 +47,11 @@ public class PartitioningTest extends SelfAwareTestCase {
   
   
   private void assertEmpty(Partitioning empty) {
-    assertEquals(0, empty.getParts());
-    assertTrue(empty.asList().isEmpty());
+    
+    assertEmptyPartition(empty);
     assertEquals(0, empty.getBlock().capacity());
-    try {
-      empty.getPart(0);
-      fail();
-    } catch (IndexOutOfBoundsException expected) { }
     assertTrue(empty.serialSize() > 0);
-    ByteBuffer serialForm = empty.serialize();
-    assertTrue(serialForm.hasRemaining());
+    assertEquals(empty.serialSize(), empty.serialize().remaining());
   }
   
   
