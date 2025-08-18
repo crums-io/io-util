@@ -86,10 +86,26 @@ public class JsonUtils {
   /**
    * Returns the required named integer.
    */
-  public static int getInt(JSONObject jObj, String name) throws JsonParsingException {
+  public static int getInt(JSONObject jObj, String name)
+      throws JsonParsingException {
     return getNumber(jObj, name, true).intValue();
   }
   
+  /** Returns the required named boolean. */
+  public static boolean getBoolean(JSONObject jObj, String name)
+      throws JsonParsingException {
+    
+    Object value = jObj.get(name);
+    if (value == null)
+      throw new JsonParsingException(
+          "expected key '" + name + "' not found");
+    try {
+      return ((Boolean) value).booleanValue();
+    } catch (ClassCastException ccx) {
+      throw new JsonParsingException(
+          "expected boolean value for '" + name + "'; actual was " + value);
+    }
+  }
   
   public static boolean getBoolean(JSONObject jObj, String name, boolean defaultVal) {
     Object value = jObj.get(name);
@@ -102,6 +118,9 @@ public class JsonUtils {
           "expected boolean value for '" + name + "'; actual was " + value);
     }
   }
+  
+  
+  
   
   
   /**
