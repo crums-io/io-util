@@ -4,8 +4,10 @@
 package io.crums.io.buffer;
 
 
+import java.io.IOException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
+import java.nio.channels.WritableByteChannel;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -15,6 +17,8 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 
+import io.crums.io.Serial;
+import io.crums.io.channels.ChannelUtils;
 import io.crums.util.Maps;
 import io.crums.util.Strings;
 
@@ -22,6 +26,9 @@ import io.crums.util.Strings;
  * A partition with named parts. This is not envisioned with very many parts
  * (tho the parts themselves can be big), so there's no attempt at say
  * prefix compressing the keys.
+ * <p>
+ * TODO: Review whether this should extend {@linkplain Partition} directly.
+ * </p>
  */
 public class NamedParts extends Partitioning {
   
@@ -179,6 +186,16 @@ public class NamedParts extends Partitioning {
       bytes += names.get(index).getBytes(Strings.UTF_8).length;
     return bytes;
   }
+  
+  
+  public static int serialSize(Map<String, ByteBuffer> parts) {
+    int bytes = 4 + parts.size() * 8;
+    for (var entry : parts.entrySet()) {
+      bytes += entry.getKey().getBytes(Strings.UTF_8).length;
+      bytes += entry.getValue().capacity();
+    }
+    return bytes;
+  }
 
   @Override
   public ByteBuffer writeHeaderTo(ByteBuffer out) {
@@ -192,6 +209,74 @@ public class NamedParts extends Partitioning {
       out.put(bytes);
     }
     return out;
+  }
+  
+  
+  /**
+   * Writes the specified named {@code parts} to the given buffer in the
+   * {@linkplain Serial} format understood by this class.
+   * 
+   * @param parts   possibly empty map. Buffer values are understood in
+   *                absolute terms (capacity)
+   * @param out     the buffer written to
+   */
+  public static void writeNamedParts(
+      Map<String, ByteBuffer> parts, ByteBuffer out) {
+    out.putInt(parts.size());
+    for (var entry : parts.entrySet()) {
+      byte[] name = entry.getKey().getBytes(Strings.UTF_8);
+      checkName(name);
+      
+      out.putInt(entry.getValue().capacity());
+      out.putInt(name.length);
+      out.put(name);
+    }
+    for (var entry : parts.entrySet())
+      out.put(entry.getValue().clear());
+  }
+  
+  
+  private static void checkName(byte[] name) {
+    if (name.length > MAX_NAME_LEN)
+      throw new IllegalArgumentException(
+          "name '%s..' (byte-length %d) exceeds maximum allowed byte-length"
+          .formatted(Strings.utf8String(name).substring(0, 10), name.length));
+  }
+  
+  
+
+  /**
+   * Writes the specified named {@code parts} to the given channel in the
+   * {@linkplain Serial} format understood by this class.
+   * 
+   * @param parts   possibly empty map. Buffer values are understood in
+   *                absolute terms (capacity)
+   * @param out     the channel written to
+   */
+  public static void writeNamedParts(
+      Map<String, ByteBuffer> parts, WritableByteChannel out) throws IOException {
+    
+    ByteBuffer work = ByteBuffer.allocate(8);
+    
+    work.putInt(parts.size()).flip();
+    ChannelUtils.writeRemaining(out, work);
+    
+
+    for (var entry : parts.entrySet()) {
+      byte[] name = entry.getKey().getBytes(Strings.UTF_8);
+      checkName(name);
+      
+      work.clear()
+        .putInt(entry.getValue().capacity())
+        .putInt(name.length)
+        .flip();
+
+      ChannelUtils.writeRemaining(out, work);
+      ChannelUtils.writeRemaining(out, ByteBuffer.wrap(name));
+    }
+    
+    for (var entry : parts.entrySet())
+      ChannelUtils.writeRemaining(out, entry.getValue().clear());
   }
   
   
