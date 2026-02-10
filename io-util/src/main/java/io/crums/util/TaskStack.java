@@ -46,6 +46,18 @@ public class TaskStack implements Channel {
   protected final List<AutoCloseable> opStack = Collections.synchronizedList(new ArrayList<AutoCloseable>());
   
   
+
+  /**
+   * Pushes the given resource onto the stack and returns it. Used in constructors.
+   * 
+   * @param <T> any closeable type
+   * @param resource the source pushed onto the stack
+   * @return the argument
+   */
+  public <T extends AutoCloseable> T push(T resource) {
+    pushClose(resource);
+    return resource;
+  }
   
   
   /**
