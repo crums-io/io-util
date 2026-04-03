@@ -25,6 +25,9 @@ public class FuzzyThrottler {
    * the activity that must be throttled.
    */
   protected final FuzzySpeed speed;
+
+  // Note: this field might as well be static since it is always evaluated
+  // to the same value. 
   private final double w;
   
 //  private final 
@@ -56,12 +59,28 @@ public class FuzzyThrottler {
   }
   
   
+
+  /**
+   * Returns the current throttle nanos. The higher the value, the more load
+   * the system is experiencing.
+   * <p>
+   * Use this method when you need to tell producers to slow down.
+   * </p>
+   * 
+   * @return
+   */
+  public long getThrottleNanos() {
+    return ticker.getThrottleNanos();
+  }
   
   
   /**
    * Updates the throttle based on the current state of the {@linkplain #speed}.
    * This method should be invoked once in a while (but not too often!). The most
    * natural time to invoke it, is when the state of instance's speed has changed.
+   * 
+   * @return bounded in the range 0 to 15 sec
+   * @see #getThrottleNanos()
    */
   public void updateThrottle() {
     long currentThrottleNanos = ticker.getThrottleNanos();
@@ -76,6 +95,8 @@ public class FuzzyThrottler {
     final double f = snapshot.tooFast();
     final double j = snapshot.justRight();
     final double s = snapshot.tooSlow();
+
+
     
     double tfa = a * f * wfa();
     double tfc = c * f * wfc(); 
@@ -92,7 +113,10 @@ public class FuzzyThrottler {
     double t = (tfa + tfc + tfd + tja + tjd + tsa + tsc + tsd) / w;
     
     // bounded in the range 50 micros to 15 sec..
-    long newThrottleNanos = (long) Math.min( Math.max(5e4, (1 + t) * currentThrottleNanos), 15e9);
+    long newThrottleNanos =
+      (long) Math.min(
+        Math.max(0, t * (currentThrottleNanos + 50)),
+        15e9);
     
     LOG.log(Level.INFO, "Throttling to " + new DecimalFormat("#,###").format(newThrottleNanos) + " nanoseconds");
     ticker.setThrottleNanos(newThrottleNanos);
@@ -141,6 +165,8 @@ public class FuzzyThrottler {
    * Returns the ticker this instance throttles. The process that must be throttled
    * must somehow periodically invoke the returned ticker's {@linkplain Ticker#tick()
    * tick()} method in for it to be throttled by this instance.
+   * 
+   * @see #getThrottleNanos()
    */
   public Ticker throttledTicker() {
     return ticker;
