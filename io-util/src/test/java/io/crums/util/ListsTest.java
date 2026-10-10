@@ -118,8 +118,43 @@ public class ListsTest {
     expected.remove(i);
     assertEquals(expected, rm);
   }
-  
-  
+
+
+  // ── isSorted / isSortedNoDups ────────────────────────────────────────────
+
+  @Test
+  public void testIsSortedNoDups_strictlyAscending() {
+    assertTrue(Lists.isSortedNoDups(List.of(1, 2, 3)));
+  }
+
+  @Test
+  public void testIsSortedNoDups_descendingFails() {
+    assertFalse(Lists.isSortedNoDups(List.of(3, 2, 1)));
+  }
+
+  @Test
+  public void testIsSortedNoDups_duplicateAdjacentFails() {
+    // dupsOk == false: a duplicate element must fail, per the method's own
+    // "no dups" contract.
+    assertFalse(Lists.isSortedNoDups(List.of(1, 2, 2, 3)));
+  }
+
+  @Test
+  public void testIsSorted_dupsOk_strictlyAscending() {
+    assertTrue(Lists.isSorted(List.of(1, 2, 3), true));
+  }
+
+  @Test
+  public void testIsSorted_dupsOk_duplicateAdjacentPasses() {
+    // dupsOk == true: ties are explicitly allowed; only a genuine decrease
+    // should fail.
+    assertTrue(Lists.isSorted(List.of(1, 2, 2, 3), true));
+  }
+
+  @Test
+  public void testIsSorted_dupsOk_descendingFails() {
+    assertFalse(Lists.isSorted(List.of(1, 3, 2), true));
+  }
 
 }
 

@@ -345,7 +345,7 @@ public class Lists {
       return true;
     
     T prev = list.get(0);
-    final int compMax = dupsOk ? 1 : 0; // exclusive
+    final int compMax = dupsOk ? 0 : 1; // exclusive
     
     for (int index = 1; index < size; ++index) {
       T next = list.get(index);
