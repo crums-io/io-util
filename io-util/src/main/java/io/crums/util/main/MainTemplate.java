@@ -8,7 +8,7 @@ import static io.crums.util.main.Args.*;
 
 import java.io.PrintStream;
 
-import io.crums.util.UnanonymousType;
+import io.crums.util.collections.UnanonymousType;
 
 /**
  * If many console programs start to look alike, well you try..

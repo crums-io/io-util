@@ -8,7 +8,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import io.crums.util.DelegateEquivalent;
+import io.crums.util.collections.DelegateEquivalent;
 import io.crums.util.Strings;
 
 /**

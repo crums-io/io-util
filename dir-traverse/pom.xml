@@ -1,0 +1,29 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+
+  <parent>
+    <groupId>io.crums</groupId>
+    <artifactId>util</artifactId>
+    <version>${revision}</version>
+  </parent>
+
+
+  <artifactId>dir-traverse</artifactId>
+
+  <name>${project.groupId}:${project.artifactId}</name>
+  <description>
+    A generic tree-traversal abstraction (io.crums.util.tree) and its
+    file-system implementation (io.crums.util.tree.fs): recursive directory
+    walking, ordering, and removal.
+  </description>
+
+  <dependencies>
+    <dependency>
+      <groupId>io.crums</groupId>
+      <artifactId>util-common</artifactId>
+      <version>${revision}</version>
+    </dependency>
+  </dependencies>
+
+</project>

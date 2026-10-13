@@ -1,0 +1,33 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+
+  <parent>
+    <groupId>io.crums</groupId>
+    <artifactId>util</artifactId>
+    <version>${revision}</version>
+  </parent>
+
+
+  <artifactId>util-common</artifactId>
+
+  <name>${project.groupId}:${project.artifactId}</name>
+  <description>
+    The most widely imported general-purpose utilities: collection-flavored
+    helpers (Lists, Sets, Maps, CollectionUtils, Iterators, CachingList, BigList,
+    NumberList, PrimitiveComparator, and the type-equivalence helpers
+    ClassEquivalent, DelegateEquivalent, UnanonymousType, Isomorphism), string
+    and id utilities (Strings, IntegralStrings, RandomId, BigShort, TidyProperties,
+    SuppliedValue, TaskStack, CacheWheel, CloseableIterator), and NIO channel
+    utilities (ChannelUtils, SharedChannel).
+  </description>
+
+  <dependencies>
+    <dependency>
+      <groupId>io.crums</groupId>
+      <artifactId>util-api</artifactId>
+      <version>${revision}</version>
+    </dependency>
+  </dependencies>
+
+</project>

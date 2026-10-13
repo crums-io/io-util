@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import io.crums.util.Lists;
+import io.crums.util.collections.Lists;
 
 /**
  * Groups {@linkplain Option option}s so that their symbol shortcuts are

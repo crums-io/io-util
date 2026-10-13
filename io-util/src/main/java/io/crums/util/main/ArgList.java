@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import io.crums.util.Lists;
+import io.crums.util.collections.Lists;
 
 /**
  * A consumable argument list.

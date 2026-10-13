@@ -10,7 +10,7 @@ import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.List;
 
-import io.crums.util.Lists;
+import io.crums.util.collections.Lists;
 
 /**
  * Utility for printing columnar stuff to the console.

@@ -66,8 +66,6 @@ public class FuzzyThrottler {
    * <p>
    * Use this method when you need to tell producers to slow down.
    * </p>
-   * 
-   * @return
    */
   public long getThrottleNanos() {
     return ticker.getThrottleNanos();
@@ -79,7 +77,6 @@ public class FuzzyThrottler {
    * This method should be invoked once in a while (but not too often!). The most
    * natural time to invoke it, is when the state of instance's speed has changed.
    * 
-   * @return bounded in the range 0 to 15 sec
    * @see #getThrottleNanos()
    */
   public void updateThrottle() {

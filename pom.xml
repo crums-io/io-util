@@ -103,7 +103,12 @@
 
 
   <modules>
+    <module>util-api</module>
+    <module>util-common</module>
     <module>io-util</module>
+    <module>util-buffer</module>
+    <module>dir-traverse</module>
+    <module>alf</module>
     <module>io-xp</module>
     <module>table-io</module>
     <module>jsonimple</module>

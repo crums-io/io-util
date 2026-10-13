@@ -20,8 +20,8 @@
   <dependencies>
     <dependency>
      <groupId>io.crums</groupId>
-     <artifactId>io-util</artifactId>
-     <version>[1.0.0,)</version>
+     <artifactId>util-common</artifactId>
+     <version>1.0.5-SNAPSHOT</version>
     </dependency>
   </dependencies>
   

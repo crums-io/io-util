@@ -10,7 +10,7 @@ import java.util.Objects;
 import java.util.StringTokenizer;
 import java.util.function.Predicate;
 
-import io.crums.util.Lists;
+import io.crums.util.collections.Lists;
 
 /**
  * Parses a comma-separated list of whole numbers (interpreted as longs) and

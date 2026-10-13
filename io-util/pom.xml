@@ -12,12 +12,20 @@
 	
 	
 	<artifactId>io-util</artifactId>
-	
-	
+
+
   <name>${project.groupId}:${project.artifactId}</name>
 	<description>
-	  I/O and other utilites. This library's more common constructs are gathered here.
+	  General-purpose file and NIO channel I/O utilities (io.crums.util.io).
 	</description>
+
+  <dependencies>
+    <dependency>
+      <groupId>io.crums</groupId>
+      <artifactId>util-common</artifactId>
+      <version>${revision}</version>
+    </dependency>
+  </dependencies>
 
 
 
