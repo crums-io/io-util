@@ -45,8 +45,9 @@ A few simple features and abstractions are included to aid working with the obje
 * *Parser implementation interfaces*. The `JsonEntityWriter` and `JsonEntityReader` interfaces define useful default methods for 
 serializing and de-serializing Objects to and from JSON. Concrete parser implementations usually implement both and need only implement 2 abstract methods, one for each interface.
 
-## Module Dependencies
+## JPMS Module
 
-JPMS dependencies:
-* `java.base`
+* **Name:** `io.crums.jsonimple`
+* **Exports:** `io.crums.util.json`, `io.crums.util.json.simple`, `io.crums.util.json.simple.parser`
+* **Requires:** `java.base`
 

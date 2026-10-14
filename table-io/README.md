@@ -12,7 +12,7 @@ To use this module add this dependency in your POM file:
   <dependency>
     <groupId>io.crums</groupId>
     <artifactId>table-io</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.5-SNAPSHOT</version>
   </dependency>
 ```
 
@@ -60,7 +60,7 @@ Here's an incomplete, but growing list of component features and attributes.
   that of another--much, nay, exactly, like TableSets. That is both tables have a row with a same "key", but only one of the rows (the one from the higher
   ranking table) makes it to the merged output table. The merge algorithm is designed to minimize row comparisons
   and can often block transfer a region of a source table to a target table without ever having to load that region
-  into memory. For a sketch of the algorithm see [here](https://github.com/crums-io/io-util/blob/master/table-io/src/main/java/io/crums/io/store/table/merge/BaseMergeSource.java).
+  into memory. For a sketch of the algorithm see [here](https://github.com/crums-io/io-util/blob/master/table-io/src/main/java/io/crums/util/io/store/table/merge/BaseMergeSource.java).
   
 * **Deletes.** Deletes are supported by updating a row with content indicating it's been tombstoned. How this encoding
   is done is left to the user defined DeleteCodec. In the worst case design, each row sets
@@ -84,10 +84,13 @@ This shows statistics for some I/O bound operations, such as row merge rates und
 
 
 
-## Module Dependencies
+## JPMS Module
 
-JPMS dependencies:
-* `java.base`
-* `io.crums.util`
-* `io.crums.util.xp`
+* **Name:** `io.crums.util.io.store`
+* **Exports:** `io.crums.util.io.block`, `io.crums.util.io.store`, `io.crums.util.io.store.ks`,
+  `io.crums.util.io.store.table`, `io.crums.util.io.store.table.del`,
+  `io.crums.util.io.store.table.iter`, `io.crums.util.io.store.table.merge`,
+  `io.crums.util.io.store.table.order`
+* **Requires:** `java.base`, `io.crums.util.xp` (transitive), `io.crums.util.io.buffer` (transitive),
+  `io.crums.util.io` (transitive)
 

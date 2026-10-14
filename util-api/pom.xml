@@ -15,10 +15,7 @@
   <description>
     A small, stable vocabulary of types (Opening, Serial, SerialFormatException,
     FactoryException, Base64_32, Digest, Digests) that tend to appear in the public
-    API signatures of other crums.io projects. Factored out of util-common so that a
-    project whose own public API exposes one of these types doesn't force its
-    downstream consumers to pull in util-common's much larger, more general (and more
-    volatile) grab-bag of utilities.
+    API signatures of other crums.io projects.
   </description>
 
 </project>

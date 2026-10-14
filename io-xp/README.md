@@ -14,15 +14,15 @@ To use this module add this dependency in your POM file:
   <dependency>
     <groupId>io.crums</groupId>
     <artifactId>io-xp</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.5-SNAPSHOT</version>
   </dependency>
 ```
 
 
-## Module Dependencies
+## JPMS Module
 
-JPMS dependencies:
-* `java.base`
-* `io.crums.util`
+* **Name:** `io.crums.util.xp`
+* **Exports:** `io.crums.math.stats`, `io.crums.test`, `io.crums.util.cc`, `io.crums.util.cc.throt`, `io.crums.util.ticker`
+* **Requires:** `java.base`, `io.crums.util` (transitive)
 
 
