@@ -120,7 +120,7 @@ public class ListsTest {
   }
 
 
-  // ── isSorted / isSortedNoDups ────────────────────────────────────────────
+  // -- isSorted / isSortedNoDups --------------------------------------------
 
   @Test
   public void testIsSortedNoDups_strictlyAscending() {
