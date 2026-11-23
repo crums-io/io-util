@@ -69,6 +69,54 @@ public class Lists {
   public static <T> List<T> sink() {
     return (List<T>) SINK;
   }
+
+
+  /**
+   * Binary searches the given list, first performing an O(1) bounds-check, before
+   * invoking {@code Collections.binarySearch(list, key)}. As a side-effect, a list
+   * of size 3 or less, never reaches that method. Depending on the workflow, this
+   * may be more efficient than invoking that method directly. The method's
+   * signature, is a verbatim copy of the signature of the corresponding
+   * {@code Collections.binarySearch(..)} method.
+   * 
+   * @see Collections#binarySearch(List, Object)
+   */
+  public static <T> int binarySearch(
+      List<? extends Comparable<? super T>> list, T key) {
+    int size = list.size();
+    if (size == 0)
+      return -1;
+    
+
+    int lastIndex = size - 1;
+    int hiComp = list.get(lastIndex).compareTo(key);
+    if (hiComp < 0)
+      return -1 - size;
+    if (hiComp == 0)
+      return lastIndex;
+    if (size == 1)
+      return -1;
+
+    int loComp = list.get(0).compareTo(key);
+    if (loComp == 0)
+      return 0;
+    if (loComp > 0)
+      return -1;
+
+    if (size == 2)
+      return -2;
+
+    if (size == 3) {
+      int midComp = list.get(1).compareTo(key);
+      if (midComp > 0)
+        return -2;
+      if (midComp == 0)
+        return 1;
+      else
+        return -3;
+    }
+    return Collections.binarySearch(list, key);
+  }
   
   /**
    * Returns a read-only view.
